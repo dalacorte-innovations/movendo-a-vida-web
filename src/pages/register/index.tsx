@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { MdEmail } from 'react-icons/md';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { RiLock2Fill } from 'react-icons/ri';
-import { FaMeta } from 'react-icons/fa6';
 import { FaApple } from 'react-icons/fa';
-import { FcGoogle } from 'react-icons/fc';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { saveToStorage, savePermissionsToStorage } from '../../utils/storage';
+import { saveToStorage } from '../../utils/storage';
 import { configBackendConnection, endpoints } from '../../utils/backendConnection';
 import Background from '../../assets/images/backgorund-register.png';
+import RegisterWithGoogle from '../../components/Google/registerGoogle.tsx';
+import RegisterWithFacebook from '../../components/Facebook/registerFacebook.tsx';
 
-const RegisterPage = ({ onLogin }) => {
+const RegisterPage = () => {
   const [username, setUsername] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +23,6 @@ const RegisterPage = ({ onLogin }) => {
   const [nameError, setNameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [repeatPasswordError, setRepeatPasswordError] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
   const handleUsernameChange = (event) => {
@@ -52,10 +51,6 @@ const RegisterPage = ({ onLogin }) => {
 
   const toggleRepeatPasswordVisibility = () => {
     setIsRepeatPasswordVisible(!isRepeatPasswordVisible);
-  };
-
-  const handleRememberMeChange = (event) => {
-    setRememberMe(event.target.checked);
   };
 
   const handleSubmit = async (event) => {
@@ -91,31 +86,24 @@ const RegisterPage = ({ onLogin }) => {
       setIsLoading(true);
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, 400));
-        const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.loginToken}`, {
+        const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.registerUser}`, {
           method: 'POST',
           headers: configBackendConnection.headersDefault,
           body: JSON.stringify({
-            username: username,
+            email: username,
+            first_name: name,
             password: password,
           }),
         });
 
-        if (response.status === 200) {
+        if (response.status === 201) {
           const data = await response.json();
-          const { token, name, restricted_access, user_type, permissions } = data;
+          const { token, name, restricted_access, user_type } = data;
 
-          if (rememberMe) {
-            localStorage.setItem('token', token);
-          } else {
-            sessionStorage.setItem('token', token);
-          }
-
+          localStorage.setItem('token', token);
           saveToStorage({ token, name, restricted_access, user_type });
-          savePermissionsToStorage(permissions);
 
           toast.success('Cadastro bem-sucedido!');
-          onLogin(true);
           navigate('/');
         } else {
           toast.error('Erro ao realizar o cadastro.');
@@ -140,7 +128,6 @@ const RegisterPage = ({ onLogin }) => {
             <h2 className="text-white text-3xl font-bold mb-4 text-center font-metropolis">Seja bem-vindo!</h2>
             <p className="text-thirdGray text-sm text-center mb-8">Cadastre seus dados.</p>
             <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto">
-              
               <div className="mb-6">
                 <div className="flex items-center mb-2">
                   <MdEmail className="text-blue-500 mr-2" size={20} />
@@ -211,18 +198,6 @@ const RegisterPage = ({ onLogin }) => {
                 {repeatPasswordError && <p className="text-red-500 text-sm mt-1">{repeatPasswordError}</p>}
               </div>
 
-              <div className="flex justify-between items-center space-x-4 mb-6">
-                <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500">
-                  <FaMeta size={20} className="text-blue-500" />
-                </button>
-                <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500">
-                  <FcGoogle size={20} />
-                </button>
-                <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500">
-                  <FaApple size={20} className="text-white" />
-                </button>
-              </div>
-
               <button
                 type="submit"
                 className={`w-full py-2 bg-blue-600 text-white rounded-xl font-semibold ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -250,6 +225,14 @@ const RegisterPage = ({ onLogin }) => {
                 )}
               </button>
             </form>
+
+            <div className="flex justify-between items-center space-x-4 mt-4 mb-6">
+              <RegisterWithFacebook />
+              <RegisterWithGoogle />
+              <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500">
+                <FaApple size={20} className="text-white" />
+              </button>
+            </div>
 
             <p className="text-thirdGray mt-6 text-center text-sm">
               Já possui uma conta? <a href="/login" className="text-white text-sm">Siga para o login</a>

@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { MdEmail } from 'react-icons/md';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { RiLock2Fill } from 'react-icons/ri';
-import { FaMeta } from 'react-icons/fa6';
 import { FaApple } from 'react-icons/fa';
-import { FcGoogle } from 'react-icons/fc';
+import LoginWithGoogle from '../../components/Google/loginGoogle.tsx';
+import LoginWithFacebook from '../../components/Facebook/loginFacebook.tsx';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { saveToStorage, savePermissionsToStorage } from '../../utils/storage';
@@ -19,6 +19,8 @@ const LoginPage = ({ onLogin }) => {
   const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [isSocialLogin, setIsSocialLogin] = useState(false);
+
   const navigate = useNavigate();
 
   const handleUsernameChange = (event) => {
@@ -41,60 +43,69 @@ const LoginPage = ({ onLogin }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setUsernameError('');
-    setPasswordError('');
+    
+    if (!isSocialLogin) {
+      setUsernameError('');
+      setPasswordError('');
 
-    let canSubmit = true;
+      let canSubmit = true;
 
-    if (username === '') {
-      setUsernameError('Campo obrigatório*');
-      canSubmit = false;
-    }
+      if (username === '') {
+        setUsernameError('Campo obrigatório*');
+        canSubmit = false;
+      }
 
-    if (password === '') {
-      setPasswordError('Campo obrigatório*');
-      canSubmit = false;
-    }
+      if (password === '') {
+        setPasswordError('Campo obrigatório*');
+        canSubmit = false;
+      }
 
-    if (canSubmit) {
-      setIsLoading(true);
-
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 400));
-        const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.loginToken}`, {
-          method: 'POST',
-          headers: configBackendConnection.headersDefault,
-          body: JSON.stringify({
-            username: username,
-            password: password,
-          }),
-        });
-
-        if (response.status === 200) {
-          const data = await response.json();
-          const { token, name, restricted_access, user_type, permissions } = data;
-
-          if (rememberMe) {
-            localStorage.setItem('token', token);
-          } else {
-            sessionStorage.setItem('token', token);
-          }
-
-          saveToStorage({ token, name, restricted_access, user_type });
-          savePermissionsToStorage(permissions);
-
-          toast.success('Login bem-sucedido!');
-          onLogin(true);
-          navigate('/');
-        } else {
-          toast.error('Credenciais inválidas');
-        }
-      } catch (error) {
-        toast.error('Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.');
-      } finally {
-        setIsLoading(false);
+      if (!canSubmit) {
+        return;
       }
     }
+
+    setIsLoading(true);
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.loginToken}`, {
+        method: 'POST',
+        headers: configBackendConnection.headersDefault,
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
+      });
+
+      if (response.status === 200) {
+        const data = await response.json();
+        const { token, name, restricted_access, user_type, permissions } = data;
+
+        if (rememberMe) {
+          localStorage.setItem('token', token);
+        } else {
+          sessionStorage.setItem('token', token);
+        }
+
+        saveToStorage({ token, name, restricted_access, user_type });
+        savePermissionsToStorage(permissions);
+
+        toast.success('Login bem-sucedido!');
+        onLogin(true);
+        navigate('/');
+      } else {
+        toast.error('Credenciais inválidas');
+      }
+    } catch (error) {
+      toast.error('Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSocialLoginStart = () => {
+    setIsSocialLogin(true);
   };
 
   return (
@@ -155,11 +166,11 @@ const LoginPage = ({ onLogin }) => {
               <hr className="border-gray-600 my-6" />
 
               <div className="flex justify-between items-center space-x-4 mb-6">
-                <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500">
-                  <FaMeta size={20} className="text-blue-500" />
+                <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500" onClick={handleSocialLoginStart}>
+                  <LoginWithFacebook onLogin={onLogin} />
                 </button>
-                <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500">
-                  <FcGoogle size={20} />
+                <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500" onClick={handleSocialLoginStart}>
+                  <LoginWithGoogle onLogin={onLogin} />
                 </button>
                 <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500">
                   <FaApple size={20} className="text-white" />

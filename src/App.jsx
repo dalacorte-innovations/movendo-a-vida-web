@@ -5,8 +5,11 @@ import { useEffect, useState } from 'react';
 import LoginPage from './pages/login/index.jsx';
 import HomePage from './pages/home/index.tsx';
 import LogoutPage from './pages/logout/index.jsx';
-import RegisterPage from './pages/register/index.tsx';  // Adicione o import do RegisterPage
+import RegisterPage from './pages/register/index.tsx';
 import { getToken } from './utils/storage';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
+const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 function App() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -25,28 +28,30 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <div>
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="dark"
-        />
-        <Routes>
-          <Route path="/login" element={authenticated ? <Navigate to="/" /> : <LoginPage onLogin={handleLogin} />} />
-          <Route path="/logout" element={<LogoutPage onLogout={handleLogout} />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/" element={authenticated ? <HomePage /> : <Navigate to="/login" />} />
-        </Routes>
-      </div>
-    </BrowserRouter>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <BrowserRouter>
+        <div>
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
+          <Routes>
+            <Route path="/login" element={authenticated ? <Navigate to="/" /> : <LoginPage onLogin={handleLogin} />} />
+            <Route path="/logout" element={<LogoutPage onLogout={handleLogout} />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/" element={authenticated ? <HomePage /> : <Navigate to="/login" />} />
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </GoogleOAuthProvider>
   );
 }
 
