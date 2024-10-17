@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { MdEmail } from 'react-icons/md';
 import BackgroundImage from '../../assets/images/background-resetpassword.png';
+import { configBackendConnection, endpoints } from '../../utils/backendConnection';
 
 const ResetPasswordPage = () => {
   const [email, setEmail] = useState('');
@@ -26,11 +27,23 @@ const ResetPasswordPage = () => {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.resetPassword}`, {
+        method: 'POST',
+        headers: configBackendConnection.headersDefault,
+        body: JSON.stringify({
+          email: email,
+        }),
+      });
 
-      toast.success('Código de redefinição de senha enviado!');
+      if (response.status === 200) {
+        toast.success('Código de redefinição de senha enviado para o seu e-mail!');
+        navigate('/login');
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Erro ao solicitar redefinição de senha.');
+      }
     } catch (error) {
-      toast.error('Erro ao solicitar redefinição de senha.');
+      toast.error('Erro ao processar a solicitação. Tente novamente mais tarde.');
     } finally {
       setIsLoading(false);
     }

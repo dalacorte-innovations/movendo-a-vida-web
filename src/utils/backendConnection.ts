@@ -11,6 +11,8 @@ const ApiIndex = "api/v1";
 export const endpoints = {
     loginToken: `${ApiIndex}/rest-auth/login/`,
     registerUser: `${ApiIndex}/register/`,
+    resetPassword: `${ApiIndex}/password_reset/`,
+    resetPasswordConfirm: `/password_reset/confirm/`,
 };
 
 

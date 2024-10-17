@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { MdLock } from 'react-icons/md'; // Ícone de cadeado para senha
-import BackgroundImage from '../../assets/images/background-resetpassword.png'; // Imagem de fundo para a redefinição de senha
+import { MdLock } from 'react-icons/md';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import BackgroundImage from '../../assets/images/background-resetpassword.png';
+import { configBackendConnection, endpoints } from '../../utils/backendConnection';
 
 const ResetPasswordConfirm = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { uidb64, token } = useParams();
   const navigate = useNavigate();
 
   const handlePasswordChange = (event) => {
@@ -20,6 +25,14 @@ const ResetPasswordConfirm = () => {
   const handleConfirmPasswordChange = (event) => {
     setConfirmPassword(event.target.value);
     setConfirmPasswordError('');
+  };
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
   };
 
   const handleSubmit = async (event) => {
@@ -43,12 +56,24 @@ const ResetPasswordConfirm = () => {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.resetPasswordConfirm}${uidb64}/${token}/`, {
+        method: 'POST',
+        headers: configBackendConnection.headersDefault,
+        body: JSON.stringify({
+          new_password1: password,
+          new_password2: confirmPassword,
+        }),
+      });
 
-      toast.success('Senha redefinida com sucesso!');
-      navigate('/login'); // Redireciona para a página de login após sucesso
+      if (response.status === 200) {
+        toast.success('Senha redefinida com sucesso!');
+        navigate('/login');
+      } else {
+        const data = await response.json();
+        toast.error(data.detail || 'Erro ao redefinir senha.');
+      }
     } catch (error) {
-      toast.error('Erro ao redefinir senha.');
+      toast.error('Erro ao processar a solicitação.');
     } finally {
       setIsLoading(false);
     }
@@ -57,12 +82,10 @@ const ResetPasswordConfirm = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-primaryBlack font-metropolis">
       <div className="flex w-full h-full">
-        {/* Imagem de fundo */}
         <div className="hidden md:block w-1/2 h-screen">
           <img src={BackgroundImage} alt="Background" className="w-full h-full object-cover" />
         </div>
 
-        {/* Modal de confirmação de senha */}
         <div className="w-full md:w-[56rem] flex flex-col items-center justify-center p-8 min-h-screen">
           <div className="bg-primaryGray rounded-3xl shadow-lg p-8 max-w-lg w-full">
             <h2 className="text-white text-2xl font-bold mb-4 text-center">Redefina sua senha</h2>
@@ -71,35 +94,41 @@ const ResetPasswordConfirm = () => {
             </p>
 
             <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto">
-              <div className="mb-6">
+              <div className="mb-6 relative">
                 <div className="flex items-center mb-2">
                   <MdLock className="text-blue-500 mr-2" size={20} />
                   <label htmlFor="password" className="block text-white">Nova Senha</label>
                 </div>
                 <input
-                  type="password"
+                  type={isPasswordVisible ? 'text' : 'password'}
                   id="password"
-                  className={`w-full pl-4 py-2 bg-primaryGray text-sm text-white rounded-xl border-2 focus:outline-none ${passwordError ? 'border-red-500' : 'border-gray-600'}`}
+                  className={`w-full pl-4 pr-10 py-2 bg-primaryGray text-sm text-white rounded-xl border-2 focus:outline-none ${passwordError ? 'border-red-500' : 'border-gray-600'}`}
                   placeholder="Insira sua nova senha"
                   value={password}
                   onChange={handlePasswordChange}
                 />
+                <span className="absolute right-3 top-10 text-gray-500 cursor-pointer" onClick={togglePasswordVisibility}>
+                  {isPasswordVisible ? <FaEyeSlash size={24} /> : <FaEye size={24} />}
+                </span>
                 {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
               </div>
 
-              <div className="mb-6">
+              <div className="mb-6 relative">
                 <div className="flex items-center mb-2">
                   <MdLock className="text-blue-500 mr-2" size={20} />
                   <label htmlFor="confirmPassword" className="block text-white">Confirmar Senha</label>
                 </div>
                 <input
-                  type="password"
+                  type={isConfirmPasswordVisible ? 'text' : 'password'}
                   id="confirmPassword"
-                  className={`w-full pl-4 py-2 bg-primaryGray text-sm text-white rounded-xl border-2 focus:outline-none ${confirmPasswordError ? 'border-red-500' : 'border-gray-600'}`}
+                  className={`w-full pl-4 pr-10 py-2 bg-primaryGray text-sm text-white rounded-xl border-2 focus:outline-none ${confirmPasswordError ? 'border-red-500' : 'border-gray-600'}`}
                   placeholder="Confirme sua nova senha"
                   value={confirmPassword}
                   onChange={handleConfirmPasswordChange}
                 />
+                <span className="absolute right-3 top-10 text-gray-500 cursor-pointer" onClick={toggleConfirmPasswordVisibility}>
+                  {isConfirmPasswordVisible ? <FaEyeSlash size={24} /> : <FaEye size={24} />}
+                </span>
                 {confirmPasswordError && <p className="text-red-500 text-sm mt-1">{confirmPasswordError}</p>}
               </div>
 

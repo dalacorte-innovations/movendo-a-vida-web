@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import { MdEmail } from 'react-icons/md';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { RiLock2Fill } from 'react-icons/ri';
-import { FaApple } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { saveToStorage } from '../../utils/storage';
 import { configBackendConnection, endpoints } from '../../utils/backendConnection';
 import Background from '../../assets/images/backgorund-register.png';
 import RegisterWithGoogle from '../../components/Google/registerGoogle.tsx';
@@ -97,12 +95,6 @@ const RegisterPage = () => {
         });
 
         if (response.status === 201) {
-          const data = await response.json();
-          const { token, name, restricted_access, user_type } = data;
-
-          localStorage.setItem('token', token);
-          saveToStorage({ token, name, restricted_access, user_type });
-
           toast.success('Cadastro bem-sucedido!');
           navigate('/');
         } else {
