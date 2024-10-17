@@ -229,9 +229,6 @@ const RegisterPage = () => {
             <div className="flex justify-between items-center space-x-4 mt-4 mb-6">
               <RegisterWithFacebook />
               <RegisterWithGoogle />
-              <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500">
-                <FaApple size={20} className="text-white" />
-              </button>
             </div>
 
             <p className="text-thirdGray mt-6 text-center text-sm">

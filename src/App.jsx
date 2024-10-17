@@ -6,6 +6,9 @@ import LoginPage from './pages/login/index.jsx';
 import HomePage from './pages/home/index.tsx';
 import LogoutPage from './pages/logout/index.jsx';
 import RegisterPage from './pages/register/index.tsx';
+import ResetPasswordPage from './pages/reset-password/index.tsx';
+import ResetPasswordConfirm from './pages/reset-password-confirm/index.tsx';
+
 import { getToken } from './utils/storage';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -47,7 +50,10 @@ function App() {
             <Route path="/login" element={authenticated ? <Navigate to="/" /> : <LoginPage onLogin={handleLogin} />} />
             <Route path="/logout" element={<LogoutPage onLogout={handleLogout} />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/" element={authenticated ? <HomePage /> : <Navigate to="/login" />} />
+
+            <Route path="/reset/:uidb64/:token" element={<ResetPasswordConfirm />} />
           </Routes>
         </div>
       </BrowserRouter>

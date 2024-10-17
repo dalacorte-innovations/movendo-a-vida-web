@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { MdEmail } from 'react-icons/md';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { RiLock2Fill } from 'react-icons/ri';
-import { FaApple } from 'react-icons/fa';
 import LoginWithGoogle from '../../components/Google/loginGoogle.tsx';
 import LoginWithFacebook from '../../components/Facebook/loginFacebook.tsx';
 import { useNavigate } from 'react-router-dom';
@@ -160,7 +159,7 @@ const LoginPage = ({ onLogin }) => {
                   <input type="checkbox" id="rememberMe" className="mr-2 text-thirdGray form-checkbox" onChange={handleRememberMeChange} />
                   <label htmlFor="rememberMe" className="text-thirdGray text-sm">Lembrar de mim</label>
                 </div>
-                <a href="#" className="text-sm text-thirdGray">Esqueceu sua senha?</a>
+                <a href="/reset-password" className="text-sm text-thirdGray">Esqueceu sua senha?</a>
               </div>
 
               <hr className="border-gray-600 my-6" />
@@ -171,9 +170,6 @@ const LoginPage = ({ onLogin }) => {
                 </button>
                 <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500" onClick={handleSocialLoginStart}>
                   <LoginWithGoogle onLogin={onLogin} />
-                </button>
-                <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500">
-                  <FaApple size={20} className="text-white" />
                 </button>
               </div>
 
