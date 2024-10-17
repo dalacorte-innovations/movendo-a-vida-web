@@ -12,7 +12,6 @@ const LoginWithFacebook = ({ onLogin }) => {
   const handleFacebookResponse = async (response) => {
     if (response.accessToken) {
       try {
-        // Coleta primeiro o token do Facebook
         const userInfoResponse = await fetch(
           `https://graph.facebook.com/me?access_token=${response.accessToken}&fields=id,name,email`,
           { method: 'GET' }
@@ -20,14 +19,13 @@ const LoginWithFacebook = ({ onLogin }) => {
 
         if (userInfoResponse.ok) {
           const userInfo = await userInfoResponse.json();
-          // Aqui você tem o e-mail e outras informações do usuário via Facebook
           const facebookResponse = await fetch(`${configBackendConnection.baseURL}/${endpoints.loginToken}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              facebook_token: response.accessToken, // Use o token do Facebook aqui
+              facebook_token: response.accessToken,
             }),
           });
 

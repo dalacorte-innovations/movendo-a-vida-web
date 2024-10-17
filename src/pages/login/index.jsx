@@ -159,18 +159,14 @@ const LoginPage = ({ onLogin }) => {
                   <input type="checkbox" id="rememberMe" className="mr-2 text-thirdGray form-checkbox" onChange={handleRememberMeChange} />
                   <label htmlFor="rememberMe" className="text-thirdGray text-sm">Lembrar de mim</label>
                 </div>
-                <a href="/reset-password" className="text-sm text-thirdGray">Esqueceu sua senha?</a>
+                <a href="/reset-password" className="text-sm text-thirdGray text-right">Esqueceu sua senha?</a>
               </div>
 
               <hr className="border-gray-600 my-6" />
 
-              <div className="flex justify-between items-center space-x-4 mb-6">
-                <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500" onClick={handleSocialLoginStart}>
+              <div className="flex justify-between items-center space-x-4 mt-4 mb-6" onClick={handleSocialLoginStart}>
                   <LoginWithFacebook onLogin={onLogin} />
-                </button>
-                <button className="flex items-center justify-center w-36 h-10 rounded-lg border border-gray-500" onClick={handleSocialLoginStart}>
                   <LoginWithGoogle onLogin={onLogin} />
-                </button>
               </div>
 
               <button
