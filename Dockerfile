@@ -12,4 +12,4 @@ RUN bun install
 
 EXPOSE 3033
 
-CMD ["bun", "start"]
+CMD ["bun", "run", "dev"]

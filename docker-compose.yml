@@ -11,4 +11,4 @@ services:
       - /app/node_modules
     env_file:
       - .env
-    command: ["bun", "start"]
+    command: ["bun", "run", "dev"]
