@@ -42,7 +42,8 @@ const LoginPage = ({ onLogin }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
+    // Verifica se é um login normal, e faz a validação dos campos
     if (!isSocialLogin) {
       setUsernameError('');
       setPasswordError('');
@@ -68,38 +69,44 @@ const LoginPage = ({ onLogin }) => {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 400));
-      const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.loginToken}`, {
-        method: 'POST',
-        headers: configBackendConnection.headersDefault,
-        body: JSON.stringify({
-          username: username,
-          password: password,
-        }),
-      });
 
-      if (response.status === 200) {
-        const data = await response.json();
-        const { token, name, restricted_access, user_type, permissions } = data;
+      // Apenas faz a requisição para login comum
+      if (!isSocialLogin) {
+        const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.loginToken}`, {
+          method: 'POST',
+          headers: configBackendConnection.headersDefault,
+          body: JSON.stringify({
+            username: username,
+            password: password,
+          }),
+        });
 
-        if (rememberMe) {
-          localStorage.setItem('token', token);
+        if (response.status === 200) {
+          const data = await response.json();
+          const { token, name, restricted_access, user_type, permissions } = data;
+
+          if (rememberMe) {
+            localStorage.setItem('token', token);
+          } else {
+            sessionStorage.setItem('token', token);
+          }
+
+          saveToStorage({ token, name, restricted_access, user_type });
+          savePermissionsToStorage(permissions);
+
+          toast.success('Login bem-sucedido!');
+          onLogin(true);
+          navigate('/');
         } else {
-          sessionStorage.setItem('token', token);
+          toast.error('Credenciais inválidas');
         }
-
-        saveToStorage({ token, name, restricted_access, user_type });
-        savePermissionsToStorage(permissions);
-
-        toast.success('Login bem-sucedido!');
-        onLogin(true);
-        navigate('/');
-      } else {
-        toast.error('Credenciais inválidas');
       }
     } catch (error) {
       toast.error('Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.');
     } finally {
       setIsLoading(false);
+      // Resetando o social login após a tentativa
+      setIsSocialLogin(false);
     }
   };
 
@@ -165,8 +172,8 @@ const LoginPage = ({ onLogin }) => {
               <hr className="border-gray-600 my-6" />
 
               <div className="flex justify-between items-center space-x-4 mt-4 mb-6" onClick={handleSocialLoginStart}>
-                  <LoginWithFacebook onLogin={onLogin} />
-                  <LoginWithGoogle onLogin={onLogin} />
+                <LoginWithFacebook onLogin={onLogin} />
+                <LoginWithGoogle onLogin={onLogin} />
               </div>
 
               <button
