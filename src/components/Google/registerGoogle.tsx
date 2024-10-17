@@ -3,7 +3,6 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { FcGoogle } from 'react-icons/fc';
 import { toast } from 'react-toastify';
 import { configBackendConnection, endpoints } from '../../utils/backendConnection';
-import { saveToStorage } from '../../utils/storage';
 import { useNavigate } from 'react-router-dom';
 
 const RegisterWithGoogle = () => {
@@ -36,13 +35,8 @@ const RegisterWithGoogle = () => {
           });
 
           if (googleResponse.status === 201) {
-            const data = await googleResponse.json();
-            const { token, name, restricted_access, user_type } = data;
-            localStorage.setItem('token', token);
-            saveToStorage({ token, name, restricted_access, user_type });
-
             toast.success('Registro via Google realizado com sucesso, faça o login!');
-            navigate('/');
+            navigate('/login');
           } else {
             toast.error('Erro ao realizar o login via Google.');
           }

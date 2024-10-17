@@ -24,10 +24,6 @@ function App() {
     setAuthenticated(!!token);
   }, []);
 
-  const handleLogin = (isLoggedIn) => {
-    setAuthenticated(isLoggedIn);
-  };
-
   const handleLogout = () => {
     setAuthenticated(false);
   };

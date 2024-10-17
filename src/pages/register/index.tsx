@@ -96,7 +96,7 @@ const RegisterPage = () => {
 
         if (response.status === 201) {
           toast.success('Cadastro bem-sucedido!');
-          navigate('/');
+          navigate('/login');
         } else {
           toast.error('Erro ao realizar o cadastro.');
         }

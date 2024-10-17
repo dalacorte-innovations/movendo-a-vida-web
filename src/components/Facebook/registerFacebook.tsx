@@ -1,9 +1,7 @@
 import React from 'react';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
-import { FaFacebook } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { configBackendConnection, endpoints } from '../../utils/backendConnection';
-import { saveToStorage } from '../../utils/storage';
 import { useNavigate } from 'react-router-dom';
 import { FaMeta } from 'react-icons/fa6';
 
@@ -28,12 +26,8 @@ const RegisterWithFacebook = () => {
 
         if (facebookResponse.status === 201) {
           const data = await facebookResponse.json();
-          const { token, name, restricted_access, user_type } = data;
-          localStorage.setItem('token', token);
-          saveToStorage({ token, name, restricted_access, user_type });
-
           toast.success('Registro via Facebook realizado com sucesso, faça o login!');
-          navigate('/');
+          navigate('/login');
         } else {
           toast.error('Erro ao realizar o registro via Facebook.');
         }

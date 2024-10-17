@@ -4,7 +4,7 @@ import { getToken } from '../../utils/storage.jsx';
 
 const PublicRoute = ({ element }) => {
   const token = getToken();
-  return !token ? element : <Navigate to="/" replace />;
+  return !token ? element : <Navigate to="/index" replace />;
 };
 
 export default PublicRoute;
