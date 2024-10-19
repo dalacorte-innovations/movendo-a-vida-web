@@ -9,8 +9,9 @@ import RegisterPage from './pages/register/index.tsx';
 import ResetPasswordPage from './pages/reset-password/index.tsx';
 import LandingPage from './pages/ladding-page/index.tsx';
 import ResetPasswordConfirm from './pages/reset-password-confirm/index.tsx';
-import ProtectedRoute from './components/Authentication/ProtectedRoute.tsx'
-import PublicRoute from './components/Authentication/PublicRoute.tsx'
+import PlansPage from './pages/plans/index.tsx';
+import ProtectedRoute from './components/Authentication/ProtectedRoute.tsx';
+import PublicRoute from './components/Authentication/PublicRoute.tsx';
 import { getToken } from './utils/storage';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -18,15 +19,17 @@ const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 function App() {
   const [authenticated, setAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = getToken();
     setAuthenticated(!!token);
+    setLoading(false);
   }, []);
 
-  const handleLogout = () => {
-    setAuthenticated(false);
-  };
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
 
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
@@ -47,14 +50,54 @@ function App() {
           <Routes>
             <Route path="/landing-page" element={<LandingPage />} />
 
-            <Route path="/" element={<Navigate to={authenticated ? "/index" : "/login"} replace />} />
-            <Route path="*" element={<Navigate to={authenticated ? "/index" : "/login"} replace />} />
-            <Route path="/login" element={<PublicRoute element={<LoginPage onLogin={setAuthenticated} />} />} />
-            <Route path="/register" element={<PublicRoute element={<RegisterPage />} />} />
-            <Route path="/logout" element={<ProtectedRoute element={<LogoutPage onLogout={handleLogout} />} />} />
-            <Route path="/reset-password" element={<PublicRoute element={<ResetPasswordPage />} />} />
-            <Route path="/password_reset/confirm/:uidb64/:token" element={<PublicRoute element={<ResetPasswordConfirm />} />} />
-
+            <Route
+              path="/"
+              element={
+                authenticated ? (
+                  <Navigate to="/home" replace />
+                ) : (
+                  <Navigate to="/landing-page" replace />
+                )
+              }
+            />
+            <Route
+              path="*"
+              element={
+                authenticated ? (
+                  <Navigate to="/home" replace />
+                ) : (
+                  <Navigate to="/landing-page" replace />
+                )
+              }
+            />
+            <Route
+              path="/home"
+              element={<ProtectedRoute element={<HomePage />} />}
+            />
+            <Route
+              path="/plans"
+              element={<PlansPage />}
+            />
+            <Route
+              path="/login"
+              element={<PublicRoute element={<LoginPage onLogin={setAuthenticated} />} />}
+            />
+            <Route
+              path="/register"
+              element={<PublicRoute element={<RegisterPage />} />}
+            />
+            <Route
+              path="/logout"
+              element={<ProtectedRoute element={<LogoutPage onLogout={() => setAuthenticated(false)} />} />}
+            />
+            <Route
+              path="/reset-password"
+              element={<PublicRoute element={<ResetPasswordPage />} />}
+            />
+            <Route
+              path="/password_reset/confirm/:uidb64/:token"
+              element={<PublicRoute element={<ResetPasswordConfirm />} />}
+            />
           </Routes>
         </div>
       </BrowserRouter>

@@ -36,7 +36,7 @@ const LandingPage = () => {
             <li className="cursor-pointer text-thirdGray font-metropolis text-sm hover:text-white transition-colors" onClick={() => navigate('/beneficios')}>
               Benefícios
             </li>
-            <li className="cursor-pointer text-thirdGray font-metropolis text-sm hover:text-white transition-colors" onClick={() => navigate('/planos')}>
+            <li className="cursor-pointer text-thirdGray font-metropolis text-sm hover:text-white transition-colors" onClick={() => navigate('/plans')}>
               Planos
             </li>
             <li className="cursor-pointer text-thirdGray font-metropolis text-sm hover:text-white transition-colors" onClick={() => navigate('/contato')}>
@@ -70,7 +70,7 @@ const LandingPage = () => {
               <li className="cursor-pointer text-white font-metropolis text-lg hover:text-thirdGray transition-colors" onClick={() => { navigate('/beneficios'); toggleMenu(); }}>
                 Benefícios
               </li>
-              <li className="cursor-pointer text-white font-metropolis text-lg hover:text-thirdGray transition-colors" onClick={() => { navigate('/planos'); toggleMenu(); }}>
+              <li className="cursor-pointer text-white font-metropolis text-lg hover:text-thirdGray transition-colors" onClick={() => { navigate('/plans'); toggleMenu(); }}>
                 Planos
               </li>
               <li className="cursor-pointer text-white font-metropolis text-lg hover:text-thirdGray transition-colors" onClick={() => { navigate('/contato'); toggleMenu(); }}>
@@ -105,7 +105,7 @@ const LandingPage = () => {
                 Defina sua trajetória com clareza e alcance cada marco em sua carreira e vida pessoal. Com um planejamento de 20 anos, você pode transformar seus sonhos em conquistas tangíveis.
               </p>
               <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-sm font-semibold" onClick={() => navigate('/planos')}>
+                <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-sm font-semibold" onClick={() => navigate('/plans')}>
                   Ver planos
                 </button>
                 <button className="bg-secontGray hover:bg-gray-700 text-white px-6 py-2 rounded-xl text-sm font-semibold" onClick={() => navigate('/contato')}>
@@ -273,7 +273,7 @@ const LandingPage = () => {
             <h1 className="text-primaryWhite text-xl font-metropolis">Plano de Vida</h1>
             <nav className="flex justify-center space-x-4 md:space-x-8 mt-4">
               <a href="/beneficios" className="text-thirdGray text-lg hover:text-white">Benefícios</a>
-              <a href="/planos" className="text-thirdGray text-lg hover:text-white">Planos</a>
+              <a href="/plans" className="text-thirdGray text-lg hover:text-white">Planos</a>
               <a href="/contato" className="text-thirdGray text-lg hover:text-white">Contato</a>
             </nav>
         </div>

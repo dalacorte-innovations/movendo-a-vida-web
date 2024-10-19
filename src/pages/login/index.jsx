@@ -43,7 +43,6 @@ const LoginPage = ({ onLogin }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Verifica se é um login normal, e faz a validação dos campos
     if (!isSocialLogin) {
       setUsernameError('');
       setPasswordError('');
@@ -70,7 +69,6 @@ const LoginPage = ({ onLogin }) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 400));
 
-      // Apenas faz a requisição para login comum
       if (!isSocialLogin) {
         const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.loginToken}`, {
           method: 'POST',
@@ -105,7 +103,6 @@ const LoginPage = ({ onLogin }) => {
       toast.error('Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.');
     } finally {
       setIsLoading(false);
-      // Resetando o social login após a tentativa
       setIsSocialLogin(false);
     }
   };
