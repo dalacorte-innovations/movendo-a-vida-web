@@ -7,10 +7,10 @@ import HomePage from './pages/home/index.tsx';
 import LogoutPage from './pages/logout/index.jsx';
 import RegisterPage from './pages/register/index.tsx';
 import ResetPasswordPage from './pages/reset-password/index.tsx';
+import LandingPage from './pages/ladding-page/index.tsx';
 import ResetPasswordConfirm from './pages/reset-password-confirm/index.tsx';
 import ProtectedRoute from './components/Authentication/ProtectedRoute.tsx'
 import PublicRoute from './components/Authentication/PublicRoute.tsx'
-
 import { getToken } from './utils/storage';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -45,6 +45,8 @@ function App() {
             theme="dark"
           />
           <Routes>
+            <Route path="/landing-page" element={<LandingPage />} />
+
             <Route path="/" element={<Navigate to={authenticated ? "/index" : "/login"} replace />} />
             <Route path="*" element={<Navigate to={authenticated ? "/index" : "/login"} replace />} />
             <Route path="/login" element={<PublicRoute element={<LoginPage onLogin={setAuthenticated} />} />} />

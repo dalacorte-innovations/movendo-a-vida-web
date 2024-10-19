@@ -13,7 +13,10 @@ module.exports = {
         primaryGray: '#141414',
         secontGray: '#3F3D3C',
         thirdGray: '#555555',
+        forthyGray: '#9F9F9F',
         primaryBlack: '#0D0D0D',
+        primaryWhite: '#FFFFFF',
+        primaryPink: '#BB02BB'
       },
       spacing: {
         '69p': '69%',

@@ -110,12 +110,17 @@ const RegisterPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-primaryBlack font-metropolis relative">
-      <div className="flex w-full">
-        <div className="hidden md:block w-1/2 h-screen">
-          <img src={Background} alt="Background" className="w-full h-full object-cover" />
+      <div className="flex w-full flex-col md:flex-row">
+        <div className="hidden md:block md:w-1/2 min-h-screen">
+          <img 
+            src={Background} 
+            alt="Background" 
+            className="w-full h-full object-cover max-h-screen"
+            style={{ objectFit: 'cover', maxHeight: '100vh' }} 
+          />
         </div>
 
-        <div className="w-full md:w-[56rem] flex flex-col items-center justify-center p-8 min-h-screen">
+        <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-8 min-h-screen">
           <div className="bg-primaryGray rounded-3xl shadow-lg p-8 max-w-lg w-full">
             <h2 className="text-white text-3xl font-bold mb-4 text-center font-metropolis">Seja bem-vindo!</h2>
             <p className="text-thirdGray text-sm text-center mb-8">Cadastre seus dados.</p>
@@ -229,7 +234,7 @@ const RegisterPage = () => {
 
             <hr className="border-gray-600 my-4" />
 
-            <p className="text-center text-sm text-white cursor-pointer" onClick={() => navigate('/ladding-page')}>
+            <p className="text-center text-sm text-white cursor-pointer" onClick={() => navigate('/landing-page')}>
               Voltar para o site
             </p>
           </div>

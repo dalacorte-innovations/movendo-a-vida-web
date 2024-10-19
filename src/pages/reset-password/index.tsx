@@ -109,7 +109,7 @@ const ResetPasswordPage = () => {
 
               <hr className="border-gray-600 my-4" />
 
-              <p className="text-center text-sm text-white cursor-pointer" onClick={() => navigate('/')}>
+              <p className="text-center text-sm text-white cursor-pointer" onClick={() => navigate('/landing-page')}>
                 Voltar para o site
               </p>
             </form>
