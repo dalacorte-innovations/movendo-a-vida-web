@@ -6,7 +6,7 @@ import LoginWithGoogle from '../../components/Google/loginGoogle.tsx';
 import LoginWithFacebook from '../../components/Facebook/loginFacebook.tsx';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { saveToStorage, savePermissionsToStorage } from '../../utils/storage';
+import { saveToStorage } from '../../utils/storage';
 import { configBackendConnection, endpoints } from '../../utils/backendConnection';
 import Background from '../../assets/images/background-login.png';
 
@@ -81,7 +81,16 @@ const LoginPage = ({ onLogin }) => {
 
         if (response.status === 200) {
           const data = await response.json();
-          const { token, name, restricted_access, user_type, permissions } = data;
+          const { token, name, user_type, plan_name, last_payment, payment_made } = data;
+
+          const storageData = {
+            token,
+            name,
+            user_type,
+            plan_name,
+            last_payment,
+            payment_made
+          };
 
           if (rememberMe) {
             localStorage.setItem('token', token);
@@ -89,8 +98,7 @@ const LoginPage = ({ onLogin }) => {
             sessionStorage.setItem('token', token);
           }
 
-          saveToStorage({ token, name, restricted_access, user_type });
-          savePermissionsToStorage(permissions);
+          saveToStorage(storageData);
 
           toast.success('Login bem-sucedido!');
           onLogin(true);
