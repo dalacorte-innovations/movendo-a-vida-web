@@ -16,7 +16,8 @@ module.exports = {
         forthyGray: '#9F9F9F',
         primaryBlack: '#0D0D0D',
         primaryWhite: '#FFFFFF',
-        primaryPink: '#BB02BB'
+        primaryPink: '#BB02BB',
+        primaryPurple: '#260926'
       },
       spacing: {
         '69p': '69%',

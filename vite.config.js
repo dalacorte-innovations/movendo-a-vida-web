@@ -13,6 +13,7 @@ export default defineConfig({
       'process.env.REACT_APP_GOOGLE_CLIENT_ID': JSON.stringify(process.env.REACT_APP_GOOGLE_CLIENT_ID),
       'process.env.FACEBOOK_OAUTH2_CLIENT_SECRET': JSON.stringify(process.env.FACEBOOK_OAUTH2_CLIENT_SECRET),
       'process.env.FACEBOOK_OAUTH2_CLIENT_ID': JSON.stringify(process.env.FACEBOOK_OAUTH2_CLIENT_ID),
+      'process.env.STRIP_API_KEY': JSON.stringify(process.env.STRIP_API_KEY),
     }),
   ],
   server: {

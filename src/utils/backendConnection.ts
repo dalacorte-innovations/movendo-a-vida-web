@@ -13,6 +13,7 @@ export const endpoints = {
     registerUser: `${ApiIndex}/register/`,
     resetPassword: `${ApiIndex}/password_reset/`,
     resetPasswordConfirm: `/password_reset/confirm/`,
+    stripPayment: `${ApiIndex}/stripe-payment/`,        
 };
 
 
