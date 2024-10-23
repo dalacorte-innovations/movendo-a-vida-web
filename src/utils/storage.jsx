@@ -34,6 +34,14 @@ export const getName = () => {
     return getFromStorage('name');
 };
 
+export const getPlan = () => {
+    return getFromStorage('plan_name');
+}
+
+export const getPlanMade = () => {
+    return getFromStorage('payment_made');
+}
+
 export const getTypeUser = () => {
     return getFromStorage('user_type');
 };
