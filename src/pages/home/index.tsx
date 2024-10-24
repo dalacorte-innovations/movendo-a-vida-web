@@ -11,7 +11,7 @@ function HomePage() {
 
     const buttons = [
         { id: 1, icon: FaPlane, name: 'Plano de Viagem', url: '#' },
-        { id: 2, icon: FaBagShopping, name: 'Plano de Vida', url: '#' },
+        { id: 2, icon: FaBagShopping, name: 'Plano de Vida', url: '/life-plan/dashboard' },
     ];
 
     const handleButtonClick = (url) => {
@@ -31,7 +31,7 @@ function HomePage() {
                                 <Link to={button.url} key={button.id} className="mt-4 w-full md:w-auto" id={`home-page-button-link-${button.id}`}>
                                     <button
                                         className={`w-full md:w-48 h-16 rounded-lg flex items-center justify-center transition-colors duration-300 bg-${
-                                            hoveredButton === button.id ? 'gray-700' : 'gray-900'
+                                            hoveredButton === button.id ? 'gray-700' : 'bg-primaryBlack'
                                         } hover:bg-gray-700 text-sm`}
                                         onMouseEnter={() => setHoveredButton(button.id)}
                                         onMouseLeave={() => setHoveredButton(null)}

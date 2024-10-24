@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { FaStar } from 'react-icons/fa';
 import { HiHome } from "react-icons/hi2";
 import { MdExpandMore } from 'react-icons/md';
@@ -14,7 +14,9 @@ import { IoExitSharp } from "react-icons/io5";
 
 const Sidebar = () => {
     const [selected, setSelected] = useState(null);
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(window.innerWidth >= 1024); // Inicializa baseado no tamanho da tela
+
+    const location = useLocation();
 
     const options = [
         { id: 1, name: 'Home', icon: HiHome, url: '/' },
@@ -23,7 +25,7 @@ const Sidebar = () => {
         { id: 4, name: 'Favoritos', icon: FaStar, url: '#' },
         { id: 5, name: 'Ajuda', icon: IoMdHelpCircle, url: '#' },
         { id: 6, name: 'Configurações', icon: BsFillGearFill, url: '#' },
-        { id: 7, name: 'Sair', icon: IoExitSharp, url: '/logout'}
+        { id: 7, name: 'Sair', icon: IoExitSharp, url: '/logout' }
     ];
 
     const toggleSidebar = () => {
@@ -36,12 +38,19 @@ const Sidebar = () => {
         }
     };
 
+    // Monitora mudanças de rota e ajusta a expansão da sidebar em telas pequenas
+    useEffect(() => {
+        if (window.innerWidth < 1024) {
+            setIsExpanded(false);
+        }
+    }, [location]);
+
     return (
         <div className={`flex flex-col h-[100%] bg-primaryBlack transition-all duration-300 ${isExpanded ? 'w-64 p-8' : 'w-16 p-4'}`}>
             <div className="flex items-center justify-between mb-8">
                 {isExpanded && <h1 className="text-lg font-metropolis text-white transition-opacity duration-300 ease-in-out">Plano de Vida</h1>}
-                <button 
-                    className="bg-primaryPurple w-8 h-8 rounded-full flex items-center justify-center text-white"
+                <button
+                    className={`bg-primaryPurple w-8 h-8 rounded-full flex items-center justify-center text-white ${!isExpanded && 'hidden lg:flex'}`}
                     onClick={toggleSidebar}
                 >
                     <FaLongArrowAltLeft className={`transition-transform duration-300 ease-in-out ${!isExpanded && 'rotate-180'}`} />

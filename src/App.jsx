@@ -3,6 +3,9 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useEffect, useState } from 'react';
 import LoginPage from './pages/login/index.jsx';
+import PlanoDeVidaPage from './pages/plano-de-vida/index.tsx';
+import LifePlanDashboard from './pages/life-plan-dashboard/index.tsx';
+
 import HomePage from './pages/home/index.tsx';
 import LogoutPage from './pages/logout/index.jsx';
 import RegisterPage from './pages/register/index.tsx';
@@ -77,6 +80,14 @@ function App() {
             <Route
               path="/plans"
               element={<PlansPage />}
+            />
+            <Route
+              path="/life-plan/create"
+              element={<ProtectedRoute element={<PlanoDeVidaPage />} />} 
+            />
+            <Route
+              path="/life-plan/dashboard"
+              element={<ProtectedRoute element={<LifePlanDashboard />} />} 
             />
             <Route
               path="/login"
