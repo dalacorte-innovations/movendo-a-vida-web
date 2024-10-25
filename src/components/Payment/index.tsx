@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { toast } from 'react-toastify';
 import backgroundImage from '../../assets/images/background-beneficios.png';
 import { getToken } from '../../utils/storage';
+import { ThemeContext } from '../../utils/ThemeContext.jsx';
 
 const PaymentModal = ({ selectedPlan, onClose }) => {
+  const { darkMode } = useContext(ThemeContext);
 
   const handlePayment = () => {
     const token = getToken();
@@ -38,21 +40,23 @@ const PaymentModal = ({ selectedPlan, onClose }) => {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 sm:p-0"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative w-full max-w-6xl mx-auto p-6 shadow-xl flex flex-col md:flex-row bg-primaryBlack rounded-lg max-h-screen overflow-y-auto">
+      <div
+        className={`relative w-full max-w-6xl mx-auto p-6 shadow-xl flex flex-col md:flex-row ${darkMode ? 'bg-primaryBlack' : 'bg-primaryBlack'} rounded-lg max-h-screen overflow-y-auto`}
+      >
         <div
-          className="w-full md:w-1/2 p-6 flex flex-col justify-center bg-primaryBlack bg-cover bg-center relative"
+          className={`w-full md:w-1/2 p-6 flex flex-col justify-center ${darkMode ? 'bg-primaryBlack text-white' : 'bg-gray-100 text-gray-900'} bg-cover bg-center relative`}
           style={{ backgroundImage: `url(${backgroundImage})` }}
         >
           <button className="text-gray-600 font-semibold mb-4 relative z-10" onClick={onClose}>
             ← Voltar para o site
           </button>
-          <div className="flex flex-col items-center justify-center text-center mt-10 sm:mt-4">
-            <h3 className="text-2xl font-semibold text-black mb-2">Plano selecionado</h3>
-            <p className="text-sm text-gray-500 mb-6">
+          <div className="flex flex-col items-center justify-center text-center mt-4">
+            <h3 className="text-2xl font-semibold mb-2 text-black">Plano selecionado</h3>
+            <p className="text-sm text-gray-400 mb-4">
               Melhor opção para quem possui um perfil de investidor conservador e busca uma experiência segura.
             </p>
 
-            <div className="bg-primaryGray rounded-xl p-6 mb-6 text-white w-full">
+            <div className={`rounded-xl p-6 mb-6 ${darkMode ? 'bg-primaryGray text-white' : 'bg-gray-200 text-gray-900'} w-full`}>
               <div className="flex justify-between items-center mb-4">
                 <h4 className="text-lg font-semibold">{selectedPlan.title}</h4>
                 {selectedPlan.popular && (
@@ -78,10 +82,10 @@ const PaymentModal = ({ selectedPlan, onClose }) => {
           </div>
         </div>
 
-        <div className="w-full md:w-1/2 p-6 bg-primaryBlack text-white flex flex-col justify-center items-center">
+        <div className={`w-full md:w-1/2 p-6 ${darkMode ? 'bg-primaryBlack text-white' : 'bg-gray-100 text-gray-900'} flex flex-col justify-center items-center`}>
           <div className="text-center mb-6">
             <h3 className="text-2xl font-semibold mb-4">Realizar pagamento</h3>
-            <p className="text-sm text-gray-400 mb-4">Clique no botão abaixo para prosseguir com o pagamento.</p>
+            <p className="text-sm mb-4 text-gray-400">Clique no botão abaixo para prosseguir com o pagamento.</p>
           </div>
 
           <button

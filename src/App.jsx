@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import LoginPage from './pages/login/index.jsx';
 import PlanoDeVidaPage from './pages/plano-de-vida/index.tsx';
 import LifePlanDashboard from './pages/life-plan-dashboard/index.tsx';
-
 import HomePage from './pages/home/index.tsx';
 import LogoutPage from './pages/logout/index.jsx';
 import RegisterPage from './pages/register/index.tsx';
@@ -17,6 +16,7 @@ import ProtectedRoute from './components/Authentication/ProtectedRoute.tsx';
 import PublicRoute from './components/Authentication/PublicRoute.tsx';
 import { getToken } from './utils/storage';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { ThemeProvider } from './utils/ThemeContext.jsx';
 
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -36,82 +36,75 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
-      <BrowserRouter>
-        <div>
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="dark"
-          />
-          <Routes>
-            <Route path="/landing-page" element={<LandingPage />} />
+      <ThemeProvider>
+        <BrowserRouter>
+          <div>
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="dark"
+            />
+            <Routes>
+              <Route path="/landing-page" element={<LandingPage />} />
 
-            <Route
-              path="/"
-              element={
-                authenticated ? (
-                  <Navigate to="/home" replace />
-                ) : (
-                  <Navigate to="/landing-page" replace />
-                )
-              }
-            />
-            <Route
-              path="*"
-              element={
-                authenticated ? (
-                  <Navigate to="/home" replace />
-                ) : (
-                  <Navigate to="/landing-page" replace />
-                )
-              }
-            />
-            <Route
-              path="/home"
-              element={<ProtectedRoute element={<HomePage />} />}
-            />
-            <Route
-              path="/plans"
-              element={<PlansPage />}
-            />
-            <Route
-              path="/life-plan/create"
-              element={<ProtectedRoute element={<PlanoDeVidaPage />} />} 
-            />
-            <Route
-              path="/life-plan/dashboard"
-              element={<ProtectedRoute element={<LifePlanDashboard />} />} 
-            />
-            <Route
-              path="/login"
-              element={<PublicRoute element={<LoginPage onLogin={setAuthenticated} />} />}
-            />
-            <Route
-              path="/register"
-              element={<PublicRoute element={<RegisterPage />} />}
-            />
-            <Route
-              path="/logout"
-              element={<ProtectedRoute element={<LogoutPage onLogout={() => setAuthenticated(false)} />} />}
-            />
-            <Route
-              path="/reset-password"
-              element={<PublicRoute element={<ResetPasswordPage />} />}
-            />
-            <Route
-              path="/password_reset/confirm/:uidb64/:token"
-              element={<PublicRoute element={<ResetPasswordConfirm />} />}
-            />
-          </Routes>
-        </div>
-      </BrowserRouter>
+              <Route
+                path="/"
+                element={
+                  authenticated ? (
+                    <Navigate to="/home" replace />
+                  ) : (
+                    <Navigate to="/landing-page" replace />
+                  )
+                }
+              />
+              <Route
+                path="*"
+                element={
+                  authenticated ? (
+                    <Navigate to="/home" replace />
+                  ) : (
+                    <Navigate to="/landing-page" replace />
+                  )
+                }
+              />
+              <Route
+                path="/home"
+                element={<ProtectedRoute element={<HomePage />} />}
+              />
+              <Route path="/plans" element={<PlansPage />} />
+              <Route
+                path="/life-plan/create"
+                element={<ProtectedRoute element={<PlanoDeVidaPage />} />}
+              />
+              <Route
+                path="/life-plan/dashboard"
+                element={<ProtectedRoute element={<LifePlanDashboard />} />}
+              />
+              <Route
+                path="/login"
+                element={<PublicRoute element={<LoginPage onLogin={setAuthenticated} />} />}
+              />
+              <Route path="/register" element={<PublicRoute element={<RegisterPage />} />} />
+              <Route
+                path="/logout"
+                element={<ProtectedRoute element={<LogoutPage onLogout={() => setAuthenticated(false)} />} />}
+              />
+              <Route path="/reset-password" element={<PublicRoute element={<ResetPasswordPage />} />} />
+              <Route
+                path="/password_reset/confirm/:uidb64/:token"
+                element={<PublicRoute element={<ResetPasswordConfirm />} />}
+              />
+            </Routes>
+          </div>
+        </BrowserRouter>
+      </ThemeProvider>
     </GoogleOAuthProvider>
   );
 }

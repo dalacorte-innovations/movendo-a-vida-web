@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { FaCircleCheck, FaRegCircleXmark } from 'react-icons/fa6';
 import PaymentModal from '../../components/Payment/index.tsx'; 
 import { useNavigate } from 'react-router-dom';
 import { getToken, getPlan, getPlanMade } from '../../utils/storage.jsx';
 import Sidebar from '../../components/sidebar/index.tsx';
 import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner.jsx';
+import { ThemeContext } from '../../utils/ThemeContext.jsx';
 
 const plans = [
   {
@@ -47,6 +48,7 @@ const PlansPage = () => {
   const [currentPlan, setCurrentPlan] = useState('');
   const [paymentMade, setPaymentMade] = useState(false);
   const navigate = useNavigate();
+  const { darkMode } = useContext(ThemeContext);
 
   useEffect(() => {
     const token = getToken();
@@ -77,16 +79,16 @@ const PlansPage = () => {
   }
 
   return (
-    <div className="flex h-[100%]">
+    <div className={`flex h-[100%] ${darkMode ? 'bg-primaryBlack' : 'bg-white'}`}>
       {isAuthenticated && (
         <div className="flex-shrink-0">
           <Sidebar />
         </div>
       )}
-      <section className="flex-1 min-h-screen bg-primaryBlack py-16 px-4 flex flex-col">
+      <section className={`flex-1 min-h-screen ${darkMode ? 'bg-primaryBlack' : 'bg-gray-100'} py-16 px-4 flex flex-col`}>
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white">Nossos planos</h2>
-          <p className="text-sm md:text-lg text-gray-400 mt-4 max-w-2xl mx-auto">
+          <h2 className={`text-3xl md:text-4xl font-bold ${darkMode ? 'text-white' : 'text-black'}`}>Nossos planos</h2>
+          <p className={`text-sm md:text-lg ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-4 max-w-2xl mx-auto`}>
             Seja qual for seu objetivo, nossos recursos foram projetados para guiá-lo ao longo dos próximos 20 anos, ajudando você a alcançar cada marco com confiança.
           </p>
         </div>
@@ -100,7 +102,7 @@ const PlansPage = () => {
                 onMouseEnter={() => handleMouseEnter(index)}
                 onMouseLeave={handleMouseLeave}
                 onClick={() => !isDisabled && handleSelectPlan(plan, index)}
-                className={`relative bg-primaryGray p-6 sm:p-8 rounded-lg shadow-lg flex flex-col items-center transition-all duration-300 
+                className={`relative ${darkMode ? 'bg-primaryGray' : 'bg-white'} p-6 sm:p-8 rounded-lg shadow-lg flex flex-col items-center transition-all duration-300 
                   ${(hoveredPlan === index || selectedPlan === index) ? 'border-2 border-primaryPink' : 'border-2 border-transparent'}
                   ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
@@ -109,11 +111,11 @@ const PlansPage = () => {
                     Mais popular
                   </div>
                 )}
-                <h3 className="text-lg font-semibold mb-2 text-white">{plan.title}</h3>
-                <div className="text-3xl md:text-4xl font-bold text-white mb-2">
+                <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>{plan.title}</h3>
+                <div className={`text-3xl md:text-4xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
                   {plan.price} <span className="text-lg font-normal">/mês</span>
                 </div>
-                <p className="text-sm text-center text-gray-400 mb-4 md:mb-6">
+                <p className={`text-sm text-center mb-4 md:mb-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   {plan.description}
                 </p>
                 <button
@@ -122,8 +124,8 @@ const PlansPage = () => {
                 >
                   {isDisabled ? 'Plano Atual' : 'Ver plano'}
                 </button>
-                <hr className="border-gray-500 mb-4 md:mb-6 w-full" />
-                <ul className="text-sm text-gray-300 space-y-2 w-full">
+                <hr className={`border-${darkMode ? 'gray-500' : 'gray-300'} mb-4 md:mb-6 w-full`} />
+                <ul className="text-sm space-y-2 w-full">
                   {plan.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-center">
                       {plan.availableFeatures[featureIndex] ? (
@@ -131,7 +133,7 @@ const PlansPage = () => {
                       ) : (
                         <FaRegCircleXmark className="text-red-500 w-5 h-5 mr-2" />
                       )}
-                      {feature}
+                      <span className={`${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -151,7 +153,7 @@ const PlansPage = () => {
 
         <div className="text-center">
           <button
-            className="text-white font-semibold text-lg hover:underline"
+            className={`font-semibold text-lg hover:underline ${darkMode ? 'text-white' : 'text-black'}`}
             onClick={() => navigate('/')}
           >
             Voltar para o site

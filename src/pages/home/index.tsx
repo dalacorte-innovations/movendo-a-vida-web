@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaPlane } from "react-icons/fa";
 import { FaBagShopping } from "react-icons/fa6";
 import React from 'react';
 import Sidebar from '../../components/sidebar';
+import { ThemeContext } from '../../utils/ThemeContext.jsx';
 
 function HomePage() {
     const [hoveredButton, setHoveredButton] = useState(null);
+    const { darkMode } = useContext(ThemeContext);
 
     const buttons = [
         { id: 1, icon: FaPlane, name: 'Plano de Viagem', url: '#' },
@@ -21,7 +23,7 @@ function HomePage() {
     };
 
     return (
-        <div className="flex h-screen bg-primaryGray">
+        <div className={`flex h-screen ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'}`}>
             <Sidebar />
             <main className="h-screen flex flex-col items-center justify-center w-full">
                 <nav className="w-full flex flex-col items-center justify-center">
@@ -30,8 +32,12 @@ function HomePage() {
                             {buttons.map(button => (
                                 <Link to={button.url} key={button.id} className="mt-4 w-full md:w-auto" id={`home-page-button-link-${button.id}`}>
                                     <button
-                                        className={`w-full md:w-48 h-16 rounded-lg flex items-center justify-center transition-colors duration-300 bg-${
-                                            hoveredButton === button.id ? 'gray-700' : 'bg-primaryBlack'
+                                        className={`w-full md:w-48 h-16 rounded-lg flex items-center justify-center transition-colors duration-300 ${
+                                            hoveredButton === button.id
+                                                ? 'bg-gray-700'
+                                                : darkMode
+                                                ? 'bg-primaryGray'
+                                                : 'bg-primaryBlack'
                                         } hover:bg-gray-700 text-sm`}
                                         onMouseEnter={() => setHoveredButton(button.id)}
                                         onMouseLeave={() => setHoveredButton(null)}
@@ -39,8 +45,16 @@ function HomePage() {
                                         id={`home-page-button-${button.id}`}
                                     >
                                         <div className="flex items-center justify-center gap-2 m-1" id={`home-page-button-icon-container-${button.id}`}>
-                                            <button.icon className="text-white" id={`home-page-button-icon-${button.id}`} />
-                                            <span className={`text-white text-sm ${hoveredButton === button.id ? 'font-metropolis' : 'font-metropolis'}`} id={`home-page-button-text-${button.id}`}>
+                                            <button.icon
+                                                className={`${darkMode ? 'text-white' : 'text-white'}`}
+                                                id={`home-page-button-icon-${button.id}`}
+                                            />
+                                            <span
+                                                className={`text-sm ${hoveredButton === button.id ? 'font-metropolis' : 'font-metropolis'} ${
+                                                    darkMode ? 'text-white' : 'text-white'
+                                                }`}
+                                                id={`home-page-button-text-${button.id}`}
+                                            >
                                                 {button.name}
                                             </span>
                                         </div>
