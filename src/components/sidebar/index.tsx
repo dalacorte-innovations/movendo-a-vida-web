@@ -13,7 +13,7 @@ import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeContext } from '../../utils/ThemeContext.jsx';
-import { getPicture } from '../../utils/storage.jsx';
+import { getPicture, getName, getPhone, getEmail } from '../../utils/storage';
 
 const Sidebar = () => {
     const [selected, setSelected] = useState(null);
@@ -59,6 +59,8 @@ const Sidebar = () => {
     }, [location]);
 
     const userPicture = getPicture() || "https://robohash.org/dalacorte.png";
+    const userName = getName() || 'Nome desconhecido';
+    const userEmail = getEmail() || 'email.desconhecido@gmail.com';
 
     return (
         <>
@@ -203,8 +205,8 @@ const Sidebar = () => {
                     />
                     {isExpanded && (
                         <>
-                            <h2 className={`mt-2 text-sm font-metropolis ${darkMode ? 'text-white' : 'text-black'} transition-opacity duration-300 ease-in-out`}>Gabriel Dalacorte</h2>
-                            <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-800'} transition-opacity duration-300 ease-in-out`}>gabrieldalacorte@gmail.com</span>
+                            <h2 className={`mt-2 text-sm font-metropolis ${darkMode ? 'text-white' : 'text-black'} transition-opacity duration-300 ease-in-out`}>{userName}</h2>
+                            <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-800'} transition-opacity duration-300 ease-in-out`}>{userEmail}</span>
                         </>
                     )}
                 </div>
