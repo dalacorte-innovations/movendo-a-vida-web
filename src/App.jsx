@@ -12,6 +12,7 @@ import ResetPasswordPage from './pages/reset-password/index.tsx';
 import LandingPage from './pages/ladding-page/index.tsx';
 import ResetPasswordConfirm from './pages/reset-password-confirm/index.tsx';
 import PlansPage from './pages/plans/index.tsx';
+import ConfigPage from './pages/config/index.tsx';
 import ProtectedRoute from './components/Authentication/ProtectedRoute.tsx';
 import PublicRoute from './components/Authentication/PublicRoute.tsx';
 import { getToken } from './utils/storage';
@@ -78,6 +79,11 @@ function App() {
                 path="/home"
                 element={<ProtectedRoute element={<HomePage />} />}
               />
+              <Route
+                path="/config"
+                element={<ProtectedRoute element={<ConfigPage />} />}
+              />
+
               <Route path="/plans" element={<PlansPage />} />
               <Route
                 path="/life-plan/create"
@@ -91,6 +97,7 @@ function App() {
                 path="/login"
                 element={<PublicRoute element={<LoginPage onLogin={setAuthenticated} />} />}
               />
+              <Route   path="/register/:referral_code" element={<PublicRoute element={<RegisterPage />} />} />
               <Route path="/register" element={<PublicRoute element={<RegisterPage />} />} />
               <Route
                 path="/logout"

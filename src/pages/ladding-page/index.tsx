@@ -5,7 +5,7 @@ import { VscGraph } from "react-icons/vsc";
 import { IoBriefcase, IoShieldCheckmark } from "react-icons/io5"; 
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai'; 
-import BackgroundImage from '../../assets/images/background-laddingpage.png';
+import BackgroundGif from '../../assets/gifs/gif-laddingpage.gif';
 import BackgroundBeneficios from '../../assets/images/background-beneficios.png'; 
 import BackgroundFutureButton from '../../assets/images/background-future-button.png';
 import BackgroundFooter from '../../assets/images/background-footer.png';
@@ -94,7 +94,7 @@ const LandingPage = () => {
           <section
             className="absolute w-[90%] h-[90%] bg-cover bg-no-repeat bg-center rounded-[2rem] md:rounded-[3.5rem] flex items-center justify-center"
             style={{
-              backgroundImage: `url(${BackgroundImage})`,
+              backgroundImage: `url(${BackgroundGif})`,
             }}
           >
             <div className="text-white text-center max-w-xl md:max-w-4xl p-4 flex flex-col items-center justify-center -mt-16 lg:-mt-96">

@@ -2,6 +2,7 @@ import { getToken } from './storage';
 
 export const configBackendConnection = {
     baseURL: process.env.REACT_APP_BACKEND_URL as string,
+    frontURL: process.env.REACT_APP_REACT_URL as string,
     headersDefault: {
         'Content-Type': 'application/json',
     },
@@ -13,7 +14,8 @@ export const endpoints = {
     registerUser: `${ApiIndex}/register/`,
     resetPassword: `${ApiIndex}/password_reset/`,
     resetPasswordConfirm: `/password_reset/confirm/`,
-    stripPayment: `${ApiIndex}/stripe-payment/`,        
+    stripPayment: `${ApiIndex}/stripe-payment/`,
+    userConfig: `${ApiIndex}/users/me/`,
 };
 
 

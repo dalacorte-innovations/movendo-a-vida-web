@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdEmail } from 'react-icons/md';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { RiLock2Fill } from 'react-icons/ri';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { configBackendConnection, endpoints } from '../../utils/backendConnection';
 import Background from '../../assets/images/backgorund-register.png';
@@ -21,6 +21,7 @@ const RegisterPage = () => {
   const [nameError, setNameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [repeatPasswordError, setRepeatPasswordError] = useState('');
+  const { referral_code } = useParams();
   const navigate = useNavigate();
 
   const handleUsernameChange = (event) => {
@@ -91,6 +92,7 @@ const RegisterPage = () => {
             email: username,
             first_name: name,
             password: password,
+            referral_code: referral_code || null,
           }),
         });
 

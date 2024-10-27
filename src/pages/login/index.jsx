@@ -81,7 +81,10 @@ const LoginPage = ({ onLogin }) => {
 
         if (response.status === 200) {
           const data = await response.json();
-          const { token, name, user_type, plan_name, last_payment, payment_made } = data;
+          const { token, name, user_type,
+                  plan_name, last_payment, payment_made,
+                  phone, email, image_url, 
+                  referral_code, referral_count } = data;
 
           const storageData = {
             token,
@@ -89,7 +92,12 @@ const LoginPage = ({ onLogin }) => {
             user_type,
             plan_name,
             last_payment,
-            payment_made
+            payment_made,
+            phone,
+            email,
+            image_url,
+            referral_code,
+            referral_count
           };
 
           if (rememberMe) {

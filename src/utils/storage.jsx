@@ -50,3 +50,27 @@ export const isAdmin = () => {
     const typeUser = getTypeUser();
     return typeUser === DEFAULT_VALUES.userManager;
 };
+
+export const getPhone = () => {
+    return getFromStorage('phone');
+};
+
+export const getEmail = () => {
+    return getFromStorage('email');
+};
+
+export const saveImageUrl = (url) => {
+    localStorage.setItem("image_url", url);
+};
+
+export const getPicture = () => {
+    return getFromStorage('image_url');
+};
+
+export const getReferralCode = () => {
+    return getFromStorage('referral_code');
+};
+
+export const getReferralCount = () => {
+    return getFromStorage('referral_count');
+};
