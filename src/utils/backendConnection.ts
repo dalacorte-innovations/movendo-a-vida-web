@@ -16,6 +16,8 @@ export const endpoints = {
     resetPasswordConfirm: `/password_reset/confirm/`,
     stripPayment: `${ApiIndex}/stripe-payment/`,
     userConfig: `${ApiIndex}/users/me/`,
+    feedbackAPI: `${ApiIndex}/feedback/`,
+    emailMessageAPI: `${ApiIndex}/email-message/`,
 };
 
 

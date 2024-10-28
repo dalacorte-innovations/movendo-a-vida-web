@@ -31,9 +31,22 @@ const LoginWithFacebook = ({ onLogin }) => {
 
           if (facebookResponse.status === 200) {
             const data = await facebookResponse.json();
-            const { token, name, restricted_access, user_type } = data;
+            const { token, name, user_type, plan_name, last_payment, payment_made, phone, email, image_url, referral_code, referral_count } = data;
             localStorage.setItem('token', token);
-            saveToStorage({ token, name, restricted_access, user_type });
+            const storageData = {
+              token,
+              name,
+              user_type,
+              plan_name,
+              last_payment,
+              payment_made,
+              phone,
+              email,
+              image_url,
+              referral_code,
+              referral_count
+            };
+            saveToStorage(storageData);
 
             toast.success('Login via Facebook realizado com sucesso!');
             onLogin(true);

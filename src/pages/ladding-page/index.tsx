@@ -70,13 +70,13 @@ const LandingPage = () => {
 
         <nav className="hidden md:flex flex-1 justify-center space-x-4 md:space-x-8">
           <ul className="flex space-x-4 md:space-x-8">
-            <li className="cursor-pointer text-thirdGray font-metropolis text-sm hover:text-white transition-colors" onClick={() => navigate('/beneficios')}>
+            <li className="cursor-pointer text-thirdGray font-metropolis text-sm hover:text-white transition-colors" onClick={() => navigate('/benefits')}>
               {t('Benefícios')}
             </li>
             <li className="cursor-pointer text-thirdGray font-metropolis text-sm hover:text-white transition-colors" onClick={() => navigate('/plans')}>
               {t('Planos')}
             </li>
-            <li className="cursor-pointer text-thirdGray font-metropolis text-sm hover:text-white transition-colors" onClick={() => navigate('/contato')}>
+            <li className="cursor-pointer text-thirdGray font-metropolis text-sm hover:text-white transition-colors" onClick={() => navigate('/contact')}>
               {t('Contato')}
             </li>
             <li
@@ -128,13 +128,13 @@ const LandingPage = () => {
         >
           <div className="bg-primaryGray p-8 rounded-lg w-4/5 max-w-lg text-center">
             <ul className="space-y-6">
-              <li className="cursor-pointer text-white font-metropolis text-lg hover:text-thirdGray transition-colors" onClick={() => { navigate('/beneficios'); toggleMenu(); }}>
+              <li className="cursor-pointer text-white font-metropolis text-lg hover:text-thirdGray transition-colors" onClick={() => { navigate('/benefits'); toggleMenu(); }}>
                 {t('Benefícios')}
               </li>
               <li className="cursor-pointer text-white font-metropolis text-lg hover:text-thirdGray transition-colors" onClick={() => { navigate('/plans'); toggleMenu(); }}>
                 {t('Planos')}
               </li>
-              <li className="cursor-pointer text-white font-metropolis text-lg hover:text-thirdGray transition-colors" onClick={() => { navigate('/contato'); toggleMenu(); }}>
+              <li className="cursor-pointer text-white font-metropolis text-lg hover:text-thirdGray transition-colors" onClick={() => { navigate('/contact'); toggleMenu(); }}>
                 {t('Contato')}
               </li>
             </ul>
@@ -181,7 +181,7 @@ const LandingPage = () => {
                 <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-sm font-semibold" onClick={() => navigate('/plans')}>
                   {t('Ver planos')}
                 </button>
-                <button className="bg-secontGray hover:bg-gray-700 text-white px-6 py-2 rounded-xl text-sm font-semibold" onClick={() => navigate('/contato')}>
+                <button className="bg-secontGray hover:bg-gray-700 text-white px-6 py-2 rounded-xl text-sm font-semibold" onClick={() => navigate('/contact')}>
                   {t('Entre em contato')}
                 </button>
               </div>
@@ -311,9 +311,9 @@ const LandingPage = () => {
         <div className="text-center mb-16">
           <h1 className="text-primaryWhite text-xl font-metropolis">{t('Plano de Vida')}</h1>
           <nav className="flex justify-center space-x-4 md:space-x-8 mt-4">
-            <a href="/beneficios" className="text-thirdGray text-lg hover:text-white">{t('Benefícios')}</a>
+            <a href="/benefits" className="text-thirdGray text-lg hover:text-white">{t('Benefícios')}</a>
             <a href="/plans" className="text-thirdGray text-lg hover:text-white">{t('Planos')}</a>
-            <a href="/contato" className="text-thirdGray text-lg hover:text-white">{t('Contato')}</a>
+            <a href="/contact" className="text-thirdGray text-lg hover:text-white">{t('Contato')}</a>
           </nav>
         </div>
 

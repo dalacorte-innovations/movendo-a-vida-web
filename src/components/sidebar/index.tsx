@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaStar, FaSun, FaMoon } from 'react-icons/fa';
+import { FaSun, FaMoon } from 'react-icons/fa';
+import { MdFeedback } from "react-icons/md";
 import { HiHome } from "react-icons/hi2";
 import { MdExpandMore } from 'react-icons/md';
 import { FaLongArrowAltLeft } from "react-icons/fa";
@@ -12,7 +13,7 @@ import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeContext } from '../../utils/ThemeContext.jsx';
-import { getPicture, getName, getEmail, saveToStorage } from '../../utils/storage';
+import { getPicture, getName, getEmail } from '../../utils/storage';
 import { useTranslation } from 'react-i18next';
 
 const Sidebar = () => {
@@ -27,8 +28,8 @@ const Sidebar = () => {
     const options = [
         { id: 1, name: t('Home'), icon: HiHome, url: '/' },
         { id: 2, name: t('Planos'), icon: HiBuildingStorefront, url: '/plans', hasDropdown: false },
-        // { id: 4, name: t('Favoritos'), icon: FaStar, url: '#' },
-        { id: 5, name: t('Ajuda'), icon: IoMdHelpCircle, url: '#' },
+        { id: 4, name: t('Feedback'), icon: MdFeedback, url: '/feedback' },
+        { id: 5, name: t('Ajuda'), icon: IoMdHelpCircle, url: '/onboarding' },
         { id: 6, name: t('Configurações'), icon: BsFillGearFill, url: '/config' },
         { id: 7, name: t('Sair'), icon: IoExitSharp, url: '/logout' },
     ];
@@ -236,36 +237,34 @@ const Sidebar = () => {
 
                 <hr className="border-gray-400 my-4" />
 
-                <div className="flex items-center justify-between mt-4">
-                    <span className={`text-sm ${darkMode ? 'text-white' : 'text-black'}`}>{t('Idioma')}:</span>
-                    <div className="flex space-x-2">
-                        <img
-                            src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg"
-                            alt="English"
-                            className={`w-6 h-6 cursor-pointer ${selectedLanguage === 'en' && 'border-2 border-blue-500'}`}
-                            onClick={() => handleLanguageChange('en')}
-                        />
-                        <img
-                            src="https://upload.wikimedia.org/wikipedia/en/9/9a/Flag_of_Spain.svg"
-                            alt="Español"
-                            className={`w-6 h-6 cursor-pointer ${selectedLanguage === 'es' && 'border-2 border-blue-500'}`}
-                            onClick={() => handleLanguageChange('es')}
-                        />
-                        <img
-                            src="https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg"
-                            alt="Português"
-                            className={`w-6 h-6 cursor-pointer ${selectedLanguage === 'pt' && 'border-2 border-blue-500'}`}
-                            onClick={() => handleLanguageChange('pt')}
-                        />
+                {isExpanded && (
+                    <div className="flex items-center justify-between mt-4">
+                        <span className={`text-sm ${darkMode ? 'text-white' : 'text-black'}`}>{t('Idioma')}:</span>
+                        <div className="flex space-x-2">
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg"
+                                alt="English"
+                                className={`w-6 h-6 cursor-pointer ${selectedLanguage === 'en' && 'border-2 border-blue-500'}`}
+                                onClick={() => handleLanguageChange('en')}
+                            />
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/en/9/9a/Flag_of_Spain.svg"
+                                alt="Español"
+                                className={`w-6 h-6 cursor-pointer ${selectedLanguage === 'es' && 'border-2 border-blue-500'}`}
+                                onClick={() => handleLanguageChange('es')}
+                            />
+                            <img
+                                src="https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg"
+                                alt="Português"
+                                className={`w-6 h-6 cursor-pointer ${selectedLanguage === 'pt' && 'border-2 border-blue-500'}`}
+                                onClick={() => handleLanguageChange('pt')}
+                            />
+                        </div>
                     </div>
-                </div>
+                )}
 
                 <div className={`mt-auto flex flex-col items-center ${isExpanded ? 'mb-4' : 'my-4'} transition-all duration-300 ease-in-out`}>
-                    <img
-                        className="w-14 h-14 rounded-full mb-2"
-                        src={userPicture}
-                        alt="User"
-                    />
+                    <img className="w-14 h-14 rounded-full mb-2" src={userPicture} alt="User" />
                     {isExpanded && (
                         <>
                             <h2 className={`mt-2 text-sm font-metropolis ${darkMode ? 'text-white' : 'text-black'} transition-opacity duration-300 ease-in-out`}>{userName}</h2>

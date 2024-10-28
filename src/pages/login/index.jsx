@@ -12,7 +12,7 @@ import Background from '../../assets/images/background-login.png';
 import { useTranslation } from 'react-i18next';
 
 const LoginPage = ({ onLogin }) => {
-  const { t } = useTranslation(); // Usando o hook useTranslation
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -20,7 +20,6 @@ const LoginPage = ({ onLogin }) => {
   const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [isSocialLogin, setIsSocialLogin] = useState(false);
 
   const navigate = useNavigate();
 
@@ -44,26 +43,25 @@ const LoginPage = ({ onLogin }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log('Submit triggered');
 
-    if (!isSocialLogin) {
-      setUsernameError('');
-      setPasswordError('');
+    setUsernameError('');
+    setPasswordError('');
 
-      let canSubmit = true;
+    let canSubmit = true;
 
-      if (username === '') {
-        setUsernameError(t('Campo obrigatório*'));
-        canSubmit = false;
-      }
+    if (username === '') {
+      setUsernameError(t('Campo obrigatório*'));
+      canSubmit = false;
+    }
 
-      if (password === '') {
-        setPasswordError(t('Campo obrigatório*'));
-        canSubmit = false;
-      }
+    if (password === '') {
+      setPasswordError(t('Campo obrigatório*'));
+      canSubmit = false;
+    }
 
-      if (!canSubmit) {
-        return;
-      }
+    if (!canSubmit) {
+      return;
     }
 
     setIsLoading(true);
@@ -71,62 +69,52 @@ const LoginPage = ({ onLogin }) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 400));
 
-      if (!isSocialLogin) {
-        const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.loginToken}`, {
-          method: 'POST',
-          headers: configBackendConnection.headersDefault,
-          body: JSON.stringify({
-            username: username,
-            password: password,
-          }),
-        });
+      const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.loginToken}`, {
+        method: 'POST',
+        headers: configBackendConnection.headersDefault,
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
+      });
 
-        if (response.status === 200) {
-          const data = await response.json();
-          const { token, name, user_type,
-                  plan_name, last_payment, payment_made,
-                  phone, email, image_url, 
-                  referral_code, referral_count } = data;
+      if (response.status === 200) {
+        const data = await response.json();
+        const { token, name, user_type, plan_name, last_payment, payment_made, phone, email, image_url, referral_code, referral_count } = data;
 
-          const storageData = {
-            token,
-            name,
-            user_type,
-            plan_name,
-            last_payment,
-            payment_made,
-            phone,
-            email,
-            image_url,
-            referral_code,
-            referral_count
-          };
+        const storageData = {
+          token,
+          name,
+          user_type,
+          plan_name,
+          last_payment,
+          payment_made,
+          phone,
+          email,
+          image_url,
+          referral_code,
+          referral_count
+        };
 
-          if (rememberMe) {
-            localStorage.setItem('token', token);
-          } else {
-            sessionStorage.setItem('token', token);
-          }
-
-          saveToStorage(storageData);
-
-          toast.success(t('Login bem-sucedido!'));
-          onLogin(true);
-          navigate('/');
+        if (rememberMe) {
+          localStorage.setItem('token', token);
         } else {
-          toast.error(t('Credenciais inválidas'));
+          sessionStorage.setItem('token', token);
         }
+
+        saveToStorage(storageData);
+
+        toast.success(t('Login bem-sucedido!'));
+        onLogin(true);
+        navigate('/');
+      } else {
+        toast.error(t('Credenciais inválidas'));
       }
     } catch (error) {
       toast.error(t('Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.'));
     } finally {
       setIsLoading(false);
-      setIsSocialLogin(false);
     }
-  };
-
-  const handleSocialLoginStart = () => {
-    setIsSocialLogin(true);
   };
 
   return (
@@ -143,7 +131,7 @@ const LoginPage = ({ onLogin }) => {
             <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto">
               <div className="mb-6">
                 <div className="flex items-center mb-2">
-                  <MdEmail className="text-blue-500 mr-2" size={20} />
+                  <MdEmail className="text-blue-500 mr-2" size={20} tabIndex="-1" />
                   <label htmlFor="username" className="block text-white">{t('E-mail')}</label>
                 </div>
                 <input
@@ -159,7 +147,7 @@ const LoginPage = ({ onLogin }) => {
 
               <div className="mb-6 relative">
                 <div className="flex items-center mb-2">
-                  <RiLock2Fill className="text-blue-500 mr-2" size={20} />
+                  <RiLock2Fill className="text-blue-500 mr-2" size={20} tabIndex="-1" />
                   <label htmlFor="password" className="block text-white">{t('Senha')}</label>
                 </div>
                 <input
@@ -185,11 +173,6 @@ const LoginPage = ({ onLogin }) => {
               </div>
 
               <hr className="border-gray-600 my-6" />
-
-              <div className="flex justify-between items-center space-x-4 mt-4 mb-6" onClick={handleSocialLoginStart}>
-                <LoginWithFacebook onLogin={onLogin} />
-                <LoginWithGoogle onLogin={onLogin} />
-              </div>
 
               <button
                 type="submit"
@@ -218,13 +201,16 @@ const LoginPage = ({ onLogin }) => {
                 )}
               </button>
             </form>
-
+              
+            <div className="flex justify-between items-center space-x-4 mt-4 mb-6">
+              <LoginWithFacebook onLogin={onLogin} type="button" onClick={(e) => e.preventDefault()} />
+              <LoginWithGoogle onLogin={onLogin} type="button" onClick={(e) => e.preventDefault()} />
+            </div>
             <p className="text-thirdGray mt-6 text-center text-sm">
               {t('Não possui uma conta ainda?')} <a href="/register" className="text-white text-sm">{t('Faça o cadastro')}</a>
             </p>
 
             <hr className="border-gray-600 my-4" />
-
             <p className="text-center text-sm text-white cursor-pointer" onClick={() => navigate('/landing-page')}>
               {t('Voltar para o site')}
             </p>

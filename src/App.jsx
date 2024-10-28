@@ -7,11 +7,14 @@ import { ThemeProvider } from './utils/ThemeContext.jsx';
 import { getToken } from './utils/storage';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../i18n.js';
-
+import FeedbackPage from './pages/feedback/index.tsx';
 import LoginPage from './pages/login/index.jsx';
+import BenefitsPage from './pages/benefits/index.tsx';
+import ContactPage from './pages/contact/index.tsx';
 import PlanoDeVidaPage from './pages/plano-de-vida/index.tsx';
 import LifePlanDashboard from './pages/life-plan-dashboard/index.tsx';
 import HomePage from './pages/home/index.tsx';
+import TutorialPage  from './pages/onboarding/index.tsx';
 import LogoutPage from './pages/logout/index.jsx';
 import RegisterPage from './pages/register/index.tsx';
 import ResetPasswordPage from './pages/reset-password/index.tsx';
@@ -68,6 +71,8 @@ function App() {
                     )
                   }
                 />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/benefits" element={<BenefitsPage />} />
                 <Route
                   path="*"
                   element={
@@ -90,6 +95,14 @@ function App() {
                 <Route
                   path="/life-plan/create"
                   element={<ProtectedRoute element={<PlanoDeVidaPage />} />}
+                />
+                <Route 
+                  path="/onboarding"
+                  element={<ProtectedRoute element={<TutorialPage />} />}
+                />
+                <Route
+                  path="/feedback"
+                  element={<ProtectedRoute element={<FeedbackPage />} />}
                 />
                 <Route
                   path="/life-plan/dashboard"
