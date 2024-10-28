@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { MdEmail } from 'react-icons/md';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { RiLock2Fill } from 'react-icons/ri';
@@ -8,8 +8,10 @@ import { configBackendConnection, endpoints } from '../../utils/backendConnectio
 import Background from '../../assets/images/backgorund-register.png';
 import RegisterWithGoogle from '../../components/Google/registerGoogle.tsx';
 import RegisterWithFacebook from '../../components/Facebook/registerFacebook.tsx';
+import { useTranslation } from 'react-i18next';
 
 const RegisterPage = () => {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -62,22 +64,22 @@ const RegisterPage = () => {
     let canSubmit = true;
 
     if (username === '') {
-      setUsernameError('Campo obrigatório*');
+      setUsernameError(t('Campo obrigatório*'));
       canSubmit = false;
     }
 
     if (name === '') {
-      setNameError('Campo obrigatório*');
+      setNameError(t('Campo obrigatório*'));
       canSubmit = false;
     }
 
     if (password === '') {
-      setPasswordError('Campo obrigatório*');
+      setPasswordError(t('Campo obrigatório*'));
       canSubmit = false;
     }
 
     if (repeatPassword === '' || repeatPassword !== password) {
-      setRepeatPasswordError('Senhas não coincidem*');
+      setRepeatPasswordError(t('Senhas não coincidem*'));
       canSubmit = false;
     }
 
@@ -97,13 +99,13 @@ const RegisterPage = () => {
         });
 
         if (response.status === 201) {
-          toast.success('Cadastro bem-sucedido!');
+          toast.success(t('Cadastro bem-sucedido!'));
           navigate('/login');
         } else {
-          toast.error('Erro ao realizar o cadastro.');
+          toast.error(t('Erro ao realizar o cadastro.'));
         }
       } catch (error) {
-        toast.error('Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde.');
+        toast.error(t('Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde.'));
       } finally {
         setIsLoading(false);
       }
@@ -124,19 +126,19 @@ const RegisterPage = () => {
 
         <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-8 min-h-screen">
           <div className="bg-primaryGray rounded-3xl shadow-lg p-8 max-w-lg w-full">
-            <h2 className="text-white text-3xl font-bold mb-4 text-center font-metropolis">Seja bem-vindo!</h2>
-            <p className="text-thirdGray text-sm text-center mb-8">Cadastre seus dados.</p>
+            <h2 className="text-white text-3xl font-bold mb-4 text-center font-metropolis">{t('Seja bem-vindo!')}</h2>
+            <p className="text-thirdGray text-sm text-center mb-8">{t('Cadastre seus dados.')}</p>
             <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto">
               <div className="mb-6">
                 <div className="flex items-center mb-2">
                   <MdEmail className="text-blue-500 mr-2" size={20} />
-                  <label htmlFor="username" className="block text-white">E-mail</label>
+                  <label htmlFor="username" className="block text-white">{t('E-mail')}</label>
                 </div>
                 <input
                   type="email"
                   id="username"
                   className={`w-full pl-4 pr-4 py-2 bg-primaryGray text-sm text-white rounded-xl border-2 focus:outline-none ${usernameError ? 'border-red-500' : 'border-gray-600'}`}
-                  placeholder="Insira seu e-mail"
+                  placeholder={t('Insira seu e-mail')}
                   value={username}
                   onChange={handleUsernameChange}
                 />
@@ -146,13 +148,13 @@ const RegisterPage = () => {
               <div className="mb-6">
                 <div className="flex items-center mb-2">
                   <MdEmail className="text-blue-500 mr-2" size={20} />
-                  <label htmlFor="name" className="block text-white">Nome</label>
+                  <label htmlFor="name" className="block text-white">{t('Nome')}</label>
                 </div>
                 <input
                   type="text"
                   id="name"
                   className={`w-full pl-4 pr-4 py-2 bg-primaryGray text-sm text-white rounded-xl border-2 focus:outline-none ${nameError ? 'border-red-500' : 'border-gray-600'}`}
-                  placeholder="Insira seu nome"
+                  placeholder={t('Insira seu nome')}
                   value={name}
                   onChange={handleNameChange}
                 />
@@ -162,13 +164,13 @@ const RegisterPage = () => {
               <div className="mb-6 relative">
                 <div className="flex items-center mb-2">
                   <RiLock2Fill className="text-blue-500 mr-2" size={20} />
-                  <label htmlFor="password" className="block text-white">Senha</label>
+                  <label htmlFor="password" className="block text-white">{t('Senha')}</label>
                 </div>
                 <input
                   type={isPasswordVisible ? 'text' : 'password'}
                   id="password"
                   className={`w-full pl-4 pr-10 py-2 bg-primaryGray text-sm text-white rounded-xl border-2 focus:outline-none ${passwordError ? 'border-red-500' : 'border-gray-600'}`}
-                  placeholder="Insira sua senha"
+                  placeholder={t('Insira sua senha')}
                   value={password}
                   onChange={handlePasswordChange}
                 />
@@ -181,13 +183,13 @@ const RegisterPage = () => {
               <div className="mb-6 relative">
                 <div className="flex items-center mb-2">
                   <RiLock2Fill className="text-blue-500 mr-2" size={20} />
-                  <label htmlFor="repeatPassword" className="block text-white">Repita sua senha</label>
+                  <label htmlFor="repeatPassword" className="block text-white">{t('Repita sua senha')}</label>
                 </div>
                 <input
                   type={isRepeatPasswordVisible ? 'text' : 'password'}
                   id="repeatPassword"
                   className={`w-full pl-4 pr-10 py-2 bg-primaryGray text-sm text-white rounded-xl border-2 focus:outline-none ${repeatPasswordError ? 'border-red-500' : 'border-gray-600'}`}
-                  placeholder="Confirme sua senha"
+                  placeholder={t('Confirme sua senha')}
                   value={repeatPassword}
                   onChange={handleRepeatPasswordChange}
                 />
@@ -217,10 +219,10 @@ const RegisterPage = () => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.373A8.008 8.008 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.565z"
                       ></path>
                     </svg>
-                    Efetuando cadastro...
+                    {t('Efetuando cadastro...')}
                   </div>
                 ) : (
-                  'Efetuar cadastro'
+                  t('Efetuar cadastro')
                 )}
               </button>
             </form>
@@ -231,13 +233,13 @@ const RegisterPage = () => {
             </div>
 
             <p className="text-thirdGray mt-6 text-center text-sm">
-              Já possui uma conta? <a href="/login" className="text-white text-sm">Siga para o login</a>
+              {t('Já possui uma conta?')} <a href="/login" className="text-white text-sm">{t('Siga para o login')}</a>
             </p>
 
             <hr className="border-gray-600 my-4" />
 
             <p className="text-center text-sm text-white cursor-pointer" onClick={() => navigate('/landing-page')}>
-              Voltar para o site
+              {t('Voltar para o site')}
             </p>
           </div>
         </div>

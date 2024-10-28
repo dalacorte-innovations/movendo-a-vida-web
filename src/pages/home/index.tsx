@@ -6,19 +6,21 @@ import { FaBagShopping } from "react-icons/fa6";
 import React from 'react';
 import Sidebar from '../../components/sidebar';
 import { ThemeContext } from '../../utils/ThemeContext.jsx';
+import { useTranslation } from 'react-i18next';
 
 function HomePage() {
     const [hoveredButton, setHoveredButton] = useState(null);
     const { darkMode } = useContext(ThemeContext);
+    const { t } = useTranslation();
 
     const buttons = [
-        { id: 1, icon: FaPlane, name: 'Plano de Viagem', url: '#' },
-        { id: 2, icon: FaBagShopping, name: 'Plano de Vida', url: '/life-plan/dashboard' },
+        { id: 1, icon: FaPlane, name: t('Plano de Viagem'), url: '#' },
+        { id: 2, icon: FaBagShopping, name: t('Plano de Vida'), url: '/life-plan/dashboard' },
     ];
 
     const handleButtonClick = (url) => {
         if (url === "#") {
-            toast.info("Funcionalidade em desenvolvimento");
+            toast.info(t("Funcionalidade em desenvolvimento"));
         }
     };
 

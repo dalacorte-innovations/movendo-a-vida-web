@@ -10,12 +10,14 @@ import { configBackendConnection, endpoints, getAuthHeaders, getFileUploadHeader
 import { toast } from 'react-toastify';
 import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner.jsx';
 import { formatPhoneNumber, unformatPhoneNumber } from '../../utils/formatValues.js';
+import { useTranslation } from 'react-i18next';
 
 const ConfigPage = () => {
     const { darkMode } = useContext(ThemeContext);
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        nomeCompleto: getName() || 'Nome desconhecido',
+        nomeCompleto: getName() || t('Nome desconhecido'),
         telefone: formatPhoneNumber(getPhone() || '51999999999'),
         email: getEmail() || 'email.desconhecido@gmail.com',
     });
@@ -41,7 +43,7 @@ const ConfigPage = () => {
     const handleCopyLink = () => {
         const referralLink = `${configBackendConnection.frontURL}/register/${referralCode}`;
         navigator.clipboard.writeText(referralLink);
-        toast.success("Link copiado para a área de transferência!");
+        toast.success(t("Link copiado para a área de transferência!"));
     };
 
     const handleDiscard = () => {
@@ -68,12 +70,12 @@ const ConfigPage = () => {
 
                     saveImageUrl(JSON.stringify(updatedImageUrl));
                     setProfilePicUrl(updatedImageUrl);
-                    toast.success('Imagem enviada com sucesso!');
+                    toast.success(t('Imagem enviada com sucesso!'));
                 } else {
-                    toast.error('Erro ao enviar imagem.');
+                    toast.error(t('Erro ao enviar imagem.'));
                 }
             } catch (error) {
-                toast.error('Erro ao conectar com o servidor.');
+                toast.error(t('Erro ao conectar com o servidor.'));
             } finally {
                 setLoading(false);
             }
@@ -97,13 +99,13 @@ const ConfigPage = () => {
                 });
 
                 if (response.ok) {
-                    toast.success('Configurações salvas com sucesso!');
+                    toast.success(t('Configurações salvas com sucesso!'));
                     setIsEditing(false);
                 } else {
-                    toast.error('Erro ao salvar configurações.');
+                    toast.error(t('Erro ao salvar configurações.'));
                 }
             } catch (error) {
-                toast.error('Erro ao conectar com o servidor.');
+                toast.error(t('Erro ao conectar com o servidor.'));
             } finally {
                 setLoading(false);
             }
@@ -143,7 +145,7 @@ const ConfigPage = () => {
                         <div className={`flex flex-row items-center mb-6`}>
                             <img
                                 src={profilePicUrl}
-                                alt="Profile"
+                                alt={t("Foto de perfil")}
                                 className="rounded-full w-24 h-24 md:w-32 md:h-32"
                                 key={profilePicUrl}
                             />
@@ -159,10 +161,10 @@ const ConfigPage = () => {
                                     htmlFor="file-upload"
                                     className={`bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm md:text-base cursor-pointer`}
                                 >
-                                    Subir nova foto
+                                    {t("Subir nova foto")}
                                 </label>
                                 <p className="mt-2 max-w-full md:max-w-[282px] text-sm text-gray-400 text-center md:text-left">
-                                    A foto deve ter pelo menos 800x800px. JPG ou PNG são permitidos.
+                                    {t("A foto deve ter pelo menos 800x800px. JPG ou PNG são permitidos.")}
                                 </p>
                             </div>
                         </div>
@@ -170,7 +172,7 @@ const ConfigPage = () => {
                         <hr className="border-gray-600 my-4" />
 
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className={`text-lg font-metropolis ${darkMode ? 'text-white' : 'text-black'}`}>Informações pessoais</h2>
+                            <h2 className={`text-lg font-metropolis ${darkMode ? 'text-white' : 'text-black'}`}>{t("Informações pessoais")}</h2>
                             <div className="flex gap-2">
                                 <button
                                     type="button"
@@ -178,7 +180,7 @@ const ConfigPage = () => {
                                     onClick={handleSave}
                                 >
                                     <IoPencil className="mr-2" />
-                                    {isEditing ? 'Salvar' : 'Editar'}
+                                    {isEditing ? t('Salvar') : t('Editar')}
                                 </button>
                                 {isEditing && (
                                     <button
@@ -186,7 +188,7 @@ const ConfigPage = () => {
                                         className={`bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-xl text-sm md:text-base flex items-center`}
                                         onClick={handleCancel}
                                     >
-                                        Cancelar
+                                        {t("Cancelar")}
                                     </button>
                                 )}
                             </div>
@@ -194,7 +196,7 @@ const ConfigPage = () => {
 
                         <div className={`flex flex-col md:flex-row justify-between mt-8 w-full`}>
                             <div className="flex flex-col mb-4 md:mb-0 w-full md:w-1/3">
-                                <label className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>Nome completo</label>
+                                <label className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>{t("Nome completo")}</label>
                                 {isEditing ? (
                                     <input
                                         type="text"
@@ -207,7 +209,7 @@ const ConfigPage = () => {
                                 )}
                             </div>
                             <div className="flex flex-col mb-4 md:mb-0 w-full md:w-1/3">
-                                <label className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>Telefone</label>
+                                <label className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>{t("Telefone")}</label>
                                 {isEditing ? (
                                     <input
                                         type="text"
@@ -220,7 +222,7 @@ const ConfigPage = () => {
                                 )}
                             </div>
                             <div className="flex flex-col mb-4 md:mb-0 w-full md:w-1/3">
-                                <label className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>E-mail</label>
+                                <label className={`${darkMode ? 'text-white' : 'text-gray-700'}`}>{t("E-mail")}</label>
                                 {isEditing ? (
                                     <input
                                         type="email"
@@ -237,14 +239,14 @@ const ConfigPage = () => {
 
                     <section className={`rounded-3xl p-10 ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'} border-2 border-secontGray`} style={{ height: isSmallScreen ? 'auto' : '20rem' }}>
                         <h2 className={`text-md md:text-lg font-metropolis mb-2 ${darkMode ? 'text-white' : 'text-gray-700'}`}>
-                            Convide amigos
+                            {t("Convide amigos")}
                         </h2>
                         <p className="text-sm text-gray-400 mb-4">
-                            Convide seus amigos para criarem um plano de vida e ganhe bônus.
+                            {t("Convide seus amigos para criarem um plano de vida e ganhe bônus.")}
                         </p>
                         <div className="flex items-center gap-2 mb-2">
                             <FcShare className="text-xl" />
-                            <p className="text-gray-400">Compartilhe seu link</p>
+                            <p className="text-gray-400">{t("Compartilhe seu link")}</p>
                         </div>
                         <div className="relative flex items-center">
                             <input
@@ -256,7 +258,7 @@ const ConfigPage = () => {
                             <MdContentCopy
                                 className="absolute right-4 cursor-pointer text-gray-400 hover:text-gray-600"
                                 onClick={handleCopyLink}
-                                title="Copiar link"
+                                title={t("Copiar link")}
                             />
                         </div>
                         <div className="flex flex-col md:flex-row justify-between mt-4 gap-4">
@@ -264,17 +266,17 @@ const ConfigPage = () => {
                                 type="button"
                                 className={`rounded-xl w-full md:w-[49%] px-4 py-2 text-sm md:text-base ${darkMode ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
                             >
-                                Retirar bônus
+                                {t("Retirar bônus")}
                             </button>
                             <button
                                 type="button"
                                 className={`rounded-xl w-full md:w-[49%] px-4 py-2 text-sm md:text-base ${darkMode ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-black hover:bg-gray-400'}`}
                                 onClick={handleDiscard}
                             >
-                                Descartar
+                                {t("Descartar")}
                             </button>
                         </div>
-                        <p className={`mt-4 ${darkMode ? 'text-white' : 'text-black'}`}>Pessoas que usaram o link: {referralCount}</p> {/* Adicionando o texto aqui */}
+                        <p className={`mt-4 ${darkMode ? 'text-white' : 'text-black'}`}>{t("Pessoas que usaram o link")}: {referralCount}</p>
                     </section>
                 </div>
             </main>

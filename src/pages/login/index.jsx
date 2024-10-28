@@ -9,8 +9,10 @@ import { toast } from 'react-toastify';
 import { saveToStorage } from '../../utils/storage';
 import { configBackendConnection, endpoints } from '../../utils/backendConnection';
 import Background from '../../assets/images/background-login.png';
+import { useTranslation } from 'react-i18next';
 
 const LoginPage = ({ onLogin }) => {
+  const { t } = useTranslation(); // Usando o hook useTranslation
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -50,12 +52,12 @@ const LoginPage = ({ onLogin }) => {
       let canSubmit = true;
 
       if (username === '') {
-        setUsernameError('Campo obrigatório*');
+        setUsernameError(t('Campo obrigatório*'));
         canSubmit = false;
       }
 
       if (password === '') {
-        setPasswordError('Campo obrigatório*');
+        setPasswordError(t('Campo obrigatório*'));
         canSubmit = false;
       }
 
@@ -108,15 +110,15 @@ const LoginPage = ({ onLogin }) => {
 
           saveToStorage(storageData);
 
-          toast.success('Login bem-sucedido!');
+          toast.success(t('Login bem-sucedido!'));
           onLogin(true);
           navigate('/');
         } else {
-          toast.error('Credenciais inválidas');
+          toast.error(t('Credenciais inválidas'));
         }
       }
     } catch (error) {
-      toast.error('Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.');
+      toast.error(t('Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.'));
     } finally {
       setIsLoading(false);
       setIsSocialLogin(false);
@@ -136,19 +138,19 @@ const LoginPage = ({ onLogin }) => {
 
         <div className="w-full md:w-[56rem] flex flex-col items-center justify-center p-8 min-h-screen">
           <div className="bg-primaryGray rounded-3xl shadow-lg p-8 max-w-lg w-full">
-            <h2 className="text-white text-3xl font-bold mb-4 text-center font-metropolis">Bem-vindo de volta!</h2>
-            <p className="text-thirdGray text-sm text-center mb-8">Por favor insira seus dados.</p>
+            <h2 className="text-white text-3xl font-bold mb-4 text-center font-metropolis">{t('Bem-vindo de volta!')}</h2>
+            <p className="text-thirdGray text-sm text-center mb-8">{t('Por favor insira seus dados.')}</p>
             <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto">
               <div className="mb-6">
                 <div className="flex items-center mb-2">
                   <MdEmail className="text-blue-500 mr-2" size={20} />
-                  <label htmlFor="username" className="block text-white">E-mail</label>
+                  <label htmlFor="username" className="block text-white">{t('E-mail')}</label>
                 </div>
                 <input
                   type="email"
                   id="username"
                   className={`w-full pl-4 pr-4 py-2 bg-primaryGray text-sm text-white rounded-xl border-2 focus:outline-none ${usernameError ? 'border-red-500' : 'border-gray-600'}`}
-                  placeholder="Insira seu e-mail"
+                  placeholder={t('Insira seu e-mail')}
                   value={username}
                   onChange={handleUsernameChange}
                 />
@@ -158,13 +160,13 @@ const LoginPage = ({ onLogin }) => {
               <div className="mb-6 relative">
                 <div className="flex items-center mb-2">
                   <RiLock2Fill className="text-blue-500 mr-2" size={20} />
-                  <label htmlFor="password" className="block text-white">Senha</label>
+                  <label htmlFor="password" className="block text-white">{t('Senha')}</label>
                 </div>
                 <input
                   type={isPasswordVisible ? 'text' : 'password'}
                   id="password"
                   className={`w-full pl-4 pr-10 py-2 bg-primaryGray text-sm text-white rounded-xl border-2 focus:outline-none ${passwordError ? 'border-red-500' : 'border-gray-600'}`}
-                  placeholder="Insira sua senha"
+                  placeholder={t('Insira sua senha')}
                   value={password}
                   onChange={handlePasswordChange}
                 />
@@ -177,9 +179,9 @@ const LoginPage = ({ onLogin }) => {
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center">
                   <input type="checkbox" id="rememberMe" className="mr-2 text-thirdGray form-checkbox" onChange={handleRememberMeChange} />
-                  <label htmlFor="rememberMe" className="text-thirdGray text-sm">Lembrar de mim</label>
+                  <label htmlFor="rememberMe" className="text-thirdGray text-sm">{t('Lembrar de mim')}</label>
                 </div>
-                <a href="/reset-password" className="text-sm text-thirdGray text-right">Esqueceu sua senha?</a>
+                <a href="/reset-password" className="text-sm text-thirdGray text-right">{t('Esqueceu sua senha?')}</a>
               </div>
 
               <hr className="border-gray-600 my-6" />
@@ -209,22 +211,22 @@ const LoginPage = ({ onLogin }) => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.373A8.008 8.008 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.565z"
                       ></path>
                     </svg>
-                    Entrando...
+                    {t('Entrando...')}
                   </div>
                 ) : (
-                  'Fazer login'
+                  t('Fazer login')
                 )}
               </button>
             </form>
 
             <p className="text-thirdGray mt-6 text-center text-sm">
-              Não possui uma conta ainda? <a href="/register" className="text-white text-sm">Faça o cadastro</a>
+              {t('Não possui uma conta ainda?')} <a href="/register" className="text-white text-sm">{t('Faça o cadastro')}</a>
             </p>
 
             <hr className="border-gray-600 my-4" />
 
             <p className="text-center text-sm text-white cursor-pointer" onClick={() => navigate('/landing-page')}>
-              Voltar para o site
+              {t('Voltar para o site')}
             </p>
           </div>
         </div>

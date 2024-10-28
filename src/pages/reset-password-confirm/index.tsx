@@ -5,8 +5,10 @@ import { MdLock } from 'react-icons/md';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import BackgroundImage from '../../assets/images/background-resetpassword.png';
 import { configBackendConnection, endpoints } from '../../utils/backendConnection';
+import { useTranslation } from 'react-i18next';
 
 const ResetPasswordConfirm = () => {
+  const { t } = useTranslation();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -39,17 +41,17 @@ const ResetPasswordConfirm = () => {
     event.preventDefault();
 
     if (!password) {
-      setPasswordError('Campo obrigatório*');
+      setPasswordError(t('Campo obrigatório*'));
       return;
     }
 
     if (!confirmPassword) {
-      setConfirmPasswordError('Campo obrigatório*');
+      setConfirmPasswordError(t('Campo obrigatório*'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setConfirmPasswordError('As senhas não coincidem');
+      setConfirmPasswordError(t('As senhas não coincidem'));
       return;
     }
 
@@ -66,14 +68,14 @@ const ResetPasswordConfirm = () => {
       });
 
       if (response.status === 200) {
-        toast.success('Senha redefinida com sucesso!');
+        toast.success(t('Senha redefinida com sucesso!'));
         navigate('/login');
       } else {
         const data = await response.json();
-        toast.error(data.detail || 'Erro ao redefinir senha.');
+        toast.error(data.detail || t('Erro ao redefinir senha.'));
       }
     } catch (error) {
-      toast.error('Erro ao processar a solicitação.');
+      toast.error(t('Erro ao processar a solicitação.'));
     } finally {
       setIsLoading(false);
     }
@@ -88,22 +90,22 @@ const ResetPasswordConfirm = () => {
 
         <div className="w-full md:w-[56rem] flex flex-col items-center justify-center p-8 min-h-screen">
           <div className="bg-primaryGray rounded-3xl shadow-lg p-8 max-w-lg w-full">
-            <h2 className="text-white text-2xl font-bold mb-4 text-center">Redefina sua senha</h2>
+            <h2 className="text-white text-2xl font-bold mb-4 text-center">{t('Redefina sua senha')}</h2>
             <p className="text-thirdGray text-sm text-center mb-8">
-              Insira sua nova senha abaixo.
+              {t('Insira sua nova senha abaixo.')}
             </p>
 
             <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto">
               <div className="mb-6 relative">
                 <div className="flex items-center mb-2">
                   <MdLock className="text-blue-500 mr-2" size={20} />
-                  <label htmlFor="password" className="block text-white">Nova Senha</label>
+                  <label htmlFor="password" className="block text-white">{t('Nova Senha')}</label>
                 </div>
                 <input
                   type={isPasswordVisible ? 'text' : 'password'}
                   id="password"
                   className={`w-full pl-4 pr-10 py-2 bg-primaryGray text-sm text-white rounded-xl border-2 focus:outline-none ${passwordError ? 'border-red-500' : 'border-gray-600'}`}
-                  placeholder="Insira sua nova senha"
+                  placeholder={t('Insira sua nova senha')}
                   value={password}
                   onChange={handlePasswordChange}
                 />
@@ -116,13 +118,13 @@ const ResetPasswordConfirm = () => {
               <div className="mb-6 relative">
                 <div className="flex items-center mb-2">
                   <MdLock className="text-blue-500 mr-2" size={20} />
-                  <label htmlFor="confirmPassword" className="block text-white">Confirmar Senha</label>
+                  <label htmlFor="confirmPassword" className="block text-white">{t('Confirmar Senha')}</label>
                 </div>
                 <input
                   type={isConfirmPasswordVisible ? 'text' : 'password'}
                   id="confirmPassword"
                   className={`w-full pl-4 pr-10 py-2 bg-primaryGray text-sm text-white rounded-xl border-2 focus:outline-none ${confirmPasswordError ? 'border-red-500' : 'border-gray-600'}`}
-                  placeholder="Confirme sua nova senha"
+                  placeholder={t('Confirme sua nova senha')}
                   value={confirmPassword}
                   onChange={handleConfirmPasswordChange}
                 />
@@ -152,17 +154,17 @@ const ResetPasswordConfirm = () => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.373A8.008 8.008 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.565z"
                       ></path>
                     </svg>
-                    Redefinindo...
+                    {t('Redefinindo...')}
                   </div>
                 ) : (
-                  'Redefinir Senha'
+                  t('Redefinir Senha')
                 )}
               </button>
 
               <hr className="border-gray-600 my-4" />
 
               <p className="text-center text-sm text-white cursor-pointer" onClick={() => navigate('/login')}>
-                Voltar para o login
+                {t('Voltar para o login')}
               </p>
             </form>
           </div>

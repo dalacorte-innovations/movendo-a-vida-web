@@ -6,6 +6,7 @@ import { getToken, getPlan, getPlanMade } from '../../utils/storage.jsx';
 import Sidebar from '../../components/sidebar/index.tsx';
 import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner.jsx';
 import { ThemeContext } from '../../utils/ThemeContext.jsx';
+import { useTranslation } from 'react-i18next';
 
 const plans = [
   {
@@ -41,6 +42,7 @@ const plans = [
 ];
 
 const PlansPage = () => {
+  const { t } = useTranslation();
   const [hoveredPlan, setHoveredPlan] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [isAuthenticated, setAuthenticated] = useState(false);
@@ -87,9 +89,9 @@ const PlansPage = () => {
       )}
       <section className={`flex-1 min-h-screen ${darkMode ? 'bg-primaryBlack' : 'bg-gray-100'} py-16 px-4 flex flex-col`}>
         <div className="text-center mb-12">
-          <h2 className={`text-3xl md:text-4xl font-bold ${darkMode ? 'text-white' : 'text-black'}`}>Nossos planos</h2>
+          <h2 className={`text-3xl md:text-4xl font-bold ${darkMode ? 'text-white' : 'text-black'}`}>{t('Nossos planos')}</h2>
           <p className={`text-sm md:text-lg ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-4 max-w-2xl mx-auto`}>
-            Seja qual for seu objetivo, nossos recursos foram projetados para guiá-lo ao longo dos próximos 20 anos, ajudando você a alcançar cada marco com confiança.
+            {t('Seja qual for seu objetivo, nossos recursos foram projetados para guiá-lo ao longo dos próximos 20 anos, ajudando você a alcançar cada marco com confiança.')}
           </p>
         </div>
 
@@ -108,21 +110,21 @@ const PlansPage = () => {
               >
                 {plan.popular && (
                   <div className="absolute top-4 right-4 bg-primaryPurple text-primaryPink px-3 py-1 rounded-full text-xs font-semibold">
-                    Mais popular
+                    {t('Mais popular')}
                   </div>
                 )}
-                <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>{plan.title}</h3>
+                <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>{t(plan.title)}</h3>
                 <div className={`text-3xl md:text-4xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
-                  {plan.price} <span className="text-lg font-normal">/mês</span>
+                  {plan.price} <span className="text-lg font-normal">{t("/mês")}</span>
                 </div>
                 <p className={`text-sm text-center mb-4 md:mb-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {plan.description}
+                  {t(plan.description)}
                 </p>
                 <button
                   className={`w-full py-2 px-4 rounded-full font-semibold ${plan.buttonColor} text-white mb-4 md:mb-6`}
                   disabled={isDisabled}
                 >
-                  {isDisabled ? 'Plano Atual' : 'Ver plano'}
+                  {isDisabled ? t('Plano Atual') : t('Ver plano')}
                 </button>
                 <hr className={`border-${darkMode ? 'gray-500' : 'gray-300'} mb-4 md:mb-6 w-full`} />
                 <ul className="text-sm space-y-2 w-full">
@@ -133,7 +135,7 @@ const PlansPage = () => {
                       ) : (
                         <FaRegCircleXmark className="text-red-500 w-5 h-5 mr-2" />
                       )}
-                      <span className={`${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>{feature}</span>
+                      <span className={`${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>{t(feature)}</span>
                     </li>
                   ))}
                 </ul>
@@ -156,7 +158,7 @@ const PlansPage = () => {
             className={`font-semibold text-lg hover:underline ${darkMode ? 'text-white' : 'text-black'}`}
             onClick={() => navigate('/')}
           >
-            Voltar para o site
+            {t('Voltar para o site')}
           </button>
         </div>
       </section>
