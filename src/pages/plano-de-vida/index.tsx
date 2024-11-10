@@ -1,335 +1,476 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Sidebar from '../../components/sidebar';
-import Background from '../../assets/gifs/gif-plano-de-vida1.gif';
-import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../utils/ThemeContext.jsx';
+import { FaTrash } from 'react-icons/fa';
+import { configBackendConnection, endpoints, getAuthHeaders } from '../../utils/backendConnection';
+import { toast } from 'react-toastify';
+import { useNavigate, useParams } from 'react-router-dom';
+import { RiAddBoxFill } from 'react-icons/ri';
+import { IoCaretBack } from 'react-icons/io5';
+import { IoIosExpand } from "react-icons/io";
+import { differenceInMonths, format, startOfMonth } from 'date-fns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import ptBR from 'date-fns/locale/pt-BR';
+import { TextField } from '@mui/material';
 
-const PlanoDeVidaPage = () => {
-    const [inputError, setInputError] = useState(false);
-    const [formData, setFormData] = useState({
-        nomeCompleto: '',
-        idade: '',
-        profissao: '',
-        dataPlanejamento: '',
-    });
-    const [isAdvancedForm, setIsAdvancedForm] = useState(1);
-    const [advancedData, setAdvancedData] = useState({
-        duracaoPlanejamento: '5',
-        objetivo: '',
-        custosVida: '',
-        educacaoDesenvolvimento: '',
-        metasPessoais: '',
-        simulacao: '',
-    });
+const isValidDate = (date) => date && !isNaN(new Date(date).getTime());
 
-    const navigate = useNavigate();
-    const { darkMode } = useContext(ThemeContext);
-    const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
+const ReplicateModal = ({ isOpen, onClose, onConfirm, category }) => {
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [errorMessage, setErrorMessage] = useState('');
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.id]: e.target.value,
-        });
-    };
-
-    const handleAdvancedChange = (e) => {
-        setAdvancedData({
-            ...advancedData,
-            [e.target.id]: e.target.value,
-        });
-    };
-
-    const handleInitialSubmit = (e) => {
-        e.preventDefault();
-        const { nomeCompleto, idade, profissao, dataPlanejamento } = formData;
-        if (!nomeCompleto || !idade || !profissao || !dataPlanejamento) {
-            setInputError(true);
+    const handleConfirm = () => {
+        if (!startDate || !endDate) {
+            setErrorMessage("Por favor, selecione ambas as datas.");
             return;
         }
-        setInputError(false);
-        setIsAdvancedForm(2);
+
+        if (endDate < startDate) {
+            setErrorMessage("A data final não pode ser anterior à data inicial.");
+            return;
+        }
+
+        onConfirm(category, startDate, endDate);
+        onClose();
     };
 
-    const handleBack = () => {
-        setIsAdvancedForm((prevStage) => Math.max(prevStage - 1, 1));
+    const handleClickOutside = (e) => {
+        if (e.target.className && e.target.className.toString().includes('modal-background')) {
+            onClose();
+        }
     };
 
-    const handleNext = () => {
-        setIsAdvancedForm((prevStage) => prevStage + 1);
-    };
-
-    const handleFinalSubmit = (e) => {
-        e.preventDefault();
-        navigate('/life-plan/dashboard');
-    };
-
-    useEffect(() => {
-        const checkScreenSize = () => {
-            setIsSmallScreen(window.innerWidth < 768);
-        };
-        window.addEventListener('resize', checkScreenSize);
-        return () => window.removeEventListener('resize', checkScreenSize);
-    }, []);
+    if (!isOpen) return null;
 
     return (
-        <div className={`flex h-screen overflow-y-auto ${darkMode ? 'bg-primaryGray' : 'bg-white'}`}>
-            <div className={`fixed md:relative h-screen ${darkMode ? 'bg-darkGray' : 'bg-gray-200'}`}>
-                <Sidebar />
+        <div onClick={handleClickOutside} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center modal-background">
+            <div className="bg-white p-6 rounded-lg max-w-[19rem] w-full">
+                <h2 className="text-lg font-bold mb-4 text-center">Selecione o período</h2>
+                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+                    <DatePicker
+                        label="De"
+                        views={['year', 'month']}
+                        value={startDate}
+                        onChange={(newValue) => {
+                            setStartDate(newValue);
+                            setErrorMessage('');
+                        }}
+                        renderInput={(params) => <TextField {...params} className="w-full mb-4" />}
+                    />
+                    <DatePicker
+                        label="Até"
+                        views={['year', 'month']}
+                        value={endDate}
+                        onChange={(newValue) => {
+                            setEndDate(newValue);
+                            setErrorMessage('');
+                        }}
+                        renderInput={(params) => <TextField {...params} className="w-full mb-4" />}
+                    />
+                </LocalizationProvider>
+                {errorMessage && <p className="text-red-500 text-sm text-center">{errorMessage}</p>}
+                <div className="flex justify-center gap-4 mt-5">
+                    <button onClick={onClose} className="text-gray-500">Cancelar</button>
+                    <button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded">Confirmar</button>
+                </div>
             </div>
-            <main className={`ml-0 lg:ml-20 flex flex-col ${isSmallScreen ? 'items-center mt-5' : 'md:flex-row'} h-full w-full`}>
-                <div className={`flex flex-col justify-center w-full md:w-3/5 p-4 md:p-10 ${isSmallScreen ? 'mt-5 text-center' : ''}`}>
-                    {isAdvancedForm === 1 ? (
-                        <>
-                            <h1 className={`text-xl md:text-2xl font-metropolis mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
-                                Criar formulário do plano de vida
-                            </h1>
-                            <hr className={`border-gray-600 my-6 ${!darkMode && 'border-gray-300'}`} />
-                            <section className={`rounded-lg p-4 md:p-6 ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'}`}>
-                                <h2 className={`text-md md:text-lg font-metropolis mb-4 ${darkMode ? 'text-forthyGray' : 'text-gray-700'}`}>
-                                    Informações Pessoais
-                                </h2>
-                                <form className="space-y-4 md:space-y-6 min-h-[300px]" onSubmit={handleInitialSubmit}>
-                                    {['nomeCompleto', 'idade', 'profissao'].map((id, index) => (
-                                        <div key={index}>
-                                            <div className="flex items-center mb-1 md:mb-2 pl-3">
-                                                <label
-                                                    className={`block text-sm md:text-base font-metropolis ${darkMode ? 'text-white' : 'text-black'}`}
-                                                    htmlFor={id}
-                                                >
-                                                    {id.charAt(0).toUpperCase() + id.slice(1).replace(/([A-Z])/g, ' $1')}
-                                                </label>
-                                                <span className="text-red-500 ml-1">*</span>
-                                            </div>
-                                            <input
-                                                type={id === 'idade' ? 'number' : 'text'}
-                                                id={id}
-                                                className={`w-full pl-4 pr-4 py-2 text-sm rounded-xl no-arrows border-2 focus:outline-none ${
-                                                    darkMode ? 'bg-primaryGray text-white border-gray-600' : 'bg-gray-100 text-black border-gray-400'
-                                                } ${inputError && !formData[id] ? 'border-red-500' : ''}`}
-                                                placeholder={`Insira seu ${id}`}
-                                                value={formData[id]}
-                                                onChange={handleChange}
-                                            />
-                                            {inputError && !formData[id] && (
-                                                <p className="text-red-500 text-sm mt-1">Campo obrigatório*</p>
-                                            )}
-                                        </div>
-                                    ))}
-                                    <div>
-                                        <div className="flex items-center mb-1 md:mb-2 pl-3">
-                                            <label
-                                                className={`block text-sm md:text-base font-metropolis ${darkMode ? 'text-white' : 'text-black'}`}
-                                                htmlFor="dataPlanejamento"
-                                            >
-                                                Data de início do planejamento
-                                            </label>
-                                            <span className="text-red-500 ml-1">*</span>
-                                        </div>
-                                        <input
-                                            type="date"
-                                            id="dataPlanejamento"
-                                            className={`w-full pl-4 pr-4 py-2 text-sm rounded-xl border-2 focus:outline-none ${
-                                                darkMode ? 'bg-primaryGray text-white border-gray-600' : 'bg-gray-100 text-black border-gray-400'
-                                            } ${inputError && !formData.dataPlanejamento ? 'border-red-500' : ''}`}
-                                            value={formData.dataPlanejamento}
-                                            onChange={handleChange}
-                                        />
-                                        {inputError && !formData.dataPlanejamento && (
-                                            <p className="text-red-500 text-sm mt-1">Campo obrigatório*</p>
-                                        )}
-                                    </div>
-                                    <div className="flex flex-col md:flex-row justify-between mt-6 gap-4">
-                                        <button
-                                            type="button"
-                                            className={`rounded-xl px-4 py-2 w-full md:w-1/2 text-sm md:text-base ${darkMode ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-black hover:bg-gray-400'}`}
-                                            onClick={() => navigate('/life-plan/dashboard')}
-                                        >
-                                            Voltar
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className={`rounded-xl px-4 py-2 w-full md:w-1/2 text-sm md:text-base ${darkMode ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
-                                        >
-                                            Avançar
-                                        </button>
-                                    </div>
-                                </form>
-                            </section>
-                        </>
-                    ) : isAdvancedForm === 2 ? (
-                        <>
-                            <h1 className={`text-xl md:text-2xl font-metropolis mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
-                                Planejamento Financeiro
-                            </h1>
-                            <hr className={`border-gray-600 my-6 ${!darkMode && 'border-gray-300'}`} />
-                            <section className={`rounded-lg p-4 md:p-6 ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'}`}>
-                                <form className="space-y-4 md:space-y-6 min-h-[300px]">
-                                    <div>
-                                        <div className="flex items-center mb-1 md:mb-2 pl-3">
-                                            <label
-                                                className={`block text-sm md:text-base font-metropolis ${darkMode ? 'text-white' : 'text-black'}`}
-                                                htmlFor="duracaoPlanejamento"
-                                            >
-                                                Duração do Planejamento
-                                            </label>
-                                            <span className="text-red-500 ml-1">*</span>
-                                        </div>
-                                        <select
-                                            id="duracaoPlanejamento"
-                                            className={`w-full pl-4 pr-4 py-2 text-sm rounded-xl border-2 focus:outline-none ${
-                                                darkMode ? 'bg-primaryGray text-white border-gray-600' : 'bg-gray-100 text-black border-gray-400'
-                                            }`}
-                                            value={advancedData.duracaoPlanejamento}
-                                            onChange={handleAdvancedChange}
-                                        >
-                                            <option value="5">5 anos</option>
-                                            <option value="10">10 anos</option>
-                                            <option value="20">20 anos</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center mb-1 md:mb-2 pl-3">
-                                            <label
-                                                className={`block text-sm md:text-base font-metropolis ${darkMode ? 'text-white' : 'text-black'}`}
-                                                htmlFor="objetivo"
-                                            >
-                                                Objetivo
-                                            </label>
-                                            <span className="text-red-500 ml-1">*</span>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            id="objetivo"
-                                            className={`w-full pl-4 pr-4 py-2 text-sm rounded-xl border-2 focus:outline-none ${
-                                                darkMode ? 'bg-primaryGray text-white border-gray-600' : 'bg-gray-100 text-black border-gray-400'
-                                            }`}
-                                            placeholder="Ex.: Comprar apartamento"
-                                            value={advancedData.objetivo}
-                                            onChange={handleAdvancedChange}
-                                        />
-                                    </div>
-                                    <div className="flex flex-col md:flex-row justify-between mt-6 gap-4">
-                                        <button
-                                            type="button"
-                                            className={`rounded-xl px-4 py-2 w-full md:w-1/2 text-sm md:text-base ${darkMode ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-black hover:bg-gray-400'}`}
-                                            onClick={handleBack}
-                                        >
-                                            Voltar
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={`rounded-xl px-4 py-2 w-full md:w-1/2 text-sm md:text-base ${darkMode ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
-                                            onClick={handleNext}
-                                        >
-                                            Avançar
-                                        </button>
-                                    </div>
-                                </form>
-                            </section>
-                        </>
-                    ) : isAdvancedForm === 3 ? (
-                        <>
-                            <h1 className={`text-xl md:text-2xl font-metropolis mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
-                                Planejamento de Custos e Gastos
-                            </h1>
-                            <section className={`rounded-lg p-4 md:p-6 ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'}`}>
-                                <form className="space-y-4 md:space-y-6 min-h-[300px]">
-                                    <div>
-                                        <label className={`block text-sm md:text-base font-metropolis ${darkMode ? 'text-white' : 'text-black'}`} htmlFor="custosVida">
-                                            Custos de Vida
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="custosVida"
-                                            className={`w-full pl-4 pr-4 py-2 text-sm rounded-xl border-2 focus:outline-none ${
-                                                darkMode ? 'bg-primaryGray text-white border-gray-600' : 'bg-gray-100 text-black border-gray-400'
-                                            }`}
-                                            placeholder="Ex.: Aluguel, Luz, Internet"
-                                            value={advancedData.custosVida}
-                                            onChange={handleAdvancedChange}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className={`block text-sm md:text-base font-metropolis ${darkMode ? 'text-white' : 'text-black'}`} htmlFor="educacaoDesenvolvimento">
-                                            Educação e Desenvolvimento
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="educacaoDesenvolvimento"
-                                            className={`w-full pl-4 pr-4 py-2 text-sm rounded-xl border-2 focus:outline-none ${
-                                                darkMode ? 'bg-primaryGray text-white border-gray-600' : 'bg-gray-100 text-black border-gray-400'
-                                            }`}
-                                            placeholder="Ex.: Curso de Especialização, Idiomas"
-                                            value={advancedData.educacaoDesenvolvimento}
-                                            onChange={handleAdvancedChange}
-                                        />
-                                    </div>
-                                    <div className="flex flex-col md:flex-row justify-between mt-6 gap-4">
-                                        <button
-                                            type="button"
-                                            className={`rounded-xl px-4 py-2 w-full md:w-1/2 text-sm md:text-base ${darkMode ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-black hover:bg-gray-400'}`}
-                                            onClick={handleBack}
-                                        >
-                                            Voltar
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={`rounded-xl px-4 py-2 w-full md:w-1/2 text-sm md:text-base ${darkMode ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
-                                            onClick={handleNext}
-                                        >
-                                            Avançar
-                                        </button>
-                                    </div>
-                                </form>
-                            </section>
-                        </>
+        </div>
+    );
+};
+
+const PlanoDeVidaPage = () => {
+    const { darkMode } = useContext(ThemeContext);
+    const navigate = useNavigate();
+    const { id } = useParams();
+    const [canEdit, setCanEdit] = useState(false);
+    const [isAdding, setIsAdding] = useState({});
+    const [expandedCategory, setExpandedCategory] = useState(null);
+    const [planName, setPlanName] = useState(id ? "" : "Nome do Plano de Vida");
+    const [categories, setCategories] = useState({
+        receitas: { items: [], total: 0, newItem: { name: '', value: '', meta: '', replicateMonths: 0 } },
+        estudos: { items: [], total: 0, newItem: { name: '', value: '', meta: '', replicateMonths: 0 } },
+        custos: { items: [], total: 0, newItem: { name: '', value: '', meta: '', replicateMonths: 0 } },
+        lucroPrejuizo: { items: [], total: 0, newItem: { name: '', value: '', meta: '', replicateMonths: 0 } },
+        investimentos: { items: [], total: 0, newItem: { name: '', value: '', meta: '', replicateMonths: 0 } },
+        realizacoes: { items: [], total: 0, newItem: { name: '', value: '', meta: '', replicateMonths: 0 } },
+        intercambio: { items: [], total: 0, newItem: { name: '', value: '', meta: '', replicateMonths: 0 } },
+        empresas: { items: [], total: 0, newItem: { name: '', value: '', meta: '', replicateMonths: 0 } }
+    });
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentCategory, setCurrentCategory] = useState(null);
+    const [replicateMonthsByCategory, setReplicateMonthsByCategory] = useState({});
+
+    useEffect(() => {
+        if (id) {
+            const fetchPlanDetails = async () => {
+                try {
+                    const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.lifePlanAPI}${id}/`, {
+                        method: 'GET',
+                        headers: getAuthHeaders(),
+                    });
+                    if (!response.ok) throw new Error('Erro ao carregar o plano de vida');
+                    const data = await response.json();
+
+                    const formattedItems = { ...categories };
+                    Object.keys(formattedItems).forEach(categoryKey => {
+                        formattedItems[categoryKey].items = [];
+                    });
+
+                    Object.keys(data.total_per_category).forEach(categoryKey => {
+                        if (formattedItems[categoryKey]) {
+                            formattedItems[categoryKey].total = data.total_per_category[categoryKey];
+                        }
+                    });
+
+                    data.items.forEach(item => {
+                        if (formattedItems[item.category]) {
+                            formattedItems[item.category].items.push({
+                                name: item.name,
+                                value: parseFloat(item.value),
+                                meta: parseFloat(item.meta),
+                                date: isValidDate(item.date) ? item.date : null
+                            });
+                        }
+                    });
+
+                    setPlanName(data.name);
+                    setCategories(formattedItems);
+                    setCanEdit(true);
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+            fetchPlanDetails();
+        }
+    }, [id]);
+
+    const formatCurrency = (value) => {
+        const numericValue = parseFloat(value);
+        return isNaN(numericValue) ? 'R$ 0,00' : numericValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    };
+
+    const handleAddItem = (category) => {
+        const { name, value, meta } = categories[category].newItem;
+        const replicationDates = replicateMonthsByCategory[category] || [];
+    
+        if (!name || !value) {
+            toast.error("Por favor, preencha os campos obrigatórios antes de confirmar.");
+            return;
+        }
+    
+        const valorNumerico = parseCurrencyValue(value);
+        const metaNumerica = meta ? parseCurrencyValue(meta) : null;
+    
+        const items = replicationDates.length > 0 
+            ? replicationDates.map(date => ({ name, value: valorNumerico, meta: metaNumerica, date }))
+            : [{ name, value: valorNumerico, meta: metaNumerica, date: null }];
+    
+        setCategories((prevCategories) => {
+            const updatedItems = [...prevCategories[category].items, ...items];
+            const updatedTotal = updatedItems.reduce((acc, item) => acc + item.value, 0);
+    
+            return {
+                ...prevCategories,
+                [category]: { ...prevCategories[category], items: updatedItems, total: updatedTotal, newItem: { name: '', value: '', meta: '', replicateMonths: 0 } },
+            };
+        });
+    
+        setIsAdding((prev) => ({ ...prev, [category]: false }));
+        setReplicateMonthsByCategory((prev) => ({ ...prev, [category]: [] }));
+        toast.success("Item adicionado com sucesso!");
+    };
+
+    const handleDeleteItem = (category, index) => {
+        setCategories((prevCategories) => {
+            const updatedItems = prevCategories[category].items.filter((_, i) => i !== index);
+            const updatedTotal = updatedItems.reduce((acc, item) => acc + item.value, 0);
+
+            return {
+                ...prevCategories,
+                [category]: { ...prevCategories[category], items: updatedItems, total: updatedTotal },
+            };
+        });
+    };
+
+    const handleNewItemChange = (e, category) => {
+        const { id, value } = e.target;
+        setCategories((prevCategories) => ({
+            ...prevCategories,
+            [category]: {
+                ...prevCategories[category],
+                newItem: {
+                    ...prevCategories[category].newItem,
+                    [id]: value,
+                },
+            },
+        }));
+    };
+
+    const handleNameChange = (e) => {
+        setPlanName(e.target.value);
+    };
+
+    const toggleExpandCategory = (categoryKey) => {
+        setExpandedCategory(expandedCategory === categoryKey ? null : categoryKey);
+    };
+
+    const handleSubmitPlan = async () => {
+        try {
+            const itemsForPlan = {};
+            for (const [categoryKey, category] of Object.entries(categories)) {
+                itemsForPlan[categoryKey] = {
+                    total: category.total,
+                    items: category.items.map(item => ({
+                        name: item.name,
+                        value: item.value,
+                        meta: item.meta,
+                        date: item.date || ""
+                    }))
+                };
+            }
+
+            const payload = {
+                name: planName,
+                items_for_plan: itemsForPlan
+            };
+            console.log(payload)
+            const method = id ? 'PATCH' : 'POST';
+            const url = id
+                ? `${configBackendConnection.baseURL}/${endpoints.lifePlanAPI}${id}/`
+                : `${configBackendConnection.baseURL}/${endpoints.lifePlanAPI}`;
+
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) throw new Error(id ? "Erro ao atualizar o plano de vida" : "Erro ao criar o plano de vida");
+            navigate('/life-plan/dashboard');
+            toast.success(id ? "Plano de vida atualizado com sucesso!" : "Plano de vida criado com sucesso!");
+        } catch (error) {
+            console.error(error);
+            toast.error(id ? "Erro ao atualizar o plano de vida." : "Erro ao criar o plano de vida.");
+        }
+    };
+
+    const openModal = (category) => {
+        setCurrentCategory(category);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setCurrentCategory(null);
+    };
+
+    const handleConfirmModal = (category, startDate, endDate) => {
+        const replicationDates = [];
+        const currentDate = startOfMonth(new Date(startDate));
+        const monthsToReplicate = differenceInMonths(endDate, startDate);
+
+        for (let i = 0; i <= monthsToReplicate; i++) {
+            const replicateDate = new Date(currentDate);
+            replicateDate.setMonth(currentDate.getMonth() + i);
+            const formattedDate = `01;${format(replicateDate, 'MM;yyyy')}`;
+            replicationDates.push(formattedDate);
+        }
+
+        setReplicateMonthsByCategory((prev) => ({ ...prev, [category]: replicationDates }));
+    };
+
+    const handleCurrencyInput = (e, category, field) => {
+        let value = e.target.value.replace(/\D/g, '');
+        value = (parseInt(value) / 100).toFixed(2);
+        value = value.toString().replace(".", ",");
+
+        const formattedValue = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        setCategories((prevCategories) => ({
+            ...prevCategories,
+            [category]: {
+                ...prevCategories[category],
+                newItem: {
+                    ...prevCategories[category].newItem,
+                    [field]: formattedValue,
+                },
+            },
+        }));
+    };
+
+    const parseCurrencyValue = (value) => parseFloat(value.replace(/\./g, '').replace(',', '.'));
+
+    return (
+        <div className={`flex h-screen overflow-y-auto ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'}`}>
+            <Sidebar />
+            <main className="flex flex-col mt-20 flex-grow p-6 overflow-y-scroll" style={{ maxHeight: '90vh' }}>
+                <div className="flex justify-start items-center mb-6">
+                    {canEdit ? (
+                        <input
+                            type="text"
+                            value={planName}
+                            onChange={handleNameChange}
+                            onBlur={() => setCanEdit(!canEdit)}
+                            className={`text-2xl font-bold bg-transparent border-b-2 border-transparent focus:border-gray-500 focus:outline-none transition duration-200 ${darkMode ? 'text-white' : 'text-black'}`}
+                            placeholder="Nome do Plano de Vida"
+                        />
                     ) : (
-                        <>
-                            <h1 className={`text-xl md:text-2xl font-metropolis mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
-                                Metas de Realização Pessoal
-                            </h1>
-                            <section className={`rounded-lg p-4 md:p-6 ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'}`}>
-                                <form className="space-y-4 md:space-y-6 min-h-[300px]">
-                                    <div>
-                                        <label className={`block text-sm md:text-base font-metropolis ${darkMode ? 'text-white' : 'text-black'}`} htmlFor="metasPessoais">
-                                            Metas Pessoais
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="metasPessoais"
-                                            className={`w-full pl-4 pr-4 py-2 text-sm rounded-xl border-2 focus:outline-none ${
-                                                darkMode ? 'bg-primaryGray text-white border-gray-600' : 'bg-gray-100 text-black border-gray-400'
-                                            }`}
-                                            placeholder="Ex.: Comprar uma Casa, Viajar"
-                                            value={advancedData.metasPessoais}
-                                            onChange={handleAdvancedChange}
-                                        />
-                                    </div>
-                                    <div className="flex flex-col md:flex-row justify-between mt-6 gap-4">
-                                        <button
-                                            type="button"
-                                            className={`rounded-xl px-4 py-2 w-full md:w-1/2 text-sm md:text-base ${darkMode ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-black hover:bg-gray-400'}`}
-                                            onClick={handleBack}
-                                        >
-                                            Voltar
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className={`rounded-xl px-4 py-2 w-full md:w-1/2 text-sm md:text-base ${darkMode ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
-                                        >
-                                            Finalizar
-                                        </button>
-                                    </div>
-                                </form>
-                            </section>
-                        </>
+                        <h1
+                            className={`text-2xl font-bold cursor-pointer ${darkMode ? 'text-white' : 'text-black'}`}
+                            onClick={() => setCanEdit(!canEdit)}
+                        >
+                            {planName}
+                        </h1>
                     )}
                 </div>
-                <div
-                    className="hidden lg:block w-2/5 bg-cover bg-center rounded-r-lg"
-                    style={{ backgroundImage: `url(${Background})` }}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {Object.keys(categories)
+                        .filter(categoryKey => categoryKey !== 'lucroPrejuizo')
+                        .map((categoryKey) => {
+                            const category = categories[categoryKey];
+                            const displayCategoryKey = 
+                                categoryKey === 'realizacoes' ? 'Realizações' :
+                                categoryKey === 'intercambio' ? 'Intercâmbio' :
+                                categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1).replace(/([A-Z])/g, ' $1');
+
+                            const uniqueNames = [...new Set(category.items.map(item => item.name))];
+
+                            return (
+                                <div key={categoryKey} className="flex flex-col p-4 border border-secontGray rounded-lg">
+                                    <div className="flex justify-between items-center">
+                                        <h2 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                                            {displayCategoryKey}
+                                        </h2>
+                                        <IoIosExpand
+                                            className="cursor-pointer text-gray-500"
+                                            onClick={() => toggleExpandCategory(categoryKey)}
+                                        />
+                                    </div>
+                                    <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm mb-4`}>
+                                        Total: R$ {formatCurrency(category.total)}
+                                    </p>
+                                    {expandedCategory === categoryKey && (
+                                        <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded">
+                                            {category.items.map((item, itemIndex) => (
+                                                <div key={itemIndex} className="p-2 rounded-lg border border-secontGray flex flex-col md:flex-row md:justify-between items-center md:items-start">
+                                                <div className={`${darkMode ? 'text-gray-200' : 'text-gray-800'} text-sm`}>{item.name}</div>
+                                                    <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-xs`}>
+                                                        {item.date && isValidDate(item.date) ? 
+                                                            (() => {
+                                                                const [day, month, year] = item.date.split(';');
+                                                                const parsedDate = new Date(`${year}-${month}-${day}`);
+                                                                return format(parsedDate, 'MMM yyyy', { locale: ptBR }).toUpperCase();
+                                                            })()
+                                                            : 'Mês'
+                                                        }
+                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-xs`}>{formatCurrency(item.value)}</span>
+                                                        <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-xs`}>Meta: {formatCurrency(item.meta)}</span>
+                                                        <FaTrash
+                                                            className="text-red-500 cursor-pointer"
+                                                            onClick={() => handleDeleteItem(categoryKey, itemIndex)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {isAdding[categoryKey] ? (
+                                        <div className="mt-4">
+                                            <select
+                                                onChange={(e) => handleNewItemChange({ target: { id: 'name', value: e.target.value } }, categoryKey)}
+                                                className={`w-full p-2 mb-2 border border-secontGray rounded-lg text-sm bg-transparent ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}
+                                            >
+                                                <option value="">Selecionar item existente</option>
+                                                {uniqueNames.map((name, index) => (
+                                                    <option key={index} value={name}>{name}</option>
+                                                ))}
+                                            </select>
+                                            <input
+                                                type="text"
+                                                id="name"
+                                                placeholder="Nome do item"
+                                                className={`w-full p-2 mb-2 border border-secontGray rounded-lg text-sm bg-transparent ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}
+                                                value={category.newItem.name}
+                                                onChange={(e) => handleNewItemChange(e, categoryKey)}
+                                            />
+                                            <input
+                                                type="text"
+                                                id="value"
+                                                placeholder="Valor"
+                                                className={`w-full p-2 mb-2 border border-secontGray rounded-lg text-sm bg-transparent ${darkMode ? 'text-gray-200' : 'text-gray-800'} no-arrows`}
+                                                value={category.newItem.value}
+                                                onChange={(e) => handleCurrencyInput(e, categoryKey, 'value')}
+                                                />
+                                            <input
+                                                type="text"
+                                                id="meta"
+                                                placeholder="Meta"
+                                                className={`w-full p-2 mb-2 border border-secontGray rounded-lg text-sm bg-transparent ${darkMode ? 'text-gray-200' : 'text-gray-800'} no-arrows`}
+                                                value={category.newItem.meta}
+                                                onChange={(e) => handleCurrencyInput(e, categoryKey, 'meta')}
+                                                />
+                                            <button
+                                                className="w-full mb-2 bg-gray-400 text-white p-2 rounded-lg text-sm transition hover:bg-gray-500"
+                                                onClick={() => openModal(categoryKey)}
+                                            >
+                                                Data
+                                            </button>
+                                            <button
+                                                className="w-full bg-blue-500 text-white p-2 rounded-lg text-sm"
+                                                onClick={() => handleAddItem(categoryKey)}
+                                            >
+                                                Confirmar
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg text-sm transition"
+                                            onClick={() => setIsAdding({ ...isAdding, [categoryKey]: true })}
+                                        >
+                                            Adicionar
+                                        </button>
+                                    )}
+                                </div>
+                            );
+                        })}
+                </div>
+
+                <ReplicateModal
+                    isOpen={isModalOpen}
+                    onClose={closeModal}
+                    onConfirm={handleConfirmModal}
+                    category={currentCategory}
                 />
+                <div className="relative flex justify-center gap-2 mt-6 lg:mt-[10.5rem]">
+                    <button
+                        className={`flex-1 flex items-center justify-center font-semibold text-base py-4 px-6 transition-colors rounded-xl ${
+                            darkMode ? 'bg-primaryBlack text-white hover:bg-[#1a1a1a]' : 'bg-gray-300 text-black hover:bg-gray-400'
+                        }`}
+                        onClick={handleSubmitPlan}
+                    >
+                        <RiAddBoxFill className="mr-2" size={20} />
+                        {id ? "Editar Plano de Vida" : "Criar Plano de Vida"}
+                    </button>
+                    <button
+                        className={`flex-1 flex items-center justify-center font-semibold text-base py-4 px-6 transition-colors rounded-xl ${
+                            darkMode ? 'bg-primaryBlack text-white hover:bg-gray-600' : 'bg-gray-200 text-black hover:bg-gray-300'
+                        }`}
+                        onClick={() => navigate('/life-plan/dashboard')}
+                    >
+                        <IoCaretBack className="mr-2" size={20} />
+                        Voltar
+                    </button>
+                </div>
+
             </main>
         </div>
     );

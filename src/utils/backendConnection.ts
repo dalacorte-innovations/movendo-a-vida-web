@@ -18,6 +18,8 @@ export const endpoints = {
     userConfig: `${ApiIndex}/users/me/`,
     feedbackAPI: `${ApiIndex}/feedback/`,
     emailMessageAPI: `${ApiIndex}/email-message/`,
+    lifePlanAPI: `${ApiIndex}/life-plan/`,
+    lifePlanItemAPI: `${ApiIndex}/life-plan-item/`,
 };
 
 

@@ -92,10 +92,6 @@ function App() {
                   element={<ProtectedRoute element={<ConfigPage />} />}
                 />
                 <Route path="/plans" element={<PlansPage />} />
-                <Route
-                  path="/life-plan/create"
-                  element={<ProtectedRoute element={<PlanoDeVidaPage />} />}
-                />
                 <Route 
                   path="/onboarding"
                   element={<ProtectedRoute element={<TutorialPage />} />}
@@ -105,9 +101,18 @@ function App() {
                   element={<ProtectedRoute element={<FeedbackPage />} />}
                 />
                 <Route
+                  path="/life-plan/:id"
+                  element={<ProtectedRoute element={<PlanoDeVidaPage />} />}
+                />
+                <Route
+                  path="/life-plan/create"
+                  element={<ProtectedRoute element={<PlanoDeVidaPage />} />}
+                />
+                <Route
                   path="/life-plan/dashboard"
                   element={<ProtectedRoute element={<LifePlanDashboard />} />}
                 />
+                
                 <Route
                   path="/login"
                   element={<PublicRoute element={<LoginPage onLogin={setAuthenticated} />} />}
