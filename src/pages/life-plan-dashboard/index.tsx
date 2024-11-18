@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import { Line, Pie } from 'react-chartjs-2';
 import Sidebar from '../../components/sidebar';
 import { useNavigate } from 'react-router-dom';
 import { FaPlane } from 'react-icons/fa';
@@ -10,7 +10,6 @@ import {
     LinearScale,
     PointElement,
     LineElement,
-    BarElement,
     ArcElement,
     Title,
     Tooltip,
@@ -19,13 +18,15 @@ import {
 import { ThemeContext } from '../../utils/ThemeContext.jsx';
 import { configBackendConnection, endpoints, getAuthHeaders } from '../../utils/backendConnection';
 import { format, parseISO } from 'date-fns';
+import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
+import 'react-toastify/dist/ReactToastify.css';
 
 ChartJS.register(
     CategoryScale,
     LinearScale,
     PointElement,
     LineElement,
-    BarElement,
     ArcElement,
     Title,
     Tooltip,
@@ -38,15 +39,14 @@ const LifePlanDashboard = () => {
     const [isSmallScreen, setIsSmallScreen] = useState(false);
     const [plansData, setPlansData] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("receitas");
+    const { t } = useTranslation();
 
     useEffect(() => {
         const checkScreenSize = () => {
             setIsSmallScreen(window.innerWidth < 768);
         };
-
         checkScreenSize();
         window.addEventListener('resize', checkScreenSize);
-
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
 
@@ -57,14 +57,16 @@ const LifePlanDashboard = () => {
                     method: 'GET',
                     headers: getAuthHeaders(),
                 });
-                if (!response.ok) throw new Error('Erro ao carregar os planos de vida');
+                if (!response.ok) {
+                    toast.error(t('Erro ao carregar os planos de vida'));
+                    return;
+                }
                 const data = await response.json();
                 setPlansData(data);
             } catch (error) {
-                console.error(error);
+                toast.error(t('Erro ao carregar os planos de vida'));
             }
         };
-
         fetchPlans();
     }, []);
 
@@ -72,85 +74,90 @@ const LifePlanDashboard = () => {
         return [...new Set(items.map(item => item.category))];
     };
 
-    const getChartData = (items) => {
-        const labels = Array.from(new Set(items.map(item => format(parseISO(item.date), 'MMM yyyy'))));
-        const datasets = [];
-    
-        const incomeSources = Array.from(new Set(items.map(item => item.name)));
-        const colors = ['#6A5ACD', '#4CAF50', '#FF9800', '#F44336'];
-    
-        let maxMeta = 0;
-    
-        incomeSources.forEach((source, index) => {
-            const sourceData = items
-                .filter(item => item.name === source)
+    const isPieChartCategory = ["estudos", "custos", "investimentos", "realizações", "intercâmbio", "empresas"].includes(selectedCategory.toLowerCase());
+
+    const getChartData = (items, profitLossByDate) => {
+        if (selectedCategory === "lucro_prejuizo") {
+            const labels = profitLossByDate.map(item => format(parseISO(item.date), 'MMM yyyy'));
+            const data = profitLossByDate.map(item => item.profit_loss);
+            return {
+                labels,
+                datasets: [{
+                    label: t("Lucro/Prejuízo"),
+                    data: data,
+                    backgroundColor: 'rgba(0, 0, 0, 0)',
+                    borderColor: data.map(value => value > 0 ? '#4CAF50' : '#F44336'),
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointBackgroundColor: data.map(value => value > 0 ? '#4CAF50' : '#F44336'),
+                    pointBorderColor: '#FFFFFF',
+                    pointRadius: 4,
+                }]
+            };
+        } else if (isPieChartCategory) {
+            const filteredItems = items
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 3)
                 .reduce((acc, item) => {
-                    const label = format(parseISO(item.date), 'MMM yyyy');
-                    acc[label] = acc[label] ? acc[label] + parseFloat(item.value) : parseFloat(item.value);
+                    if (!acc[item.name]) {
+                        acc[item.name] = parseFloat(item.value);
+                    } else {
+                        acc[item.name] += parseFloat(item.value);
+                    }
                     return acc;
                 }, {});
-    
-            const meta = items.find(item => item.name === source)?.meta || 0;
-            if (meta > maxMeta) maxMeta = meta;
-    
-            datasets.push({
-                label: `${source} (Meta: R$${meta.toLocaleString('pt-BR')})`,
-                data: selectedCategory === "lucro_prejuizo" ? Object.values(sourceData) : labels.map(label => sourceData[label] || null),
-                backgroundColor: colors,
-                borderColor: colors,
-                borderWidth: 2,
-                tension: 0.3,
-                fill: selectedCategory === "lucro_prejuizo" ? true : false,
-                pointBackgroundColor: "#FFFFFF",
-                pointBorderColor: colors[index % colors.length],
-                pointRadius: 4,
+
+            const labels = Object.keys(filteredItems);
+            const data = Object.values(filteredItems);
+            const backgroundColor = ['#6A5ACD', '#4CAF50', '#FF9800', '#F44336', '#1E90FF', '#FFD700'];
+
+            return {
+                labels,
+                datasets: [{
+                    data,
+                    backgroundColor: backgroundColor.slice(0, labels.length),
+                    borderColor: '#FFFFFF',
+                    borderWidth: 1,
+                }]
+            };
+        } else {
+            const labels = Array.from(new Set(items.map(item => format(parseISO(item.date), 'MMM yyyy'))));
+            const incomeSources = Array.from(new Set(items.map(item => item.name)));
+            const colors = ['#6A5ACD', '#4CAF50', '#FF9800', '#F44336'];
+            
+            const datasets = incomeSources.map((source, index) => {
+                const sourceData = items
+                    .filter(item => item.name === source)
+                    .reduce((acc, item) => {
+                        const label = format(parseISO(item.date), 'MMM yyyy');
+                        acc[label] = acc[label] ? acc[label] + parseFloat(item.value) : parseFloat(item.value);
+                        return acc;
+                    }, {});
+
+                return {
+                    label: source,
+                    data: labels.map(label => sourceData[label] || null),
+                    backgroundColor: 'rgba(0, 0, 0, 0)',
+                    borderColor: colors[index % colors.length],
+                    borderWidth: 2,
+                    tension: 0.5,
+                    fill: false,
+                    pointBackgroundColor: colors[index % colors.length],
+                    pointBorderColor: '#FFFFFF',
+                    pointRadius: 4,
+                };
             });
-        });
-    
-        const yAxisMax = maxMeta * 1.2;
-    
-        const options = {
-            responsive: true,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: (context) => `${context.dataset.label}: ${context.raw.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
-                    }
-                },
-                legend: {
-                    display: true,
-                    position: 'top',
-                },
-            },
-            scales: selectedCategory === "lucro_prejuizo" ? {} : {
-                x: {
-                    grid: {
-                        display: false,
-                    },
-                    ticks: {
-                        color: "#888",
-                    },
-                    stacked: selectedCategory === "empresa",
-                },
-                y: {
-                    grid: {
-                        color: "#333",
-                    },
-                    ticks: {
-                        color: "#888",
-                        callback: (value) => `R$ ${value / 1000}K`,
-                    },
-                    suggestedMax: yAxisMax,
-                    stacked: selectedCategory === "empresa",
-                },
-            },
-        };
-    
-        return { labels, datasets, options };
+
+            return { labels, datasets };
+        }
     };
 
     const handleAddPlan = () => {
         navigate('/life-plan/create');
+    };
+
+    const handleViewDetailPlan = (plan) => {
+        navigate(`/life-plan/${plan.id}/table`, { state: { plan } });
     };
 
     const handleViewPlan = (id) => {
@@ -162,7 +169,6 @@ const LifePlanDashboard = () => {
             <div className={`fixed md:relative ${darkMode ? 'bg-darkGray' : 'bg-gray-200'} h-full`}>
                 <Sidebar />
             </div>
-
             <main className="flex flex-col w-full items-center h-full sm:ml-4 md:ml-0">
                 <div className={`w-full py-4 px-6 md:px-12 ${darkMode ? 'bg-primaryBlack' : 'bg-white'}`}>
                     <div className="flex items-center justify-center text-sm space-x-4">
@@ -176,7 +182,7 @@ const LifePlanDashboard = () => {
                                     onClick={() => handleViewPlan(plan.id)}
                                 >
                                     <FaPlane className="mr-2" />
-                                    {plan.name}
+                                    {t('Editar Plano')} - {plan.name}
                                 </button>
                             ))}
                         <button
@@ -186,21 +192,21 @@ const LifePlanDashboard = () => {
                             onClick={handleAddPlan}
                         >
                             <RiAddBoxFill className="mr-2" size={20} />
-                            Adicionar Plano
+                            {t('Adicionar Plano')}
                         </button>
                     </div>
                 </div>
-
                 <div className="flex flex-col lg:flex-row justify-between gap-8 p-6 md:p-12 w-[90%] mx-auto h-[calc(100%-4rem)]">
                     {plansData.map((plan) => {
-                        const availableCategories = getAvailableCategories(plan.items);
-                        const chartData = getChartData(plan.items.filter(item => item.category === selectedCategory));
-                        const ChartComponent = selectedCategory === "lucro_prejuizo" ? Doughnut : selectedCategory === "empresa" ? Bar : Line;
-                        
-                        const chartContainerStyle = selectedCategory === "lucro_prejuizo" 
-                            ? { width: '300px', height: '300px', margin: '0 auto' } 
-                            : { width: '100%', height: '90%' };
-
+                        const availableCategories = [...getAvailableCategories(plan.items), "lucro_prejuizo"];
+                        const chartData = getChartData(
+                            plan.items.filter(item => item.category === selectedCategory),
+                            plan.profit_loss_by_date
+                        );
+                        const ChartComponent = isPieChartCategory ? Pie : Line;
+                        const chartContainerStyle = isPieChartCategory
+                            ? { width: '300px', height: '300px', margin: '0 auto' }
+                            : { width: '100%', height: '80%'};
                         return (
                             <div key={plan.id} className={`relative rounded-3xl p-6 shadow-md border w-full lg:w-[49%] h-[auto] mt-4 lg:mt-20 lg:mb-36 ${darkMode ? 'border-secontGray' : 'border-gray-300 bg-white'}`}>
                                 <div className="flex justify-between items-center mb-4">
@@ -211,9 +217,9 @@ const LifePlanDashboard = () => {
                                         <h2 className={`text-lg md:text-sm font-semibold ${darkMode ? 'text-white' : 'text-black'}`}>{plan.name}</h2>
                                     </div>
                                     <button className={`font-semibold text-xs md:text-sm py-2 px-4 rounded-full transition-colors ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
-                                        onClick={() => handleViewPlan(plan.id)}
+                                        onClick={() => handleViewDetailPlan(plan)}
                                     >
-                                        Ver plano completo
+                                        {t('Ver detalhe do plano')}
                                     </button>
                                 </div>
                                 <div style={chartContainerStyle} className={`rounded-lg ${darkMode ? 'bg-darkGray' : 'bg-white'}`}>
@@ -230,7 +236,7 @@ const LifePlanDashboard = () => {
                                             }`}
                                             onClick={() => setSelectedCategory(category)}
                                         >
-                                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                                            {t(category === "lucro_prejuizo" ? "Lucro/Prejuízo" : category)}
                                         </button>
                                     ))}
                                 </div>
@@ -238,7 +244,6 @@ const LifePlanDashboard = () => {
                         );
                     })}
                 </div>
-
                 <button
                     className={`flex items-center justify-center font-semibold text-sm md:text-base py-4 mb-8 px-8 rounded-xl transition-colors w-[85%] mx-auto ${
                         darkMode ? 'bg-primaryBlack text-white hover:bg-[#1a1a1a]' : 'bg-gray-300 text-black hover:bg-gray-400'
@@ -246,7 +251,7 @@ const LifePlanDashboard = () => {
                     onClick={handleAddPlan}
                 >
                     <RiAddBoxFill className="mr-2" size={20} />
-                    Adicionar Plano
+                    {t('Adicionar Plano')}
                 </button>
             </main>
         </div>
@@ -254,3 +259,4 @@ const LifePlanDashboard = () => {
 };
 
 export default LifePlanDashboard;
+ 

@@ -13,6 +13,7 @@ import BenefitsPage from './pages/benefits/index.tsx';
 import ContactPage from './pages/contact/index.tsx';
 import PlanoDeVidaPage from './pages/plano-de-vida/index.tsx';
 import LifePlanDashboard from './pages/life-plan-dashboard/index.tsx';
+import LifePlanTable from './pages/plan-table/index.tsx';
 import HomePage from './pages/home/index.tsx';
 import TutorialPage  from './pages/onboarding/index.tsx';
 import LogoutPage from './pages/logout/index.jsx';
@@ -112,7 +113,8 @@ function App() {
                   path="/life-plan/dashboard"
                   element={<ProtectedRoute element={<LifePlanDashboard />} />}
                 />
-                
+                <Route path="/life-plan/:id/table" element={<LifePlanTable />} />
+
                 <Route
                   path="/login"
                   element={<PublicRoute element={<LoginPage onLogin={setAuthenticated} />} />}

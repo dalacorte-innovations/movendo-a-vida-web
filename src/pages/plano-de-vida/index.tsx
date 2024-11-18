@@ -14,6 +14,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { TextField } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 const isValidDate = (date) => date && !isNaN(new Date(date).getTime());
 
@@ -21,18 +22,17 @@ const ReplicateModal = ({ isOpen, onClose, onConfirm, category }) => {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
+    const { t } = useTranslation();
 
     const handleConfirm = () => {
         if (!startDate || !endDate) {
-            setErrorMessage("Por favor, selecione ambas as datas.");
+            setErrorMessage(t('Por favor, selecione ambas as datas.'));
             return;
         }
-
         if (endDate < startDate) {
-            setErrorMessage("A data final não pode ser anterior à data inicial.");
+            setErrorMessage(t('A data final não pode ser anterior à data inicial.'));
             return;
         }
-
         onConfirm(category, startDate, endDate);
         onClose();
     };
@@ -48,10 +48,10 @@ const ReplicateModal = ({ isOpen, onClose, onConfirm, category }) => {
     return (
         <div onClick={handleClickOutside} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center modal-background">
             <div className="bg-white p-6 rounded-lg max-w-[19rem] w-full">
-                <h2 className="text-lg font-bold mb-4 text-center">Selecione o período</h2>
+                <h2 className="text-lg font-bold mb-4 text-center">{t('Selecione o período')}</h2>
                 <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
                     <DatePicker
-                        label="De"
+                        label={t('De')}
                         views={['year', 'month']}
                         value={startDate}
                         onChange={(newValue) => {
@@ -61,7 +61,7 @@ const ReplicateModal = ({ isOpen, onClose, onConfirm, category }) => {
                         renderInput={(params) => <TextField {...params} className="w-full mb-4" />}
                     />
                     <DatePicker
-                        label="Até"
+                        label={t('Até')}
                         views={['year', 'month']}
                         value={endDate}
                         onChange={(newValue) => {
@@ -73,8 +73,8 @@ const ReplicateModal = ({ isOpen, onClose, onConfirm, category }) => {
                 </LocalizationProvider>
                 {errorMessage && <p className="text-red-500 text-sm text-center">{errorMessage}</p>}
                 <div className="flex justify-center gap-4 mt-5">
-                    <button onClick={onClose} className="text-gray-500">Cancelar</button>
-                    <button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded">Confirmar</button>
+                    <button onClick={onClose} className="text-gray-500">{t('Cancelar')}</button>
+                    <button onClick={handleConfirm} className="bg-blue-500 text-white px-4 py-2 rounded">{t('Confirmar')}</button>
                 </div>
             </div>
         </div>
@@ -102,6 +102,7 @@ const PlanoDeVidaPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentCategory, setCurrentCategory] = useState(null);
     const [replicateMonthsByCategory, setReplicateMonthsByCategory] = useState({});
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (id) {
@@ -111,7 +112,7 @@ const PlanoDeVidaPage = () => {
                         method: 'GET',
                         headers: getAuthHeaders(),
                     });
-                    if (!response.ok) throw new Error('Erro ao carregar o plano de vida');
+                    if (!response.ok) throw new Error(t('Erro ao carregar o plano de vida'));
                     const data = await response.json();
 
                     const formattedItems = { ...categories };
@@ -149,38 +150,38 @@ const PlanoDeVidaPage = () => {
 
     const formatCurrency = (value) => {
         const numericValue = parseFloat(value);
-        return isNaN(numericValue) ? 'R$ 0,00' : numericValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        return isNaN(numericValue) ? t('R$ 0,00') : numericValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     };
 
     const handleAddItem = (category) => {
         const { name, value, meta } = categories[category].newItem;
         const replicationDates = replicateMonthsByCategory[category] || [];
-    
+
         if (!name || !value) {
-            toast.error("Por favor, preencha os campos obrigatórios antes de confirmar.");
+            toast.error(t('Por favor, preencha os campos obrigatórios antes de confirmar.'));
             return;
         }
-    
+
         const valorNumerico = parseCurrencyValue(value);
         const metaNumerica = meta ? parseCurrencyValue(meta) : null;
-    
+
         const items = replicationDates.length > 0 
             ? replicationDates.map(date => ({ name, value: valorNumerico, meta: metaNumerica, date }))
             : [{ name, value: valorNumerico, meta: metaNumerica, date: null }];
-    
+
         setCategories((prevCategories) => {
             const updatedItems = [...prevCategories[category].items, ...items];
             const updatedTotal = updatedItems.reduce((acc, item) => acc + item.value, 0);
-    
+
             return {
                 ...prevCategories,
                 [category]: { ...prevCategories[category], items: updatedItems, total: updatedTotal, newItem: { name: '', value: '', meta: '', replicateMonths: 0 } },
             };
         });
-    
+
         setIsAdding((prev) => ({ ...prev, [category]: false }));
         setReplicateMonthsByCategory((prev) => ({ ...prev, [category]: [] }));
-        toast.success("Item adicionado com sucesso!");
+        toast.success(t('Item adicionado com sucesso!'));
     };
 
     const handleDeleteItem = (category, index) => {
@@ -236,7 +237,7 @@ const PlanoDeVidaPage = () => {
                 name: planName,
                 items_for_plan: itemsForPlan
             };
-            console.log(payload)
+
             const method = id ? 'PATCH' : 'POST';
             const url = id
                 ? `${configBackendConnection.baseURL}/${endpoints.lifePlanAPI}${id}/`
@@ -251,12 +252,12 @@ const PlanoDeVidaPage = () => {
                 body: JSON.stringify(payload),
             });
 
-            if (!response.ok) throw new Error(id ? "Erro ao atualizar o plano de vida" : "Erro ao criar o plano de vida");
+            if (!response.ok) throw new Error(id ? t('Erro ao atualizar o plano de vida') : t('Erro ao criar o plano de vida'));
             navigate('/life-plan/dashboard');
-            toast.success(id ? "Plano de vida atualizado com sucesso!" : "Plano de vida criado com sucesso!");
+            toast.success(id ? t('Plano de vida atualizado com sucesso!') : t('Plano de vida criado com sucesso!'));
         } catch (error) {
             console.error(error);
-            toast.error(id ? "Erro ao atualizar o plano de vida." : "Erro ao criar o plano de vida.");
+            toast.error(id ? t('Erro ao atualizar o plano de vida.') : t('Erro ao criar o plano de vida.'));
         }
     };
 
@@ -317,7 +318,7 @@ const PlanoDeVidaPage = () => {
                             onChange={handleNameChange}
                             onBlur={() => setCanEdit(!canEdit)}
                             className={`text-2xl font-bold bg-transparent border-b-2 border-transparent focus:border-gray-500 focus:outline-none transition duration-200 ${darkMode ? 'text-white' : 'text-black'}`}
-                            placeholder="Nome do Plano de Vida"
+                            placeholder={t('Nome do Plano de Vida')}
                         />
                     ) : (
                         <h1
@@ -334,10 +335,8 @@ const PlanoDeVidaPage = () => {
                         .filter(categoryKey => categoryKey !== 'lucroPrejuizo')
                         .map((categoryKey) => {
                             const category = categories[categoryKey];
-                            const displayCategoryKey = 
-                                categoryKey === 'realizacoes' ? 'Realizações' :
-                                categoryKey === 'intercambio' ? 'Intercâmbio' :
-                                categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1).replace(/([A-Z])/g, ' $1');
+                    
+                            const displayCategoryKey = t(categoryKey);
 
                             const uniqueNames = [...new Set(category.items.map(item => item.name))];
 
@@ -353,13 +352,13 @@ const PlanoDeVidaPage = () => {
                                         />
                                     </div>
                                     <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm mb-4`}>
-                                        Total: R$ {formatCurrency(category.total)}
+                                        {t('Total')}: R$ {formatCurrency(category.total)}
                                     </p>
                                     {expandedCategory === categoryKey && (
                                         <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded">
                                             {category.items.map((item, itemIndex) => (
                                                 <div key={itemIndex} className="p-2 rounded-lg border border-secontGray flex flex-col md:flex-row md:justify-between items-center md:items-start">
-                                                <div className={`${darkMode ? 'text-gray-200' : 'text-gray-800'} text-sm`}>{item.name}</div>
+                                                    <div className={`${darkMode ? 'text-gray-200' : 'text-gray-800'} text-sm`}>{item.name}</div>
                                                     <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-xs`}>
                                                         {item.date && isValidDate(item.date) ? 
                                                             (() => {
@@ -367,12 +366,12 @@ const PlanoDeVidaPage = () => {
                                                                 const parsedDate = new Date(`${year}-${month}-${day}`);
                                                                 return format(parsedDate, 'MMM yyyy', { locale: ptBR }).toUpperCase();
                                                             })()
-                                                            : 'Mês'
+                                                            : t('Mês')
                                                         }
                                                     </span>
                                                     <div className="flex items-center gap-2">
                                                         <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-xs`}>{formatCurrency(item.value)}</span>
-                                                        <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-xs`}>Meta: {formatCurrency(item.meta)}</span>
+                                                        <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-xs`}>{t('Meta')}: {formatCurrency(item.meta)}</span>
                                                         <FaTrash
                                                             className="text-red-500 cursor-pointer"
                                                             onClick={() => handleDeleteItem(categoryKey, itemIndex)}
@@ -389,7 +388,7 @@ const PlanoDeVidaPage = () => {
                                                 onChange={(e) => handleNewItemChange({ target: { id: 'name', value: e.target.value } }, categoryKey)}
                                                 className={`w-full p-2 mb-2 border border-secontGray rounded-lg text-sm bg-transparent ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}
                                             >
-                                                <option value="">Selecionar item existente</option>
+                                                <option value="">{t('Selecionar item existente')}</option>
                                                 {uniqueNames.map((name, index) => (
                                                     <option key={index} value={name}>{name}</option>
                                                 ))}
@@ -397,7 +396,7 @@ const PlanoDeVidaPage = () => {
                                             <input
                                                 type="text"
                                                 id="name"
-                                                placeholder="Nome do item"
+                                                placeholder={t('Nome do item')}
                                                 className={`w-full p-2 mb-2 border border-secontGray rounded-lg text-sm bg-transparent ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}
                                                 value={category.newItem.name}
                                                 onChange={(e) => handleNewItemChange(e, categoryKey)}
@@ -405,30 +404,30 @@ const PlanoDeVidaPage = () => {
                                             <input
                                                 type="text"
                                                 id="value"
-                                                placeholder="Valor"
+                                                placeholder={t('Valor')}
                                                 className={`w-full p-2 mb-2 border border-secontGray rounded-lg text-sm bg-transparent ${darkMode ? 'text-gray-200' : 'text-gray-800'} no-arrows`}
                                                 value={category.newItem.value}
                                                 onChange={(e) => handleCurrencyInput(e, categoryKey, 'value')}
-                                                />
+                                            />
                                             <input
                                                 type="text"
                                                 id="meta"
-                                                placeholder="Meta"
+                                                placeholder={t('Meta')}
                                                 className={`w-full p-2 mb-2 border border-secontGray rounded-lg text-sm bg-transparent ${darkMode ? 'text-gray-200' : 'text-gray-800'} no-arrows`}
                                                 value={category.newItem.meta}
                                                 onChange={(e) => handleCurrencyInput(e, categoryKey, 'meta')}
-                                                />
+                                            />
                                             <button
                                                 className="w-full mb-2 bg-gray-400 text-white p-2 rounded-lg text-sm transition hover:bg-gray-500"
                                                 onClick={() => openModal(categoryKey)}
                                             >
-                                                Data
+                                                {t('Data')}
                                             </button>
                                             <button
                                                 className="w-full bg-blue-500 text-white p-2 rounded-lg text-sm"
                                                 onClick={() => handleAddItem(categoryKey)}
                                             >
-                                                Confirmar
+                                                {t('Confirmar')}
                                             </button>
                                         </div>
                                     ) : (
@@ -436,7 +435,7 @@ const PlanoDeVidaPage = () => {
                                             className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg text-sm transition"
                                             onClick={() => setIsAdding({ ...isAdding, [categoryKey]: true })}
                                         >
-                                            Adicionar
+                                            {t('Adicionar')}
                                         </button>
                                     )}
                                 </div>
@@ -458,7 +457,7 @@ const PlanoDeVidaPage = () => {
                         onClick={handleSubmitPlan}
                     >
                         <RiAddBoxFill className="mr-2" size={20} />
-                        {id ? "Editar Plano de Vida" : "Criar Plano de Vida"}
+                        {id ? t('Editar Plano de Vida') : t('Criar Plano de Vida')}
                     </button>
                     <button
                         className={`flex-1 flex items-center justify-center font-semibold text-base py-4 px-6 transition-colors rounded-xl ${
@@ -467,7 +466,7 @@ const PlanoDeVidaPage = () => {
                         onClick={() => navigate('/life-plan/dashboard')}
                     >
                         <IoCaretBack className="mr-2" size={20} />
-                        Voltar
+                        {t('Voltar')}
                     </button>
                 </div>
 
