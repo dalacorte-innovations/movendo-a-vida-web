@@ -7,6 +7,7 @@ import { FaFilePdf, FaFileCsv } from 'react-icons/fa6';
 import { configBackendConnection, endpoints, getAuthHeaders } from '../../utils/backendConnection.js';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { OrganizedData } from '../../types/life-plan/lifePlan.js';
 
 const months = [
     { full: "Janeiro", abbr: "jan" },
@@ -23,16 +24,35 @@ const months = [
     { full: "Dezembro", abbr: "dez" }
 ];
 
+const categories = [
+    "receitas",
+    "estudos",
+    "custos",
+    "lucroPrejuizo",
+    "investimentos",
+    "realizacoes",
+    "intercambio",
+    "empresas"
+]
+
 const LifePlanTable = () => {
     const { darkMode } = useContext(ThemeContext);
     const location = useLocation();
     const navigate = useNavigate();
     const { plan } = location.state || { plan: { items: [] } };
 
-    const allDates = plan.items.map(item => item.date.split('-').slice(0, 2).join('-'));
-    const uniqueDates = Array.from(new Set(allDates)).sort();
-
-    const organizedData = {};
+    const allDates: string[] = plan.items.map(item => item.date.split('-').slice(0, 2).join('-'));
+    const uniqueDates: string[] = Array.from(new Set(allDates)).sort();
+    const organizedData: OrganizedData = {
+        receitas: {},
+        estudos: {},
+        custos: {},
+        lucroPrejuizo: {},
+        investimentos: {},
+        realizacoes: {},
+        intercambio: {},
+        empresas: {}
+    };
     plan.items.forEach((item) => {
         const [year, month] = item.date.split("-");
         const monthKey = `${year}-${month.padStart(2, '0')}`;
@@ -100,7 +120,8 @@ const LifePlanTable = () => {
             toast.error("Erro ao baixar o CSV");
         }
     };
-
+    console.log('org', organizedData)
+    console.log('cat', organizedData['receitas'])
     return (
         <div className={`flex flex-col md:flex-row ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'} h-screen`}>
             <div className={`fixed md:relative ${darkMode ? 'bg-darkGray' : 'bg-gray-200'} h-full`}>
@@ -131,7 +152,7 @@ const LifePlanTable = () => {
                 </div>
                 
                 <div className="space-y-8">
-                    {Object.entries(organizedData).map(([category, names]) => (
+                    {categories.map(category =>(
                         <div key={category}>
                             <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
                                 Categoria: {category}
@@ -153,16 +174,16 @@ const LifePlanTable = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {Object.entries(names).map(([name, { values, firstMeta }], rowIndex) => (
-                                            <tr key={rowIndex} className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
+                                        {Object.keys(organizedData[category]).map((name, index) => (
+                                            <tr key={index} className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
                                                 <td className="px-4 py-2 border">{name}</td>
                                                 {uniqueDates.map(date => (
                                                     <td key={date} className="px-4 py-2 border text-center">
-                                                        {values[date] ? formatValue(values[date]) : 'N/A'}
+                                                        {organizedData[category][name].values[date] ? formatValue(organizedData[category][name].values[date]) : 'N/A'}
                                                     </td>
                                                 ))}
                                                 <td className="px-4 py-2 border text-center">
-                                                    <span className={getMetaStyle(firstMeta)}>{formatValue(firstMeta)}</span>
+                                                    <span className={getMetaStyle(organizedData[category][name].firstMeta)}>{formatValue(organizedData[category][name].firstMeta)}</span>
                                                 </td>
                                             </tr>
                                         ))}

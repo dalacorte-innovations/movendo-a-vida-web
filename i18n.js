@@ -228,7 +228,9 @@ i18n.use(initReactI18next).init({
           "intercambio": "Exchange",
           "empresas": "Companies",
           "Ver detalhe do plano": "View plan details",
-          "Adicionar Plano": "Add Plan"
+          "Adicionar Plano": "Add Plan",
+          "Prazo em anos": "Term in years",
+          "Nome do plano": "Plan name",
         }
       },
       es: {
@@ -454,8 +456,9 @@ i18n.use(initReactI18next).init({
             "intercambio": "Intercambio",
             "empresas": "Empresas",
             "Ver detalhe do plano": "Ver detalles del plan",
-            "Adicionar Plano": "Agregar plan"
-
+            "Adicionar Plano": "Agregar plan",
+            "Prazo em anos": "Plazo en años",
+            "Nome do plano": "Nombre del plan",
         }
       },
       pt: {
@@ -681,7 +684,9 @@ i18n.use(initReactI18next).init({
             "intercambio": "Intercâmbio",
             "empresas": "Empresas",
             "Ver detalhe do plano": "Veja detalhes do plano",
-            "Adicionar Plano": "Adicionar Plano"
+            "Adicionar Plano": "Adicionar Plano",
+            "Prazo em anos": "Prazo em anos",
+            "Nome do plano": "Nome do plano",
         }
       }
     },
