@@ -1,13 +1,14 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar';
 import { ThemeContext } from '../../utils/ThemeContext.jsx';
-import { IoCaretBack } from 'react-icons/io5';
+import { IoCaretBack, IoSave, IoTrash } from 'react-icons/io5';
 import { FaFilePdf, FaFileCsv } from 'react-icons/fa6';
 import { configBackendConnection, endpoints, getAuthHeaders } from '../../utils/backendConnection.js';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { OrganizedData } from '../../types/life-plan/lifePlan.js';
+import TableBody from './tableBody.js';
 
 const months = [
     { full: "Janeiro", abbr: "jan" },
@@ -40,31 +41,43 @@ const LifePlanTable = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { plan } = location.state || { plan: { items: [] } };
-
+    const [resetData, setResetData] = useState(false); // THIS WILL FORCE THE RELOAD OF THE ORGANIZED DATA WHEN ALTERED
+    const [dataHasBeenAltered, setDataHasBeenAltered] = useState(false);
+    const [editingCell, setEditingCell] = useState<{name: string, date: string} | null>(null); // Track the cell being edited
+  
     const allDates: string[] = plan.items.map(item => item.date.split('-').slice(0, 2).join('-'));
     const uniqueDates: string[] = Array.from(new Set(allDates)).sort();
-    const organizedData: OrganizedData = {
-        receitas: {},
-        estudos: {},
-        custos: {},
-        lucroPrejuizo: {},
-        investimentos: {},
-        realizacoes: {},
-        intercambio: {},
-        empresas: {}
-    };
-    plan.items.forEach((item) => {
-        const [year, month] = item.date.split("-");
-        const monthKey = `${year}-${month.padStart(2, '0')}`;
-        if (!organizedData[item.category]) {
-            organizedData[item.category] = {};
-        }
-        if (!organizedData[item.category][item.name]) {
-            organizedData[item.category][item.name] = { values: {}, firstMeta: item.meta };
-        }
-        organizedData[item.category][item.name].values[monthKey] = item.value;
-    });
 
+    const generateEmptyOrganizedData = (): OrganizedData => {
+        return {
+            receitas: {},
+            estudos: {},
+            custos: {},
+            lucroPrejuizo: {},
+            investimentos: {},
+            realizacoes: {},
+            intercambio: {},
+            empresas: {}
+        }
+    }
+    const [organizedData, setOrganizedData] = useState<OrganizedData>(generateEmptyOrganizedData());
+ 
+    useEffect(() => {
+        const newOrganizedData = generateEmptyOrganizedData();
+        plan.items.forEach((item) => {
+            const [year, month] = item.date.split("-");
+            const monthKey = `${year}-${month.padStart(2, '0')}`;
+            if (!newOrganizedData[item.category]) {
+                newOrganizedData[item.category] = {};
+            }
+            if (!newOrganizedData[item.category][item.name]) {
+                newOrganizedData[item.category][item.name] = { values: {}, firstMeta: item.meta };
+            }
+            newOrganizedData[item.category][item.name].values[monthKey] = item.value;
+        });
+        setOrganizedData(newOrganizedData);
+    },[plan, resetData])
+    
     const formatValue = (value) => {
         return parseFloat(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
@@ -120,8 +133,19 @@ const LifePlanTable = () => {
             toast.error("Erro ao baixar o CSV");
         }
     };
-    console.log('org', organizedData)
-    console.log('cat', organizedData['receitas'])
+
+    const handleSaveEdit = () => {
+        // ALL EDITED CELLS VALUES ARE IMPLEMENTED TO organizedData SO THE LOGIC
+        // OF THIS FUNCTION SHOULD TAKE THIS VALUE AND SEND TO THE BACKEND
+        toast.info('this functionality has not been implemented for now')
+
+    }
+
+    const handleResetEdit = () => {
+        setResetData(!resetData);
+        setDataHasBeenAltered(false);
+    }
+
     return (
         <div className={`flex flex-col md:flex-row ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'} h-screen`}>
             <div className={`fixed md:relative ${darkMode ? 'bg-darkGray' : 'bg-gray-200'} h-full`}>
@@ -152,6 +176,24 @@ const LifePlanTable = () => {
                 </div>
                 
                 <div className="space-y-8">
+                    {dataHasBeenAltered && (
+                        <div className="flex items-center justify-between" style={{width: '400px'}}>
+                            <button
+                                className="flex items-center justify-center text-green-600 hover:text-green-700 transition-colors"
+                                onClick={handleSaveEdit}
+                            >
+                                <IoSave size={20} />
+                                <span className="ml-1">Salvar Alterações</span>
+                            </button>
+                            <button
+                                className="flex items-center justify-center text-red-600 hover:text-red-700 transition-colors"
+                                onClick={handleResetEdit}
+                            >
+                                <IoTrash size={20} />
+                                <span className="ml-1">Descartar Alterações</span>
+                            </button>
+                        </div>
+                    )}
                     {categories.map(category =>(
                         <div key={category}>
                             <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
@@ -173,21 +215,18 @@ const LifePlanTable = () => {
                                             <th className="px-4 py-2 border text-center">Meta</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        {Object.keys(organizedData[category]).map((name, index) => (
-                                            <tr key={index} className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
-                                                <td className="px-4 py-2 border">{name}</td>
-                                                {uniqueDates.map(date => (
-                                                    <td key={date} className="px-4 py-2 border text-center">
-                                                        {organizedData[category][name].values[date] ? formatValue(organizedData[category][name].values[date]) : 'N/A'}
-                                                    </td>
-                                                ))}
-                                                <td className="px-4 py-2 border text-center">
-                                                    <span className={getMetaStyle(organizedData[category][name].firstMeta)}>{formatValue(organizedData[category][name].firstMeta)}</span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
+                                    <TableBody
+                                        data={organizedData}
+                                        setData={setOrganizedData}
+                                        category={category}
+                                        formatValue={formatValue}
+                                        getMetaStyle={getMetaStyle}
+                                        darkMode={darkMode}
+                                        uniqueDates={uniqueDates}
+                                        editingCell={editingCell}
+                                        setEditingCell={setEditingCell}
+                                        setDataHasBeenAltered={setDataHasBeenAltered}
+                                    />
                                 </table>
                             </div>
                         </div>
