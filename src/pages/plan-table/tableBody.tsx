@@ -1,5 +1,6 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { OrganizedData } from "../../types/life-plan/lifePlan";
+import { toast } from 'react-toastify';
 
 interface TableBodyProps {
     data: OrganizedData;
@@ -9,8 +10,8 @@ interface TableBodyProps {
     uniqueDates: string[];
     formatValue: (value: any) => string;
     getMetaStyle: (meta: string) => string;
-    editingCell: { name: string; date: string } | null;
-    setEditingCell: Dispatch<SetStateAction<{ name: string; date: string } | null>>;
+    editingCell: { id: number; date: string } | null;
+    setEditingCell: Dispatch<SetStateAction<{ id: number; date: string } | null>>;
     setDataHasBeenAltered: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -27,19 +28,41 @@ const TableBody: React.FC<TableBodyProps> = ({
     setDataHasBeenAltered
 }) => {
 
-    const handleEditClick = (name: string, date: string) => {
-        setEditingCell({ name, date });
+    const handleEditClick = (id: number, date: string) => {
+        setEditingCell({ id, date });
     }
 
-    const handleChange = (e, name, date) => {
+    const handleChange = (e, id: number, date: string) => {
         const value = e.target.value;
+
+        if (date === "name") {
+            let nameOccurrences = 0
+            Object.keys(data[category]).forEach((key) => {
+                if (data[category][key].name === value) {
+                    nameOccurrences++;
+                }
+            })
+            console.log(nameOccurrences)
+            if(nameOccurrences > 0) {
+                toast.error('Este Nome já está sendo utilizado nesta categoria')
+                return;
+            }
+
+            setData((prev) => {
+                const updatedData = { ...prev };
+                updatedData[category][id].name = value;
+                return updatedData;
+            });
+            setDataHasBeenAltered(true);
+            return;
+        }
 
         setData((prev) => {
             const updatedData = { ...prev };
             if (date === "firstMeta") {
-            updatedData[category][name].firstMeta = value;
+            updatedData[category][id].firstMeta = value;
             } else {
-            updatedData[category][name].values[date] = value;
+            updatedData[category][id].values[date] = value;
             }
             return updatedData;
         });
@@ -52,35 +75,46 @@ const TableBody: React.FC<TableBodyProps> = ({
 
     return (
         <tbody>
-            {Object.keys(data[category]).map((name, index) => (
+            {Object.keys(data[category]).map((id, index) => (
                 <tr key={index} className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
-                    <td className="px-4 py-2 border">{name}</td>
+                    <td className="px-4 py-2 border" onClick={() => handleEditClick(parseInt(id), 'name')}>{
+                        editingCell?.id === parseInt(id) && editingCell?.date === "name" ? (
+                            <input
+                                    type="text"
+                                    value={data[category][id].name || ""}
+                                    onChange={(e) => handleChange(e, parseInt(id), 'name')}
+                                    onBlur={handleBlur}
+                                    className="w-full bg-transparent text-center" style={{width: '60px'}}
+                                />
+                        ):(
+                            data[category][id].name
+                        )}</td>
                     {uniqueDates.map(date => (
-                        <td key={date} className="px-4 py-2 border text-center" onClick={() => handleEditClick(name, date)}>
-                            {editingCell?.name === name && editingCell?.date === date ? (
+                        <td key={date} className="px-4 py-2 border text-center" onClick={() => handleEditClick(parseInt(id), date)}>
+                            {editingCell?.id === parseInt(id) && editingCell?.date === date ? (
                                 <input
                                     type="text"
-                                    value={data[category][name].values[date] || ""}
-                                    onChange={(e) => handleChange(e, name, date)}
+                                    value={data[category][parseInt(id)].values[date] || ""}
+                                    onChange={(e) => handleChange(e, parseInt(id), date)}
                                     onBlur={handleBlur}
                                     className="w-full bg-transparent text-center" style={{width: '60px'}}
                                 />
                             ) : (
-                                data[category][name].values[date] ? formatValue(data[category][name].values[date]) : 'N/A'
+                                data[category][ parseInt(id)].values[date] ? formatValue(data[category][ parseInt(id)].values[date]) : 'N/A'
                             )}
                         </td>
                     ))}
                     <td className="px-4 py-2 border text-center" style={{width: '60px'}}>
-                        {editingCell?.name === name && editingCell?.date === "firstMeta" ? (
+                        {editingCell?.id === parseInt(id) && editingCell?.date === "firstMeta" ? (
                             <input
                                 type="text"
-                                value={data[category][name].firstMeta || ""}
-                                onChange={(e) => handleChange(e, name, "firstMeta")}
+                                value={data[category][ parseInt(id)].firstMeta || ""}
+                                onChange={(e) => handleChange(e, parseInt(id), "firstMeta")}
                                 onBlur={handleBlur}
                                 className="w-full bg-transparent text-center"
                             />
                         ) : (
-                            <span className={getMetaStyle(data[category][name].firstMeta)}>{formatValue(data[category][name].firstMeta)}</span>
+                            <span className={getMetaStyle(data[category][parseInt(id)].firstMeta)}>{formatValue(data[category][parseInt(id)].firstMeta)}</span>
                         )}
                     </td>
                 </tr>

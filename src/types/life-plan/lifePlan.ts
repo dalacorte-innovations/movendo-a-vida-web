@@ -31,7 +31,8 @@ export type LifePlanData = {
 };
 
 type CategoryData = {
-    [key: string]: {
+    [key: number]: {
+        name: string | undefined;
         values: { [key: string]: string };
         firstMeta: string;
     }

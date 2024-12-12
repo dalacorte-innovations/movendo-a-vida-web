@@ -44,7 +44,7 @@ const LifePlanTable = () => {
     const { plan } = location.state || { plan: { items: [] } };
     const [resetData, setResetData] = useState(false); // THIS WILL FORCE THE RELOAD OF THE ORGANIZED DATA WHEN ALTERED
     const [dataHasBeenAltered, setDataHasBeenAltered] = useState(false);
-    const [editingCell, setEditingCell] = useState<{name: string, date: string} | null>(null); // Track the cell being edited
+    const [editingCell, setEditingCell] = useState<{id: number, date: string} | null>(null); // Track the cell being edited
   
     const allDates: string[] = plan.items.map(item => item.date.split('-').slice(0, 2).join('-'));
     const uniqueDates: string[] = Array.from(new Set(allDates)).sort();
@@ -76,7 +76,19 @@ const LifePlanTable = () => {
             }
             newOrganizedData[item.category][item.name].values[monthKey] = item.value;
         });
-        setOrganizedData(newOrganizedData);
+        const finalOrganizedData: OrganizedData = generateEmptyOrganizedData();
+        let rowIndex = 0
+        categories.forEach(category => {
+            Object.keys(newOrganizedData[category]).forEach((name) => {
+                finalOrganizedData[category][rowIndex] = {
+                    name: name,
+                    values: newOrganizedData[category][name].values,
+                    firstMeta: newOrganizedData[category][name].firstMeta
+                }
+                rowIndex++
+            })
+        })
+        setOrganizedData(finalOrganizedData);
     },[plan, resetData])
     
     const formatValue = (value) => {
