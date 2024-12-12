@@ -160,11 +160,15 @@ const LifePlanTable = () => {
     }
 
     const handleAddItem = (category: string) => {
+        let newIndex = 0;
+        categories.forEach(category => (
+            newIndex += Object.keys(organizedData[category]).length
+        ))
         setOrganizedData({
             ...organizedData,
             [category]: {
                 ...organizedData[category],
-                [`Item ${Object.keys(organizedData[category]).length + 1}`]: { values: {}, firstMeta: 0 }
+                [newIndex]: { name: "", values: {}, firstMeta: 0 }
             }
         })
         setDataHasBeenAltered(true);

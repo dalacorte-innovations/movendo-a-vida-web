@@ -80,12 +80,13 @@ const TableBody: React.FC<TableBodyProps> = ({
                     <td className="px-4 py-2 border" onClick={() => handleEditClick(parseInt(id), 'name')}>{
                         editingCell?.id === parseInt(id) && editingCell?.date === "name" ? (
                             <input
-                                    type="text"
-                                    value={data[category][id].name || ""}
-                                    onChange={(e) => handleChange(e, parseInt(id), 'name')}
-                                    onBlur={handleBlur}
-                                    className="w-full bg-transparent text-center" style={{width: '60px'}}
-                                />
+                                type="text"
+                                value={data[category][id].name || ""}
+                                onChange={(e) => handleChange(e, parseInt(id), 'name')}
+                                onBlur={handleBlur}
+                                className="w-full bg-transparent text-center"
+                                style={{width: '100px'}}
+                            />
                         ):(
                             data[category][id].name
                         )}</td>
