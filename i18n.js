@@ -233,6 +233,7 @@ i18n.use(initReactI18next).init({
           "Nome do plano": "Plan name",
           "Salvar Alterações": "Save Changes",
           "Descartar Alterações": "Discard Changes",
+          "Lucro Total": "Total Profit",
         }
       },
       es: {
@@ -463,6 +464,7 @@ i18n.use(initReactI18next).init({
             "Nome do plano": "Nombre del plan",
             "Salvar Alterações": "Guardar Cambios",
             "Descartar Alterações": "Descartar Cambios",
+            "Lucro Total": "Ganancia Total",
         }
       },
       pt: {
@@ -693,6 +695,7 @@ i18n.use(initReactI18next).init({
             "Nome do plano": "Nome do plano",
             "Salvar Alterações": "Salvar Alterações",
             "Descartar Alterações": "Descartar Alterações",
+            "Lucro Total": "Lucro Total",
         }
       }
     },

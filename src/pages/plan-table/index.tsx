@@ -170,6 +170,16 @@ const LifePlanTable = () => {
         setDataHasBeenAltered(true);
     };
 
+    const getTotalByCategory = (category: string) => {
+        // THIS FUNCTION IS ONLY A MOCKED VERSION OF THE FUNCTION THAT SHOULD BE IMPLEMENTED
+        // THIS IS A TOTALLY RANDOM VALUE
+        const randomTenth = Math.floor(Math.random() * 10);
+        const randomHundredth = Math.floor(Math.random() * 100);
+        const randomThousandth = Math.floor(Math.random() * 1000);
+        const randomValue = randomTenth * 100 + randomHundredth * 10 + randomThousandth;
+        return randomValue;
+    }
+
     return (
         <div className={`flex flex-col md:flex-row ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'} h-screen`}>
             <div className={`fixed md:relative ${darkMode ? 'bg-darkGray' : 'bg-gray-200'} h-full`}>
@@ -259,6 +269,19 @@ const LifePlanTable = () => {
                             >
                                 <IoAdd size={20} />
                             </button>
+                            <div
+                                className="flex items-center justify-between m-auto p-2"
+                                style={{
+                                    width: '200px',
+                                    backgroundColor: `${darkMode ? '#9CA3AF' : '#4B5563'}`,
+                                    borderRadius: '10px'
+                                }}
+                            >
+                                <h3 className={`text-lg font-semibold ${darkMode ? 'text-black' : 'text-white'}`}
+                                >
+                                    {`${t('Lucro Total')} : ${formatValue(getTotalByCategory('category'))}`}
+                                </h3>
+                            </div>
                         </div>
                     ))}
                 </div>
