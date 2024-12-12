@@ -231,6 +231,8 @@ i18n.use(initReactI18next).init({
           "Adicionar Plano": "Add Plan",
           "Prazo em anos": "Term in years",
           "Nome do plano": "Plan name",
+          "Salvar Alterações": "Save Changes",
+          "Descartar Alterações": "Discard Changes",
         }
       },
       es: {
@@ -459,6 +461,8 @@ i18n.use(initReactI18next).init({
             "Adicionar Plano": "Agregar plan",
             "Prazo em anos": "Plazo en años",
             "Nome do plano": "Nombre del plan",
+            "Salvar Alterações": "Guardar Cambios",
+            "Descartar Alterações": "Descartar Cambios",
         }
       },
       pt: {
@@ -687,6 +691,8 @@ i18n.use(initReactI18next).init({
             "Adicionar Plano": "Adicionar Plano",
             "Prazo em anos": "Prazo em anos",
             "Nome do plano": "Nome do plano",
+            "Salvar Alterações": "Salvar Alterações",
+            "Descartar Alterações": "Descartar Alterações",
         }
       }
     },

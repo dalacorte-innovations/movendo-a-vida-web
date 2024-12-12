@@ -2,13 +2,14 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar';
 import { ThemeContext } from '../../utils/ThemeContext.jsx';
-import { IoCaretBack, IoSave, IoTrash } from 'react-icons/io5';
+import { IoAdd, IoCaretBack, IoSave, IoTrash } from 'react-icons/io5';
 import { FaFilePdf, FaFileCsv } from 'react-icons/fa6';
 import { configBackendConnection, endpoints, getAuthHeaders } from '../../utils/backendConnection.js';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { OrganizedData } from '../../types/life-plan/lifePlan.js';
 import TableBody from './tableBody.js';
+import { t } from 'i18next';
 
 const months = [
     { full: "Janeiro", abbr: "jan" },
@@ -146,6 +147,17 @@ const LifePlanTable = () => {
         setDataHasBeenAltered(false);
     }
 
+    const handleAddItem = (category: string) => {
+        setOrganizedData({
+            ...organizedData,
+            [category]: {
+                ...organizedData[category],
+                [`Item ${Object.keys(organizedData[category]).length + 1}`]: { values: {}, firstMeta: 0 }
+            }
+        })
+        setDataHasBeenAltered(true);
+    };
+
     return (
         <div className={`flex flex-col md:flex-row ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'} h-screen`}>
             <div className={`fixed md:relative ${darkMode ? 'bg-darkGray' : 'bg-gray-200'} h-full`}>
@@ -183,14 +195,14 @@ const LifePlanTable = () => {
                                 onClick={handleSaveEdit}
                             >
                                 <IoSave size={20} />
-                                <span className="ml-1">Salvar Alterações</span>
+                                <span className="ml-1">{t('Salvar Alterações')}</span>
                             </button>
                             <button
                                 className="flex items-center justify-center text-red-600 hover:text-red-700 transition-colors"
                                 onClick={handleResetEdit}
                             >
                                 <IoTrash size={20} />
-                                <span className="ml-1">Descartar Alterações</span>
+                                <span className="ml-1">{t('Descartar Alterações')}</span>
                             </button>
                         </div>
                     )}
@@ -228,7 +240,13 @@ const LifePlanTable = () => {
                                         setDataHasBeenAltered={setDataHasBeenAltered}
                                     />
                                 </table>
-                            </div>
+                            </div>                
+                            <button
+                                className="flex items-center justify-center text-green-600 hover:text-green-700 transition-colors"
+                                onClick={() => {handleAddItem(category)}}
+                            >
+                                <IoAdd size={20} />
+                            </button>
                         </div>
                     ))}
                 </div>
