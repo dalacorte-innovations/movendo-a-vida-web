@@ -248,17 +248,18 @@ const LifePlanTable = () => {
                             <div className="overflow-x-auto">
                                 <table className="table-auto w-full text-sm border-collapse shadow-lg" style={{ backgroundColor: 'transparent' }}>
                                     <thead>
-                                        <tr className={`${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
-                                            <th className="px-4 py-2 border">Nome</th>
+                                        <tr>
+                                            <th className="" style={{width: '20px', backgroundColor: 'transparent'}}></th> {/**This is only a component to push the header one cell to the right */}
+                                            <th className={`px-4 py-2 border ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>Nome</th>
                                             {uniqueDates.map(date => {
                                                 const [year, month] = date.split("-");
                                                 return (
-                                                    <th key={date} className="px-4 py-2 border text-center">
+                                                    <th key={date} className={`px-4 py-2 border text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                                                         {months[parseInt(month, 10) - 1].abbr} - {year}
                                                     </th>
                                                 );
                                             })}
-                                            <th className="px-4 py-2 border text-center">Meta</th>
+                                            <th className={`px-4 py-2 border text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>Meta</th>
                                         </tr>
                                     </thead>
                                     <TableBody

@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { OrganizedData } from "../../types/life-plan/lifePlan";
 import { toast } from 'react-toastify';
-import { IoAdd } from 'react-icons/io5';
+import { IoAdd, IoTrashBin } from 'react-icons/io5';
 
 interface TableBodyProps {
     data: OrganizedData;
@@ -99,6 +99,15 @@ const TableBody: React.FC<TableBodyProps> = ({
         setDataHasBeenAltered(true);
     };
 
+    const handleRemoveItem = (id: number) => {
+        setData((prev) => {
+            const updatedData = { ...prev };
+            delete updatedData[category][id];
+            return updatedData;
+        });
+        setDataHasBeenAltered(true);
+    }
+
     const getUniqueDateSubtotal = (date: string) => {
         let subtotal = 0;
         Object.keys(data[category]).forEach((id) => {
@@ -113,6 +122,12 @@ const TableBody: React.FC<TableBodyProps> = ({
         <tbody>
             {Object.keys(data[category]).map((id, index) => (
                 <tr key={index} className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
+                    <div
+                        className='py-2 flex justify-start items-center'
+                        onClick={() => handleRemoveItem(parseInt(id))}
+                    >
+                        <IoTrashBin size={20} color='red'/>
+                    </div>
                     <td className="px-4 py-2 border" onClick={() => handleEditClick(parseInt(id), 'name')}>{
                         editingCell?.id === parseInt(id) && editingCell?.date === "name" ? (
                             <input
@@ -125,7 +140,8 @@ const TableBody: React.FC<TableBodyProps> = ({
                             />
                         ):(
                             data[category][id].name
-                        )}</td>
+                        )}
+                    </td>
                     {uniqueDates.map(date => (
                         <td key={date} className="px-4 py-2 border text-center" onClick={() => handleEditClick(parseInt(id), date)}>
                             {editingCell?.id === parseInt(id) && editingCell?.date === date ? (
