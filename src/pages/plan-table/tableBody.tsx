@@ -1,6 +1,7 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { OrganizedData } from "../../types/life-plan/lifePlan";
 import { toast } from 'react-toastify';
+import { IoAdd } from 'react-icons/io5';
 
 interface TableBodyProps {
     data: OrganizedData;
@@ -14,6 +15,16 @@ interface TableBodyProps {
     setEditingCell: Dispatch<SetStateAction<{ id: number; date: string } | null>>;
     setDataHasBeenAltered: Dispatch<SetStateAction<boolean>>;
 }
+const categories = [
+    "receitas",
+    "estudos",
+    "custos",
+    "lucroPrejuizo",
+    "investimentos",
+    "realizacoes",
+    "intercambio",
+    "empresas"
+]
 
 const TableBody: React.FC<TableBodyProps> = ({
     data,
@@ -73,6 +84,31 @@ const TableBody: React.FC<TableBodyProps> = ({
         setEditingCell(null); // Exit edit mode
     };
 
+    const handleAddItem = (category: string) => {
+        let newIndex = 0;
+        categories.forEach(category => (
+            newIndex += Object.keys(data[category]).length
+        ))
+        setData({
+            ...data,
+            [category]: {
+                ...data[category],
+                [newIndex]: { name: "", values: {}, firstMeta: 0 }
+            }
+        })
+        setDataHasBeenAltered(true);
+    };
+
+    const getUniqueDateSubtotal = (date: string) => {
+        let subtotal = 0;
+        Object.keys(data[category]).forEach((id) => {
+            if (data[category][id].values[date]) {
+                subtotal += parseFloat(data[category][id].values[date]);
+            }
+        });
+        return subtotal;
+    }
+
     return (
         <tbody>
             {Object.keys(data[category]).map((id, index) => (
@@ -120,6 +156,22 @@ const TableBody: React.FC<TableBodyProps> = ({
                     </td>
                 </tr>
             ))}
+            <button
+                className="flex items-center justify-center text-green-600 hover:text-green-700 transition-colors my-2"
+                onClick={() => handleAddItem(category)}
+            >
+                <IoAdd size={20} />
+            </button>
+            <tr className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
+                <td className="px-4 py-2 border text-center">
+                    Subtotal
+                </td>
+                {uniqueDates.map(date => (
+                    <td key={date} className="px-4 py-2 border text-center">
+                        {formatValue(getUniqueDateSubtotal(date))}    
+                    </td>
+                ))}
+            </tr>
         </tbody>
     )
 }

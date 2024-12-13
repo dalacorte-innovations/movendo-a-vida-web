@@ -159,21 +159,6 @@ const LifePlanTable = () => {
         setDataHasBeenAltered(false);
     }
 
-    const handleAddItem = (category: string) => {
-        let newIndex = 0;
-        categories.forEach(category => (
-            newIndex += Object.keys(organizedData[category]).length
-        ))
-        setOrganizedData({
-            ...organizedData,
-            [category]: {
-                ...organizedData[category],
-                [newIndex]: { name: "", values: {}, firstMeta: 0 }
-            }
-        })
-        setDataHasBeenAltered(true);
-    };
-
     const getTotalByCategory = (category: string) => {
         // THIS FUNCTION IS ONLY A MOCKED VERSION OF THE FUNCTION THAT SHOULD BE IMPLEMENTED
         // THIS IS A TOTALLY RANDOM VALUE
@@ -266,19 +251,14 @@ const LifePlanTable = () => {
                                         setDataHasBeenAltered={setDataHasBeenAltered}
                                     />
                                 </table>
-                            </div>                
-                            <button
-                                className="flex items-center justify-center text-green-600 hover:text-green-700 transition-colors"
-                                onClick={() => {handleAddItem(category)}}
-                            >
-                                <IoAdd size={20} />
-                            </button>
+                            </div>
                             <div
                                 className="flex items-center justify-between m-auto p-2"
                                 style={{
                                     width: '200px',
                                     backgroundColor: `${darkMode ? '#9CA3AF' : '#4B5563'}`,
-                                    borderRadius: '10px'
+                                    borderRadius: '10px',
+                                    marginTop: '30px'
                                 }}
                             >
                                 <h3 className={`text-lg font-semibold ${darkMode ? 'text-black' : 'text-white'}`}
