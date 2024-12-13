@@ -159,15 +159,24 @@ const LifePlanTable = () => {
         setDataHasBeenAltered(false);
     }
 
-    const getTotalByCategory = (category: string) => {
-        // THIS FUNCTION IS ONLY A MOCKED VERSION OF THE FUNCTION THAT SHOULD BE IMPLEMENTED
-        // THIS IS A TOTALLY RANDOM VALUE
-        const randomTenth = Math.floor(Math.random() * 10);
-        const randomHundredth = Math.floor(Math.random() * 100);
-        const randomThousandth = Math.floor(Math.random() * 1000);
-        const randomValue = randomTenth * 100 + randomHundredth * 10 + randomThousandth;
-        return randomValue;
-    }
+    const getTotalProfit = () => {
+        const sumValues = (data) => {
+            let total = 0;
+            for (const key in data) {
+                for (const date in data[key].values) {
+                    total += Number(data[key].values[date]);
+                }
+            }
+            return total;
+        };
+    
+        const totalEstudos = sumValues(organizedData.estudos);
+        const totalReceitas = sumValues(organizedData.receitas);
+        const totalCustos = sumValues(organizedData.custos);
+    
+        return totalReceitas - totalCustos - totalEstudos;
+    };
+    
 
     return (
         <div className={`flex flex-col md:flex-row ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'} h-screen`}>
@@ -217,6 +226,20 @@ const LifePlanTable = () => {
                             </button>
                         </div>
                     )}
+                    <div
+                        className="flex items-center justify-center m-auto p-2"
+                        style={{
+                            width: '220px',
+                            backgroundColor: `${getTotalProfit() >= 0 ? 'green' : 'red'}`,
+                            borderRadius: '10px',
+                            marginTop: '30px'
+                        }}
+                    >
+                        <h3 className={`text-lg font-semibold text-white`}
+                        >
+                            {`${getTotalProfit() >= 0 ? t('Lucro') : t('Prejuizo')} : ${formatValue(getTotalProfit())}`}
+                        </h3>
+                    </div>
                     {categories.map(category =>(
                         <div key={category}>
                             <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
@@ -251,20 +274,6 @@ const LifePlanTable = () => {
                                         setDataHasBeenAltered={setDataHasBeenAltered}
                                     />
                                 </table>
-                            </div>
-                            <div
-                                className="flex items-center justify-between m-auto p-2"
-                                style={{
-                                    width: '200px',
-                                    backgroundColor: `${darkMode ? '#9CA3AF' : '#4B5563'}`,
-                                    borderRadius: '10px',
-                                    marginTop: '30px'
-                                }}
-                            >
-                                <h3 className={`text-lg font-semibold ${darkMode ? 'text-black' : 'text-white'}`}
-                                >
-                                    {`${t('Lucro Total')} : ${formatValue(getTotalByCategory('category'))}`}
-                                </h3>
                             </div>
                         </div>
                     ))}
