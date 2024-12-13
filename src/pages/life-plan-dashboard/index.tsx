@@ -218,11 +218,13 @@ const LifePlanDashboard = () => {
                             <Box
                                 key={plan.id}
                                 sx={{
-                                    height: 'auto',
-                                    maxWidth: '400px',
-                                    maxHeight: '370px',
-                                    "@media (max-width: 1769px)": {
-                                        minHeight: '370px',
+                                    height: '560px',
+                                    maxWidth: '48%',
+                                    "@media (max-width: 1885px)": {
+                                        maxHeight: '490px'
+                                    },
+                                    "@media (max-width: 1722px)": {
+                                        maxHeight: '400px',
                                     },
                                     "@media (max-width: 1291px)": {
                                         minWidth: '100%',
