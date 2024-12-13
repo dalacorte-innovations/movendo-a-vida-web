@@ -90,7 +90,7 @@ const LifePlanPage = () => {
             <Sidebar />
             <main
                 className="flex flex-col flex-grow p-6 overflow-y-scroll m-auto justify-between items-center"
-                style={{ maxHeight: '90vh', maxWidth: '500px', minHeight: '400px'}}
+                style={{ maxHeight: '90vh', maxWidth: '500px', minHeight: '400px', overflowY: 'hidden'}}
             >
                 <h1 className={`text-3xl font-semibold  ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{id ? t('Editar Plano de Vida') : t('Criar Plano de Vida')}</h1>
                 <input
