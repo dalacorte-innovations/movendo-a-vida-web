@@ -172,7 +172,10 @@ const LifePlanDashboard = () => {
             </div>
             <main className="flex flex-col w-full items-center h-full sm:ml-4 md:ml-0">
                 <div className={`w-full py-4 px-6 md:px-12 ${darkMode ? 'bg-primaryBlack' : 'bg-white'}`}>
-                    <div className="flex items-center justify-center text-sm space-x-4">
+                    <div
+                        className="flex items-center justify-center text-sm space-x-4"
+                        style={{flexWrap: 'wrap', gap: '10px'}}
+                    >
                         {!isSmallScreen &&
                             plansData.map((plan) => (
                                 <button
