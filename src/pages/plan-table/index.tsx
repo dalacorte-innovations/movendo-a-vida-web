@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { OrganizedData } from '../../types/life-plan/lifePlan.js';
 import TableBody from './tableBody.js';
 import { t } from 'i18next';
+import { Box } from '@mui/material';
 
 const months = [
     { full: "Janeiro", abbr: "jan" },
@@ -189,7 +190,12 @@ const LifePlanTable = () => {
                     <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-black'}`}>
                         Histórico de Plano de Vida
                     </h2>
-                    <div className="flex gap-2 mt-2 md:mt-0">
+                    <div
+                        className="flex gap-2 mt-2 md:mt-0"
+                        style={{
+                            flexWrap: 'wrap'
+                        }}
+                    >
                         <button
                             className="flex items-center justify-center text-green-600 hover:text-green-700 transition-colors"
                             onClick={handleGenerateCSV}
@@ -209,7 +215,13 @@ const LifePlanTable = () => {
                 
                 <div className="space-y-8">
                     {dataHasBeenAltered && (
-                        <div className="flex items-center justify-between" style={{width: '400px'}}>
+                        <Box
+                            className="flex items-center justify-between"
+                            sx={{
+                                maxWidth: '400px',
+                                flexWrap: 'wrap'
+                            }}
+                        >
                             <button
                                 className="flex items-center justify-center text-green-600 hover:text-green-700 transition-colors"
                                 onClick={handleSaveEdit}
@@ -224,7 +236,7 @@ const LifePlanTable = () => {
                                 <IoTrash size={20} />
                                 <span className="ml-1">{t('Descartar Alterações')}</span>
                             </button>
-                        </div>
+                        </Box>
                     )}
                     <div
                         className="flex items-center justify-center m-auto p-2"
