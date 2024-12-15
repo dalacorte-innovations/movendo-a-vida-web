@@ -15,6 +15,7 @@ interface TableBodyProps {
     setEditingCell: Dispatch<SetStateAction<{ id: number; date: string } | null>>;
     setDataHasBeenAltered: Dispatch<SetStateAction<boolean>>;
     getNewIndex: () => number;
+    setupProfitLossCategoryData: () => void;
 }
 const categories = [
     "receitas",
@@ -38,7 +39,8 @@ const TableBody: React.FC<TableBodyProps> = ({
     editingCell,
     setEditingCell,
     setDataHasBeenAltered,
-    getNewIndex
+    getNewIndex,
+    setupProfitLossCategoryData
 }) => {
 
     const handleEditClick = (id: number, date: string) => {
@@ -68,6 +70,10 @@ const TableBody: React.FC<TableBodyProps> = ({
             });
             setDataHasBeenAltered(true);
             return;
+        }
+
+        if(category === "estudos" || category === "custos" || category === "receitas") {
+            setupProfitLossCategoryData();
         }
 
         setData((prev) => {

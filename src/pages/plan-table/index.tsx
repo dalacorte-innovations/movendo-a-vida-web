@@ -112,7 +112,7 @@ const LifePlanTable = () => {
  
     useEffect(() => {
         setupProfitLossCategoryData();
-    },[organizedData])
+    },[plan])
 
     useEffect(() => {
         const newOrganizedData = generateEmptyOrganizedData();
@@ -304,6 +304,7 @@ const LifePlanTable = () => {
                                         setEditingCell={setEditingCell}
                                         setDataHasBeenAltered={setDataHasBeenAltered}
                                         getNewIndex={getNewIndex}
+                                        setupProfitLossCategoryData={setupProfitLossCategoryData}
                                     />
                                 </table>
                             </div>
