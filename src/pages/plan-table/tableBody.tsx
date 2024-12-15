@@ -157,7 +157,7 @@ const TableBody: React.FC<TableBodyProps> = ({
                             )}
                         </td>
                     ))}
-                    <td className="px-4 py-2 border text-center" style={{width: '60px'}}>
+                    <td className="px-4 py-2 border text-center" style={{width: '60px'}} onClick={() => handleEditClick(parseInt(id), 'firstMeta')}>
                         {editingCell?.id === parseInt(id) && editingCell?.date === "firstMeta" ? (
                             <input
                                 type="text"
@@ -178,7 +178,10 @@ const TableBody: React.FC<TableBodyProps> = ({
             >
                 <IoAdd size={20} />
             </button>
+            
             <tr className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
+                <th className="" style={{width: '30px', backgroundColor: 'transparent'}}></th> {/**This is only a component to push the header one cell to the right */}
+                                            
                 <td className="px-4 py-2 border text-center">
                     Subtotal
                 </td>
