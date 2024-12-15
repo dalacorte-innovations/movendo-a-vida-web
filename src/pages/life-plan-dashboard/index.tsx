@@ -21,6 +21,7 @@ import { format, parseISO } from 'date-fns';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import 'react-toastify/dist/ReactToastify.css';
+import { Box } from '@mui/material';
 
 ChartJS.register(
     CategoryScale,
@@ -171,7 +172,10 @@ const LifePlanDashboard = () => {
             </div>
             <main className="flex flex-col w-full items-center h-full sm:ml-4 md:ml-0">
                 <div className={`w-full py-4 px-6 md:px-12 ${darkMode ? 'bg-primaryBlack' : 'bg-white'}`}>
-                    <div className="flex items-center justify-center text-sm space-x-4">
+                    <div
+                        className="flex items-center justify-center text-sm space-x-4"
+                        style={{flexWrap: 'wrap', gap: '10px'}}
+                    >
                         {!isSmallScreen &&
                             plansData.map((plan) => (
                                 <button
@@ -196,7 +200,13 @@ const LifePlanDashboard = () => {
                         </button>
                     </div>
                 </div>
-                <div className="flex flex-col lg:flex-row justify-between gap-8 p-6 md:p-12 w-[90%] mx-auto h-[calc(100%-4rem)]">
+                <div
+                    style={{
+                        flexWrap: 'wrap',
+                        overflowY: 'auto',
+                    }}
+                    className="flex flex-col lg:flex-row justify-between gap-8 p-6 md:p-12 w-[90%] mx-auto h-[calc(100%-4rem)]"
+                >
                     {plansData.map((plan) => {
                         const availableCategories = [...getAvailableCategories(plan.items), "lucro_prejuizo"];
                         const chartData = getChartData(
@@ -208,8 +218,46 @@ const LifePlanDashboard = () => {
                             ? { width: '300px', height: '300px', margin: '0 auto' }
                             : { width: '100%', height: '80%'};
                         return (
-                            <div key={plan.id} className={`relative rounded-3xl p-6 shadow-md border w-full lg:w-[49%] h-[auto] mt-4 lg:mt-20 lg:mb-36 ${darkMode ? 'border-secontGray' : 'border-gray-300 bg-white'}`}>
-                                <div className="flex justify-between items-center mb-4">
+                            <Box
+                                key={plan.id}
+                                sx={{
+                                    height: '560px',
+                                    maxWidth: '48%',
+                                    "@media (max-width: 1885px)": {
+                                        maxHeight: '490px'
+                                    },
+                                    "@media (max-width: 1722px)": {
+                                        maxHeight: '400px',
+                                    },
+                                    "@media (max-width: 1291px)": {
+                                        minWidth: '100%',
+                                        maxHeight: '500px',
+                                        minHeight: '500px',
+                                    },
+                                    "@media (max-width: 1048px)": {
+                                        maxHeight: '400px',
+                                        minHeight: '400px',
+                                    },
+                                    "@media (max-width: 592px)": {
+                                        maxHeight: '350px',
+                                        minHeight: '350px',
+                                    },
+                                    "@media (max-width: 516px)": {
+                                        overflowX: 'auto',
+                                        overflowY: 'hidden'
+                                    }
+                                }}
+                                className={`relative rounded-3xl p-6 shadow-md border w-full ${darkMode ? 'border-secontGray' : 'border-gray-300 bg-white'}`}
+                            >
+                                <Box
+                                    className="flex justify-between items-center mb-4"
+                                    sx={{
+                                        height: '40px',
+                                        "@media (max-width: 516px)": {
+                                            minWidth: '380px',
+                                        }
+                                    }}
+                                >
                                     <div className="flex items-center">
                                         {!isSmallScreen && (
                                             <FaPlane className="mr-2" size={22} />
@@ -221,11 +269,40 @@ const LifePlanDashboard = () => {
                                     >
                                         {t('Ver detalhe do plano')}
                                     </button>
-                                </div>
-                                <div style={chartContainerStyle} className={`rounded-lg ${darkMode ? 'bg-darkGray' : 'bg-white'}`}>
+                                </Box>
+                                <Box
+                                    sx={{
+                                        ...chartContainerStyle,
+                                        width: '100%',
+                                        height: 'calc(100% - 40px - 60px)',
+                                        "@media (max-width: 765px)": {
+                                            height: 'calc(100% - 40px - 80px)',
+                                        },
+                                        "@media (max-width: 592px)": {
+                                            height: '200px',
+                                        },
+                                        "@media (max-width: 516px)": {
+                                            minHeight: '200px',
+                                            minWidth: '380px',
+                                        }
+                                    }}
+                                    className={`rounded-lg ${darkMode ? 'bg-darkGray' : 'bg-white'}`}
+                                >
                                     <ChartComponent data={{ labels: chartData.labels, datasets: chartData.datasets }} options={chartData.options} />
-                                </div>
-                                <div className="absolute bottom-4 left-0 right-0 flex justify-center mt-4 space-x-2">
+                                </Box>
+                                <Box
+                                    sx={{
+                                        flexWrap: 'wrap',
+                                        justifyContent: 'center',
+                                        margin: 'auto',
+                                        gap: '10px',
+                                        height: 'auto',
+                                        "@media (max-width: 516px)": {
+                                            minWidth: '380px',
+                                        }
+                                    }}
+                                    className="left-0 right-0 flex justify-center"
+                                >
                                     {availableCategories.map(category => (
                                         <button
                                             key={category}
@@ -239,8 +316,8 @@ const LifePlanDashboard = () => {
                                             {t(category === "lucro_prejuizo" ? "Lucro/Prejuízo" : category)}
                                         </button>
                                     ))}
-                                </div>
-                            </div>
+                                </Box>
+                            </Box>
                         );
                     })}
                 </div>
