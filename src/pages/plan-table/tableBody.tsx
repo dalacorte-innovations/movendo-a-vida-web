@@ -42,7 +42,7 @@ const TableBody: React.FC<TableBodyProps> = ({
     getNewIndex,
     setupProfitLossCategoryData
 }) => {
-
+    const EDIT_BLOCKED_CATEGORIES = ["lucroPrejuizo"];
     const handleEditClick = (id: number, date: string) => {
         setEditingCell({ id, date });
     }
@@ -133,7 +133,14 @@ const TableBody: React.FC<TableBodyProps> = ({
                     >
                         <IoTrashBin size={20} color='red'/>
                     </div>
-                    <td className="px-4 py-2 border" onClick={() => handleEditClick(parseInt(id), 'name')}>{
+                    <td
+                        className="px-4 py-2 border"
+                        onClick={() => {
+                            if(EDIT_BLOCKED_CATEGORIES.includes(category)) return;
+                            handleEditClick(parseInt(id), 'name')
+                        }}
+                    >   
+                        {
                         editingCell?.id === parseInt(id) && editingCell?.date === "name" ? (
                             <input
                                 type="text"
@@ -148,7 +155,14 @@ const TableBody: React.FC<TableBodyProps> = ({
                         )}
                     </td>
                     {uniqueDates.map(date => (
-                        <td key={date} className="px-4 py-2 border text-center" onClick={() => handleEditClick(parseInt(id), date)}>
+                        <td
+                            key={date}
+                            className="px-4 py-2 border text-center"
+                            onClick={() => {
+                                if(EDIT_BLOCKED_CATEGORIES.includes(category)) return;
+                                handleEditClick(parseInt(id), date)
+                            }}
+                        >
                             {editingCell?.id === parseInt(id) && editingCell?.date === date ? (
                                 <input
                                     type="text"
