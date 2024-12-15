@@ -14,6 +14,7 @@ interface TableBodyProps {
     editingCell: { id: number; date: string } | null;
     setEditingCell: Dispatch<SetStateAction<{ id: number; date: string } | null>>;
     setDataHasBeenAltered: Dispatch<SetStateAction<boolean>>;
+    getNewIndex: () => number;
 }
 const categories = [
     "receitas",
@@ -36,7 +37,8 @@ const TableBody: React.FC<TableBodyProps> = ({
     getMetaStyle,
     editingCell,
     setEditingCell,
-    setDataHasBeenAltered
+    setDataHasBeenAltered,
+    getNewIndex
 }) => {
 
     const handleEditClick = (id: number, date: string) => {
@@ -85,10 +87,7 @@ const TableBody: React.FC<TableBodyProps> = ({
     };
 
     const handleAddItem = (category: string) => {
-        let newIndex = 0;
-        categories.forEach(category => (
-            newIndex += Object.keys(data[category]).length
-        ))
+        let newIndex = getNewIndex();
         setData({
             ...data,
             [category]: {
@@ -178,19 +177,20 @@ const TableBody: React.FC<TableBodyProps> = ({
             >
                 <IoAdd size={20} />
             </button>
-            
-            <tr className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
-                <th className="" style={{width: '30px', backgroundColor: 'transparent'}}></th> {/**This is only a component to push the header one cell to the right */}
-                                            
-                <td className="px-4 py-2 border text-center">
-                    Subtotal
-                </td>
-                {uniqueDates.map(date => (
-                    <td key={date} className="px-4 py-2 border text-center">
-                        {formatValue(getUniqueDateSubtotal(date))}    
+            {category !== "lucroPrejuizo" && (
+                <tr className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
+                    <th className="" style={{width: '30px', backgroundColor: 'transparent'}}></th> {/**This is only a component to push the header one cell to the right */}
+                                                
+                    <td className="px-4 py-2 border text-center">
+                        Subtotal
                     </td>
-                ))}
-            </tr>
+                    {uniqueDates.map(date => (
+                        <td key={date} className="px-4 py-2 border text-center">
+                            {formatValue(getUniqueDateSubtotal(date))}    
+                        </td>
+                    ))}
+                </tr>
+            )}
         </tbody>
     )
 }

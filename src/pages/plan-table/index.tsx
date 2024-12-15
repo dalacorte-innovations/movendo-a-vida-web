@@ -63,7 +63,57 @@ const LifePlanTable = () => {
         }
     }
     const [organizedData, setOrganizedData] = useState<OrganizedData>(generateEmptyOrganizedData());
+
+    const getNewIndex = () => {
+        let newIndex = 0;
+        categories.forEach(category => (
+            newIndex += Object.keys(organizedData[category]).length
+        ))
+        return newIndex;
+    }
+
+    const sumAllValuesByDate = (date: string, category: string) => {
+        let sum = 0;
+        Object.keys(organizedData[category]).forEach((id) => {
+            if (organizedData[category][id].values[date]) {
+                sum += parseFloat(organizedData[category][id].values[date]);
+            }
+        });
+        return sum
+    }
+
+    const getTotalMonthProfit = (date: string) => {
+        const totalMonthProfitEstudos = sumAllValuesByDate(date, "estudos");
+        const totalMonthProfitReceitas = sumAllValuesByDate(date, "receitas");
+        const totalMonthProfitCustos = sumAllValuesByDate(date, "custos");
+    
+        return totalMonthProfitReceitas - totalMonthProfitCustos - totalMonthProfitEstudos;
+    };
+
+    const setupProfitLossCategoryData = () => {
+        const newProfitLossCategoryData = {};
+        const index = getNewIndex();
+        const newProfitLossValues: {[key: string]: number} = {}
+        uniqueDates.forEach((date) => {
+            newProfitLossValues[date] = getTotalMonthProfit(date);
+        });
+        let totalProfit = 0
+        Object.values(newProfitLossValues).forEach((value) => {
+            totalProfit += value;
+        })
+        newProfitLossCategoryData[index] = { name: totalProfit > 0 ? "Lucro" : "Prejuízo", values: newProfitLossValues, firstMeta: 0 };
+        setOrganizedData({
+            ...organizedData,
+            lucroPrejuizo: {
+                ...newProfitLossCategoryData
+            }
+        })
+    }
  
+    useEffect(() => {
+        setupProfitLossCategoryData();
+    },[organizedData])
+
     useEffect(() => {
         const newOrganizedData = generateEmptyOrganizedData();
         plan.items.forEach((item) => {
@@ -159,24 +209,6 @@ const LifePlanTable = () => {
         setResetData(!resetData);
         setDataHasBeenAltered(false);
     }
-
-    const getTotalProfit = () => {
-        const sumValues = (data) => {
-            let total = 0;
-            for (const key in data) {
-                for (const date in data[key].values) {
-                    total += Number(data[key].values[date]);
-                }
-            }
-            return total;
-        };
-    
-        const totalEstudos = sumValues(organizedData.estudos);
-        const totalReceitas = sumValues(organizedData.receitas);
-        const totalCustos = sumValues(organizedData.custos);
-    
-        return totalReceitas - totalCustos - totalEstudos;
-    };
     
 
     return (
@@ -238,20 +270,6 @@ const LifePlanTable = () => {
                             </button>
                         </Box>
                     )}
-                    <div
-                        className="flex items-center justify-center m-auto p-2"
-                        style={{
-                            width: '220px',
-                            backgroundColor: `${getTotalProfit() >= 0 ? 'green' : 'red'}`,
-                            borderRadius: '10px',
-                            marginTop: '30px'
-                        }}
-                    >
-                        <h3 className={`text-lg font-semibold text-white`}
-                        >
-                            {`${getTotalProfit() >= 0 ? t('Lucro') : t('Prejuizo')} : ${formatValue(getTotalProfit())}`}
-                        </h3>
-                    </div>
                     {categories.map(category =>(
                         <div key={category}>
                             <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
@@ -261,7 +279,7 @@ const LifePlanTable = () => {
                                 <table className="table-auto w-full text-sm border-collapse shadow-lg" style={{ backgroundColor: 'transparent' }}>
                                     <thead>
                                         <tr>
-                                            <th className="" style={{width: '20px', backgroundColor: 'transparent'}}></th> {/**This is only a component to push the header one cell to the right */}
+                                            <th className="" style={{width: '30px', backgroundColor: 'transparent'}}></th> {/**This is only a component to push the header one cell to the right */}
                                             <th className={`px-4 py-2 border ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>Nome</th>
                                             {uniqueDates.map(date => {
                                                 const [year, month] = date.split("-");
@@ -285,6 +303,7 @@ const LifePlanTable = () => {
                                         editingCell={editingCell}
                                         setEditingCell={setEditingCell}
                                         setDataHasBeenAltered={setDataHasBeenAltered}
+                                        getNewIndex={getNewIndex}
                                     />
                                 </table>
                             </div>
