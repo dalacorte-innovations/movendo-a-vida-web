@@ -29,3 +29,22 @@ export type LifePlanData = {
         empresas: LifePlanCategory;
     };
 };
+
+type CategoryData = {
+    [key: number]: {
+        name: string | undefined;
+        values: { [key: string]: string };
+        firstMeta: string;
+    }
+};
+
+export type OrganizedData = {
+    receitas: CategoryData;
+    estudos: CategoryData;
+    custos: CategoryData;
+    lucroPrejuizo: CategoryData;
+    investimentos: CategoryData;
+    realizacoes: CategoryData;
+    intercambio: CategoryData;
+    empresas: CategoryData;
+};

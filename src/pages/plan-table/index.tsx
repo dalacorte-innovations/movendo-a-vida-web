@@ -1,12 +1,16 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar';
 import { ThemeContext } from '../../utils/ThemeContext.jsx';
-import { IoCaretBack } from 'react-icons/io5';
+import { IoAdd, IoCaretBack, IoSave, IoTrash } from 'react-icons/io5';
 import { FaFilePdf, FaFileCsv } from 'react-icons/fa6';
 import { configBackendConnection, endpoints, getAuthHeaders } from '../../utils/backendConnection.js';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { OrganizedData } from '../../types/life-plan/lifePlan.js';
+import TableBody from './tableBody.js';
+import { t } from 'i18next';
+import { Box } from '@mui/material';
 
 const months = [
     { full: "Janeiro", abbr: "jan" },
@@ -23,28 +27,121 @@ const months = [
     { full: "Dezembro", abbr: "dez" }
 ];
 
+const categories = [
+    "receitas",
+    "estudos",
+    "custos",
+    "lucroPrejuizo",
+    "investimentos",
+    "realizacoes",
+    "intercambio",
+    "empresas"
+]
+
 const LifePlanTable = () => {
     const { darkMode } = useContext(ThemeContext);
     const location = useLocation();
     const navigate = useNavigate();
     const { plan } = location.state || { plan: { items: [] } };
+    const [resetData, setResetData] = useState(false); // THIS WILL FORCE THE RELOAD OF THE ORGANIZED DATA WHEN ALTERED
+    const [dataHasBeenAltered, setDataHasBeenAltered] = useState(false);
+    const [editingCell, setEditingCell] = useState<{id: number, date: string} | null>(null); // Track the cell being edited
+  
+    const allDates: string[] = plan.items.map(item => item.date.split('-').slice(0, 2).join('-'));
+    const uniqueDates: string[] = Array.from(new Set(allDates)).sort();
 
-    const allDates = plan.items.map(item => item.date.split('-').slice(0, 2).join('-'));
-    const uniqueDates = Array.from(new Set(allDates)).sort();
-
-    const organizedData = {};
-    plan.items.forEach((item) => {
-        const [year, month] = item.date.split("-");
-        const monthKey = `${year}-${month.padStart(2, '0')}`;
-        if (!organizedData[item.category]) {
-            organizedData[item.category] = {};
+    const generateEmptyOrganizedData = (): OrganizedData => {
+        return {
+            receitas: {},
+            estudos: {},
+            custos: {},
+            lucroPrejuizo: {},
+            investimentos: {},
+            realizacoes: {},
+            intercambio: {},
+            empresas: {}
         }
-        if (!organizedData[item.category][item.name]) {
-            organizedData[item.category][item.name] = { values: {}, firstMeta: item.meta };
-        }
-        organizedData[item.category][item.name].values[monthKey] = item.value;
-    });
+    }
+    const [organizedData, setOrganizedData] = useState<OrganizedData>(generateEmptyOrganizedData());
 
+    const getNewIndex = () => {
+        let newIndex = 0;
+        categories.forEach(category => (
+            newIndex += Object.keys(organizedData[category]).length
+        ))
+        return newIndex;
+    }
+
+    const sumAllValuesByDate = (date: string, category: string) => {
+        let sum = 0;
+        Object.keys(organizedData[category]).forEach((id) => {
+            if (organizedData[category][id].values[date]) {
+                sum += parseFloat(organizedData[category][id].values[date]);
+            }
+        });
+        return sum
+    }
+
+    const getTotalMonthProfit = (date: string) => {
+        const totalMonthProfitEstudos = sumAllValuesByDate(date, "estudos");
+        const totalMonthProfitReceitas = sumAllValuesByDate(date, "receitas");
+        const totalMonthProfitCustos = sumAllValuesByDate(date, "custos");
+    
+        return totalMonthProfitReceitas - totalMonthProfitCustos - totalMonthProfitEstudos;
+    };
+
+    const setupProfitLossCategoryData = () => {
+        const newProfitLossCategoryData = {};
+        const index = getNewIndex();
+        const newProfitLossValues: {[key: string]: number} = {}
+        uniqueDates.forEach((date) => {
+            newProfitLossValues[date] = getTotalMonthProfit(date);
+        });
+        let totalProfit = 0
+        Object.values(newProfitLossValues).forEach((value) => {
+            totalProfit += value;
+        })
+        newProfitLossCategoryData[index] = { name: totalProfit > 0 ? "Lucro" : "Prejuízo", values: newProfitLossValues, firstMeta: 0 };
+        setOrganizedData({
+            ...organizedData,
+            lucroPrejuizo: {
+                ...newProfitLossCategoryData
+            }
+        })
+    }
+ 
+    useEffect(() => {
+        setupProfitLossCategoryData();
+    },[plan])
+
+    useEffect(() => {
+        const newOrganizedData = generateEmptyOrganizedData();
+        plan.items.forEach((item) => {
+            const [year, month] = item.date.split("-");
+            const monthKey = `${year}-${month.padStart(2, '0')}`;
+            if (!newOrganizedData[item.category]) {
+                newOrganizedData[item.category] = {};
+            }
+            if (!newOrganizedData[item.category][item.name]) {
+                newOrganizedData[item.category][item.name] = { values: {}, firstMeta: item.meta };
+            }
+            newOrganizedData[item.category][item.name].values[monthKey] = item.value;
+        });
+        const finalOrganizedData: OrganizedData = generateEmptyOrganizedData();
+        let rowIndex = 0
+        categories.forEach(category => {
+            Object.keys(newOrganizedData[category]).forEach((name) => {
+                finalOrganizedData[category][rowIndex] = {
+                    name: name,
+                    values: newOrganizedData[category][name].values,
+                    firstMeta: newOrganizedData[category][name].firstMeta
+                }
+                rowIndex++
+            })
+        })
+        setOrganizedData(finalOrganizedData);
+    },[plan, resetData])
+    
     const formatValue = (value) => {
         return parseFloat(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
@@ -101,6 +198,19 @@ const LifePlanTable = () => {
         }
     };
 
+    const handleSaveEdit = () => {
+        // ALL EDITED CELLS VALUES ARE IMPLEMENTED TO organizedData SO THE LOGIC
+        // OF THIS FUNCTION SHOULD TAKE THIS VALUE AND SEND TO THE BACKEND
+        toast.info('this functionality has not been implemented for now')
+
+    }
+
+    const handleResetEdit = () => {
+        setResetData(!resetData);
+        setDataHasBeenAltered(false);
+    }
+    
+
     return (
         <div className={`flex flex-col md:flex-row ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'} h-screen`}>
             <div className={`fixed md:relative ${darkMode ? 'bg-darkGray' : 'bg-gray-200'} h-full`}>
@@ -112,7 +222,12 @@ const LifePlanTable = () => {
                     <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-black'}`}>
                         Histórico de Plano de Vida
                     </h2>
-                    <div className="flex gap-2 mt-2 md:mt-0">
+                    <div
+                        className="flex gap-2 mt-2 md:mt-0"
+                        style={{
+                            flexWrap: 'wrap'
+                        }}
+                    >
                         <button
                             className="flex items-center justify-center text-green-600 hover:text-green-700 transition-colors"
                             onClick={handleGenerateCSV}
@@ -131,7 +246,31 @@ const LifePlanTable = () => {
                 </div>
                 
                 <div className="space-y-8">
-                    {Object.entries(organizedData).map(([category, names]) => (
+                    {dataHasBeenAltered && (
+                        <Box
+                            className="flex items-center justify-between"
+                            sx={{
+                                maxWidth: '400px',
+                                flexWrap: 'wrap'
+                            }}
+                        >
+                            <button
+                                className="flex items-center justify-center text-green-600 hover:text-green-700 transition-colors"
+                                onClick={handleSaveEdit}
+                            >
+                                <IoSave size={20} />
+                                <span className="ml-1">{t('Salvar Alterações')}</span>
+                            </button>
+                            <button
+                                className="flex items-center justify-center text-red-600 hover:text-red-700 transition-colors"
+                                onClick={handleResetEdit}
+                            >
+                                <IoTrash size={20} />
+                                <span className="ml-1">{t('Descartar Alterações')}</span>
+                            </button>
+                        </Box>
+                    )}
+                    {categories.map(category =>(
                         <div key={category}>
                             <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
                                 Categoria: {category}
@@ -139,34 +278,34 @@ const LifePlanTable = () => {
                             <div className="overflow-x-auto">
                                 <table className="table-auto w-full text-sm border-collapse shadow-lg" style={{ backgroundColor: 'transparent' }}>
                                     <thead>
-                                        <tr className={`${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
-                                            <th className="px-4 py-2 border">Nome</th>
+                                        <tr>
+                                            <th className="" style={{width: '30px', backgroundColor: 'transparent'}}></th> {/**This is only a component to push the header one cell to the right */}
+                                            <th className={`px-4 py-2 border ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>Nome</th>
                                             {uniqueDates.map(date => {
                                                 const [year, month] = date.split("-");
                                                 return (
-                                                    <th key={date} className="px-4 py-2 border text-center">
+                                                    <th key={date} className={`px-4 py-2 border text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                                                         {months[parseInt(month, 10) - 1].abbr} - {year}
                                                     </th>
                                                 );
                                             })}
-                                            <th className="px-4 py-2 border text-center">Meta</th>
+                                            <th className={`px-4 py-2 border text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>Meta</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        {Object.entries(names).map(([name, { values, firstMeta }], rowIndex) => (
-                                            <tr key={rowIndex} className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
-                                                <td className="px-4 py-2 border">{name}</td>
-                                                {uniqueDates.map(date => (
-                                                    <td key={date} className="px-4 py-2 border text-center">
-                                                        {values[date] ? formatValue(values[date]) : 'N/A'}
-                                                    </td>
-                                                ))}
-                                                <td className="px-4 py-2 border text-center">
-                                                    <span className={getMetaStyle(firstMeta)}>{formatValue(firstMeta)}</span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
+                                    <TableBody
+                                        data={organizedData}
+                                        setData={setOrganizedData}
+                                        category={category}
+                                        formatValue={formatValue}
+                                        getMetaStyle={getMetaStyle}
+                                        darkMode={darkMode}
+                                        uniqueDates={uniqueDates}
+                                        editingCell={editingCell}
+                                        setEditingCell={setEditingCell}
+                                        setDataHasBeenAltered={setDataHasBeenAltered}
+                                        getNewIndex={getNewIndex}
+                                        setupProfitLossCategoryData={setupProfitLossCategoryData}
+                                    />
                                 </table>
                             </div>
                         </div>

@@ -11,7 +11,6 @@ import FeedbackPage from './pages/feedback/index.tsx';
 import LoginPage from './pages/login/index.jsx';
 import BenefitsPage from './pages/benefits/index.tsx';
 import ContactPage from './pages/contact/index.tsx';
-import PlanoDeVidaPage from './pages/plano-de-vida/index.tsx';
 import LifePlanDashboard from './pages/life-plan-dashboard/index.tsx';
 import LifePlanTable from './pages/plan-table/index.tsx';
 import HomePage from './pages/home/index.tsx';
@@ -25,6 +24,7 @@ import PlansPage from './pages/plans/index.tsx';
 import ConfigPage from './pages/config/index.tsx';
 import ProtectedRoute from './components/Authentication/ProtectedRoute.tsx';
 import PublicRoute from './components/Authentication/PublicRoute.tsx';
+import LifePlanPage from './pages/plano-de-vida/index.tsx';
 
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -103,11 +103,11 @@ function App() {
                 />
                 <Route
                   path="/life-plan/:id"
-                  element={<ProtectedRoute element={<PlanoDeVidaPage />} />}
+                  element={<ProtectedRoute element={<LifePlanPage/>} />}
                 />
                 <Route
                   path="/life-plan/create"
-                  element={<ProtectedRoute element={<PlanoDeVidaPage />} />}
+                  element={<ProtectedRoute element={<LifePlanPage/>} />}
                 />
                 <Route
                   path="/life-plan/dashboard"

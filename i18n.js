@@ -228,7 +228,13 @@ i18n.use(initReactI18next).init({
           "intercambio": "Exchange",
           "empresas": "Companies",
           "Ver detalhe do plano": "View plan details",
-          "Adicionar Plano": "Add Plan"
+          "Adicionar Plano": "Add Plan",
+          "Prazo em anos": "Term in years",
+          "Nome do plano": "Plan name",
+          "Salvar Alterações": "Save Changes",
+          "Descartar Alterações": "Discard Changes",
+          "Lucro": "Profit",
+          "Prejuizo": "Loss",
         }
       },
       es: {
@@ -454,8 +460,13 @@ i18n.use(initReactI18next).init({
             "intercambio": "Intercambio",
             "empresas": "Empresas",
             "Ver detalhe do plano": "Ver detalles del plan",
-            "Adicionar Plano": "Agregar plan"
-
+            "Adicionar Plano": "Agregar plan",
+            "Prazo em anos": "Plazo en años",
+            "Nome do plano": "Nombre del plan",
+            "Salvar Alterações": "Guardar Cambios",
+            "Descartar Alterações": "Descartar Cambios",
+            "Lucro": "Ganancias",
+            "Prejuizo": "Pérdida",
         }
       },
       pt: {
@@ -681,7 +692,13 @@ i18n.use(initReactI18next).init({
             "intercambio": "Intercâmbio",
             "empresas": "Empresas",
             "Ver detalhe do plano": "Veja detalhes do plano",
-            "Adicionar Plano": "Adicionar Plano"
+            "Adicionar Plano": "Adicionar Plano",
+            "Prazo em anos": "Prazo em anos",
+            "Nome do plano": "Nome do plano",
+            "Salvar Alterações": "Salvar Alterações",
+            "Descartar Alterações": "Descartar Alterações",
+            "Lucro": "Lucro",
+            "Prejuizo": "Prejuízo",
         }
       }
     },
