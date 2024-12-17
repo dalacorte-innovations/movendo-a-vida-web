@@ -17,16 +17,6 @@ interface TableBodyProps {
     getNewIndex: () => number;
     setupProfitLossCategoryData: () => void;
 }
-const categories = [
-    "receitas",
-    "estudos",
-    "custos",
-    "lucroPrejuizo",
-    "investimentos",
-    "realizacoes",
-    "intercambio",
-    "empresas"
-]
 
 const TableBody: React.FC<TableBodyProps> = ({
     data,
@@ -43,23 +33,23 @@ const TableBody: React.FC<TableBodyProps> = ({
     setupProfitLossCategoryData
 }) => {
     const EDIT_BLOCKED_CATEGORIES = ["lucroPrejuizo"];
+    
     const handleEditClick = (id: number, date: string) => {
         setEditingCell({ id, date });
-    }
+    };
 
     const handleChange = (e, id: number, date: string) => {
         const value = e.target.value;
 
         if (date === "name") {
-            let nameOccurrences = 0
-            Object.keys(data[category]).forEach((key) => {
-                if (data[category][key].name === value) {
+            let nameOccurrences = 0;
+            Object.keys(data[category] || {}).forEach((key) => {
+                if (data[category][key]?.name === value) {
                     nameOccurrences++;
                 }
-            })
-            console.log(nameOccurrences)
-            if(nameOccurrences > 0) {
-                toast.error('Este Nome já está sendo utilizado nesta categoria')
+            });
+            if (nameOccurrences > 0) {
+                toast.error('Este Nome já está sendo utilizado nesta categoria');
                 return;
             }
 
@@ -72,24 +62,20 @@ const TableBody: React.FC<TableBodyProps> = ({
             return;
         }
 
-        if(category === "estudos" || category === "custos" || category === "receitas") {
+        if (category === "estudos" || category === "custos" || category === "receitas") {
             setupProfitLossCategoryData();
         }
 
         setData((prev) => {
             const updatedData = { ...prev };
-            if (date === "firstMeta") {
-            updatedData[category][id].firstMeta = value;
-            } else {
             updatedData[category][id].values[date] = value;
-            }
             return updatedData;
         });
         setDataHasBeenAltered(true);
     };
 
     const handleBlur = () => {
-        setEditingCell(null); // Exit edit mode
+        setEditingCell(null);
     };
 
     const handleAddItem = (category: string) => {
@@ -100,7 +86,7 @@ const TableBody: React.FC<TableBodyProps> = ({
                 ...data[category],
                 [newIndex]: { name: "", values: {}, firstMeta: 0 }
             }
-        })
+        });
         setDataHasBeenAltered(true);
     };
 
@@ -111,84 +97,105 @@ const TableBody: React.FC<TableBodyProps> = ({
             return updatedData;
         });
         setDataHasBeenAltered(true);
-    }
+    };
 
     const getUniqueDateSubtotal = (date: string) => {
         let subtotal = 0;
-        Object.keys(data[category]).forEach((id) => {
-            if (data[category][id].values[date]) {
-                subtotal += parseFloat(data[category][id].values[date]);
+        Object.keys(data[category] || {}).forEach((id) => {
+            if (data[category]?.[id]?.values?.[date]) {
+                subtotal += parseFloat(data[category]?.[id]?.values?.[date]);
             }
         });
         return subtotal;
+    };
+
+    if (!data[category]) {
+        console.warn(`Category "${category}" does not exist in data.`);
+        return null;
     }
 
     return (
         <tbody>
-            {Object.keys(data[category]).map((id, index) => (
+            {Object.keys(data[category] || {}).map((id, index) => (
                 <tr key={index} className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
                     <div
                         className='py-2 flex justify-start items-center'
                         onClick={() => handleRemoveItem(parseInt(id))}
                     >
-                        <IoTrashBin size={20} color='red'/>
+                        <IoTrashBin size={20} color='red' />
                     </div>
                     <td
                         className="px-4 py-2 border"
                         onClick={() => {
-                            if(EDIT_BLOCKED_CATEGORIES.includes(category)) return;
-                            handleEditClick(parseInt(id), 'name')
+                            if (EDIT_BLOCKED_CATEGORIES.includes(category)) return;
+                            handleEditClick(parseInt(id), 'name');
                         }}
-                    >   
-                        {
-                        editingCell?.id === parseInt(id) && editingCell?.date === "name" ? (
+                    >
+                        {editingCell?.id === parseInt(id) && editingCell?.date === "name" ? (
                             <input
                                 type="text"
-                                value={data[category][id].name || ""}
+                                value={data[category]?.[id]?.name || ""}
                                 onChange={(e) => handleChange(e, parseInt(id), 'name')}
                                 onBlur={handleBlur}
                                 className="w-full bg-transparent text-center"
-                                style={{width: '100px'}}
+                                style={{ width: '100px' }}
                             />
-                        ):(
-                            data[category][id].name
+                        ) : (
+                            data[category]?.[id]?.name || ""
                         )}
                     </td>
                     {uniqueDates.map(date => (
                         <td
                             key={date}
-                            className="px-4 py-2 border text-center"
+                            className={`px-4 py-2 border text-center ${
+                                category === "lucroPrejuizo" 
+                                    ? parseFloat(data[category]?.[id]?.values?.[date] || 0) < 0 
+                                        ? "text-red-500 font-bold" 
+                                        : "text-green-500 font-bold" 
+                                    : ""
+                            }`}
                             onClick={() => {
-                                if(EDIT_BLOCKED_CATEGORIES.includes(category)) return;
-                                handleEditClick(parseInt(id), date)
+                                if (EDIT_BLOCKED_CATEGORIES.includes(category)) return;
+                                handleEditClick(parseInt(id), date);
                             }}
                         >
                             {editingCell?.id === parseInt(id) && editingCell?.date === date ? (
                                 <input
                                     type="text"
-                                    value={data[category][parseInt(id)].values[date] || ""}
+                                    value={data[category]?.[id]?.values?.[date] || ""}
                                     onChange={(e) => handleChange(e, parseInt(id), date)}
                                     onBlur={handleBlur}
-                                    className="w-full bg-transparent text-center" style={{width: '60px'}}
+                                    className="w-full bg-transparent text-center"
+                                    style={{ width: '60px' }}
                                 />
                             ) : (
-                                data[category][ parseInt(id)].values[date] ? formatValue(data[category][ parseInt(id)].values[date]) : 'N/A'
+                                data[category]?.[id]?.values?.[date]
+                                    ? formatValue(data[category]?.[id]?.values?.[date])
+                                    : 'N/A'
                             )}
                         </td>
                     ))}
-                    <td className="px-4 py-2 border text-center" style={{width: '60px'}} onClick={() => handleEditClick(parseInt(id), 'firstMeta')}>
-                        {editingCell?.id === parseInt(id) && editingCell?.date === "firstMeta" ? (
-                            <input
-                                type="text"
-                                value={data[category][ parseInt(id)].firstMeta || ""}
-                                onChange={(e) => handleChange(e, parseInt(id), "firstMeta")}
-                                onBlur={handleBlur}
-                                className="w-full bg-transparent text-center"
-                            />
-                        ) : (
-                            <span className={getMetaStyle(data[category][parseInt(id)].firstMeta)}>{formatValue(data[category][parseInt(id)].firstMeta)}</span>
-                        )}
-                    </td>
+                    {category !== "lucroPrejuizo" && (
+                        <td
+                            className="px-4 py-2 border text-center"
+                            style={{ width: '60px' }}
+                            onClick={() => handleEditClick(parseInt(id), 'firstMeta')}
+                        >
+                            {editingCell?.id === parseInt(id) && editingCell?.date === "firstMeta" ? (
+                                <input
+                                    type="text"
+                                    value={data[category]?.[id]?.firstMeta || ""}
+                                    onChange={(e) => handleChange(e, parseInt(id), "firstMeta")}
+                                    onBlur={handleBlur}
+                                    className="w-full bg-transparent text-center"
+                                />
+                            ) : (
+                                <span className={getMetaStyle(data[category]?.[id]?.firstMeta)}>
+                                    {formatValue(data[category]?.[id]?.firstMeta || 0)}
+                                </span>
+                            )}
+                        </td>
+                    )}
                 </tr>
             ))}
             <button
@@ -199,20 +206,17 @@ const TableBody: React.FC<TableBodyProps> = ({
             </button>
             {category !== "lucroPrejuizo" && (
                 <tr className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
-                    <th className="" style={{width: '30px', backgroundColor: 'transparent'}}></th> {/**This is only a component to push the header one cell to the right */}
-                                                
-                    <td className="px-4 py-2 border text-center">
-                        Subtotal
-                    </td>
+                    <th className="" style={{ width: '30px', backgroundColor: 'transparent' }}></th>
+                    <td className="px-4 py-2 border text-center">Subtotal</td>
                     {uniqueDates.map(date => (
                         <td key={date} className="px-4 py-2 border text-center">
-                            {formatValue(getUniqueDateSubtotal(date))}    
+                            {formatValue(getUniqueDateSubtotal(date))}
                         </td>
                     ))}
                 </tr>
             )}
         </tbody>
-    )
-}
+    );
+};
 
 export default TableBody;

@@ -35,7 +35,8 @@ const categories = [
     "investimentos",
     "realizacoes",
     "intercambio",
-    "empresas"
+    "empresas",
+    "pessoais"
 ]
 
 const LifePlanTable = () => {
@@ -50,18 +51,51 @@ const LifePlanTable = () => {
     const allDates: string[] = plan.items.map(item => item.date.split('-').slice(0, 2).join('-'));
     const uniqueDates: string[] = Array.from(new Set(allDates)).sort();
 
+    const formatCategoryName = (category: string) => {
+        const formattedCategories: { [key: string]: string } = {
+            receitas: "Receitas",
+            estudos: "Estudos",
+            custos: "Custos",
+            lucroPrejuizo: "Lucro/Prejuízo",
+            investimentos: "Investimentos",
+            realizacoes: "Realizações",
+            intercambio: "Intercâmbio",
+            empresas: "Empresas",
+            pessoais: "Pessoais"
+        };
+        return formattedCategories[category] || category;
+    };
+
     const generateEmptyOrganizedData = (): OrganizedData => {
         return {
             receitas: {},
             estudos: {},
             custos: {},
             lucroPrejuizo: {},
-            investimentos: {},
+            investimentos: {
+                "Poupança": { name: "Poupança", values: {}, firstMeta: 0 },
+                "Investimentos Planos de 12 meses": { name: "Investimentos Planos de 12 meses", values: {}, firstMeta: 0 },
+                "Investimentos Planos de 10 Anos": { name: "Investimentos Planos de 10 Anos", values: {}, firstMeta: 0 },
+                "Investimentos Planos de Aposentadoria": { name: "Investimentos Planos de Aposentadoria", values: {}, firstMeta: 0 },
+                "Poupança Intercâmbio": { name: "Poupança Intercâmbio", values: {}, firstMeta: 0 }
+            },
             realizacoes: {},
             intercambio: {},
-            empresas: {}
-        }
-    }
+            empresas: {
+                "Criar Empresas": { name: "Criar Empresas", values: {}, firstMeta: 0 },
+                "Comprar Empresas": { name: "Comprar Empresas", values: {}, firstMeta: 0 }
+            },
+            pessoais: {
+                "Reforma no Apartamento": { name: "Reforma no Apartamento", values: {}, firstMeta: 0 },
+                "Casamento": { name: "Casamento", values: {}, firstMeta: 0 },
+                "Novo Apartamento": { name: "Novo Apartamento", values: {}, firstMeta: 0 },
+                "carroCarro NovoNovo": { name: "Carro Novo", values: {}, firstMeta: 0 },
+                "Filhos": { name: "Filhos", values: {}, firstMeta: 0 },
+                "Casa na Praia": { name: "Casa na Praia", values: {}, firstMeta: 0 }
+            }
+        };
+    };
+    
     const [organizedData, setOrganizedData] = useState<OrganizedData>(generateEmptyOrganizedData());
 
     const getNewIndex = () => {
@@ -119,28 +153,50 @@ const LifePlanTable = () => {
         plan.items.forEach((item) => {
             const [year, month] = item.date.split("-");
             const monthKey = `${year}-${month.padStart(2, '0')}`;
+    
             if (!newOrganizedData[item.category]) {
                 newOrganizedData[item.category] = {};
             }
             if (!newOrganizedData[item.category][item.name]) {
                 newOrganizedData[item.category][item.name] = { values: {}, firstMeta: item.meta };
             }
+    
             newOrganizedData[item.category][item.name].values[monthKey] = item.value;
         });
+    
         const finalOrganizedData: OrganizedData = generateEmptyOrganizedData();
-        let rowIndex = 0
+        let rowIndex = 0;
+    
         categories.forEach(category => {
             Object.keys(newOrganizedData[category]).forEach((name) => {
                 finalOrganizedData[category][rowIndex] = {
                     name: name,
                     values: newOrganizedData[category][name].values,
                     firstMeta: newOrganizedData[category][name].firstMeta
-                }
-                rowIndex++
-            })
-        })
+                };
+                rowIndex++;
+            });
+        });
+    
+        const profitLossValues: { [key: string]: number } = {};
+        uniqueDates.forEach((date) => {
+            const totalReceitas = Object.values(newOrganizedData["receitas"] || {}).reduce((acc, item) => acc + (parseFloat(item.values[date]) || 0), 0);
+            const totalCustos = Object.values(newOrganizedData["custos"] || {}).reduce((acc, item) => acc + (parseFloat(item.values[date]) || 0), 0);
+            const totalEstudos = Object.values(newOrganizedData["estudos"] || {}).reduce((acc, item) => acc + (parseFloat(item.values[date]) || 0), 0);
+    
+            profitLossValues[date] = totalReceitas - totalCustos - totalEstudos;
+        });
+    
+        const totalProfit = Object.values(profitLossValues).reduce((acc, value) => acc + value, 0);
+        finalOrganizedData["lucroPrejuizo"][0] = {
+            name: totalProfit > 0 ? "Lucro" : "Prejuízo",
+            values: profitLossValues,
+            firstMeta: 0
+        };
+    
         setOrganizedData(finalOrganizedData);
-    },[plan, resetData])
+    }, [plan, resetData]);
+    
     
     const formatValue = (value) => {
         return parseFloat(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -273,7 +329,7 @@ const LifePlanTable = () => {
                     {categories.map(category =>(
                         <div key={category}>
                             <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
-                                Categoria: {category}
+                                Categoria: {formatCategoryName(category)}
                             </h3>
                             <div className="overflow-x-auto">
                                 <table className="table-auto w-full text-sm border-collapse shadow-lg" style={{ backgroundColor: 'transparent' }}>
