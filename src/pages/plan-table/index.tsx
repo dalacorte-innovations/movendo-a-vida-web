@@ -169,6 +169,11 @@ const LifePlanTable = () => {
     
         categories.forEach(category => {
             Object.keys(newOrganizedData[category]).forEach((name) => {
+                uniqueDates.forEach( date => {
+                    if(!newOrganizedData[category][name].values[date]) {
+                        newOrganizedData[category][name].values[date] = 0;
+                    }
+                })
                 finalOrganizedData[category][rowIndex] = {
                     name: name,
                     values: newOrganizedData[category][name].values,
@@ -193,15 +198,6 @@ const LifePlanTable = () => {
             values: profitLossValues,
             firstMeta: 0
         };
-        categories.forEach(category => {
-            Object.keys(finalOrganizedData[category]).forEach((id) => {
-                uniqueDates.forEach( date => {
-                    if(!finalOrganizedData[category][id].values[date]) {
-                        finalOrganizedData[category][id].values[date] = 0;
-                    }
-                })
-            })
-        })
         setOrganizedData(finalOrganizedData);
     }, [plan, resetData]);
     
