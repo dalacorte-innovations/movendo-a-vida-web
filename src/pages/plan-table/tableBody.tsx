@@ -123,9 +123,13 @@ const TableBody: React.FC<TableBodyProps> = ({
                     <div
                         className='py-2 flex justify-start items-center'
                         onClick={() => handleRemoveItem(parseInt(id))}
+                        style={{width: category ==="lucroPrejuizo" ?  '20px' : ''}}
                     >
-                        <IoTrashBin size={20} color='red' />
+                        { category !== "lucroPrejuizo" &&
+                            <IoTrashBin size={20} color='red' />
+                        }
                     </div>
+                    
                     <td
                         className="px-4 py-2 border"
                         style={{ width: '200px', maxWidth: '200px', minWidth: '200px' }}
@@ -198,12 +202,14 @@ const TableBody: React.FC<TableBodyProps> = ({
                     )}
                 </tr>
             ))}
-            <button
-                className="flex items-center justify-center text-green-600 hover:text-green-700 transition-colors my-2"
-                onClick={() => handleAddItem(category)}
-            >
-                <IoAdd size={20} />
-            </button>
+            {category !== "lucroPrejuizo" &&
+                <button
+                    className="flex items-center justify-center text-green-600 hover:text-green-700 transition-colors my-2"
+                    onClick={() => handleAddItem(category)}
+                >
+                    <IoAdd size={20} />
+                </button>
+            }
             {category !== "lucroPrejuizo" && (
                 <tr className={`${darkMode ? 'bg-transparent text-white' : 'bg-white text-gray-900'}`}>
                     <th className="" style={{ width: '30px', backgroundColor: 'transparent' }}></th>
