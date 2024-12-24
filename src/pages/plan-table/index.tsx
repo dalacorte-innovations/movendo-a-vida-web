@@ -193,10 +193,17 @@ const LifePlanTable = () => {
             values: profitLossValues,
             firstMeta: 0
         };
-    
+        categories.forEach(category => {
+            Object.keys(finalOrganizedData[category]).forEach((id) => {
+                uniqueDates.forEach( date => {
+                    if(!finalOrganizedData[category][id].values[date]) {
+                        finalOrganizedData[category][id].values[date] = 0;
+                    }
+                })
+            })
+        })
         setOrganizedData(finalOrganizedData);
     }, [plan, resetData]);
-    
     
     const formatValue = (value) => {
         return parseFloat(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

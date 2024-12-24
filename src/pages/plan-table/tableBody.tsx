@@ -175,11 +175,11 @@ const TableBody: React.FC<TableBodyProps> = ({
                                     className="w-full bg-transparent text-center"
                                 />
                             ) : (
-                                data[category]?.[id]?.values?.[date]
+                                data[category]?.[id]?.values?.[date] !== undefined
                                     ? formatValue(data[category]?.[id]?.values?.[date]).length > 21 ?
                                         `${formatValue(data[category]?.[id]?.values?.[date]).slice(0, 21)}...`
                                         : formatValue(data[category]?.[id]?.values?.[date])
-                                    : 'N/A'
+                                    : 0
                             )}
                         </td>
                     ))}
