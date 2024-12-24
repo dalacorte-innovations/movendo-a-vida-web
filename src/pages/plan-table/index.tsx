@@ -72,28 +72,42 @@ const LifePlanTable = () => {
             estudos: {},
             custos: {},
             lucroPrejuizo: {},
-            investimentos: {
-                "Poupança": { name: "Poupança", values: {}, firstMeta: 0 },
-                "Investimentos Planos de 12 meses": { name: "Investimentos Planos de 12 meses", values: {}, firstMeta: 0 },
-                "Investimentos Planos de 10 Anos": { name: "Investimentos Planos de 10 Anos", values: {}, firstMeta: 0 },
-                "Investimentos Planos de Aposentadoria": { name: "Investimentos Planos de Aposentadoria", values: {}, firstMeta: 0 },
-                "Poupança Intercâmbio": { name: "Poupança Intercâmbio", values: {}, firstMeta: 0 }
-            },
+            investimentos: {},
             realizacoes: {},
             intercambio: {},
-            empresas: {
-                "Criar Empresas": { name: "Criar Empresas", values: {}, firstMeta: 0 },
-                "Comprar Empresas": { name: "Comprar Empresas", values: {}, firstMeta: 0 }
-            },
-            pessoais: {
-                "Reforma no Apartamento": { name: "Reforma no Apartamento", values: {}, firstMeta: 0 },
-                "Casamento": { name: "Casamento", values: {}, firstMeta: 0 },
-                "Novo Apartamento": { name: "Novo Apartamento", values: {}, firstMeta: 0 },
-                "carroCarro NovoNovo": { name: "Carro Novo", values: {}, firstMeta: 0 },
-                "Filhos": { name: "Filhos", values: {}, firstMeta: 0 },
-                "Casa na Praia": { name: "Casa na Praia", values: {}, firstMeta: 0 }
-            }
+            empresas: {},
+            pessoais: {}
         };
+    };
+
+    const generateEmptyValues = () => {
+        const returnalValue = {}
+        uniqueDates.forEach(date => {
+            returnalValue[date] = 0
+        })
+        return returnalValue
+    }
+
+    const defaultCategoryRows: { [key: string]: { name: string, values: any, firstMeta: number }[] } = {
+        investimentos: [
+            { name: "Poupança", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Investimentos Planos de 12 meses", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Investimentos Planos de 10 Anos", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Investimentos Planos de Aposentadoria", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Poupança Intercâmbio", values: generateEmptyValues(), firstMeta: 0 }
+        ],
+        empresas: [
+            { name: "Criar Empresas", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Comprar Empresas", values: generateEmptyValues(), firstMeta: 0 }
+        ],
+        pessoais: [
+            { name: "Reforma no Apartamento", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Casamento", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Novo Apartamento", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Carro Novo", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Filhos", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Casa na Praia", values: generateEmptyValues(), firstMeta: 0 }
+        ]
     };
     
     const [organizedData, setOrganizedData] = useState<OrganizedData>(generateEmptyOrganizedData());
@@ -166,7 +180,12 @@ const LifePlanTable = () => {
     
         const finalOrganizedData: OrganizedData = generateEmptyOrganizedData();
         let rowIndex = 0;
-    
+        Object.keys(defaultCategoryRows).forEach((category) => {
+            defaultCategoryRows[category].forEach((row) => {
+                finalOrganizedData[category][rowIndex] = row;
+                rowIndex++;
+            });
+        });
         categories.forEach(category => {
             Object.keys(newOrganizedData[category]).forEach((name) => {
                 let rowTotal = 0
