@@ -149,8 +149,8 @@ const TableBody: React.FC<TableBodyProps> = ({
                         ) : (
                             <div>
                                 {data[category]?.[id]?.name 
-                                    ? data[category]?.[id]?.name.length >= 12 ?
-                                            `${data[category][id].name.slice(0, 15)}...`
+                                    ? data[category]?.[id]?.name.length > 21 ?
+                                            `${data[category][id].name.slice(0, 21)}...`
                                         :   data[category]?.[id]?.name
                                     : ""}
                             </div>
