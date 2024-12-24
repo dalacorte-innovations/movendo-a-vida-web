@@ -10,7 +10,6 @@ interface TableBodyProps {
     darkMode: boolean;
     uniqueDates: string[];
     formatValue: (value: any) => string;
-    getMetaStyle: (meta: string) => string;
     editingCell: { id: number; date: string } | null;
     setEditingCell: Dispatch<SetStateAction<{ id: number; date: string } | null>>;
     setDataHasBeenAltered: Dispatch<SetStateAction<boolean>>;
@@ -25,7 +24,6 @@ const TableBody: React.FC<TableBodyProps> = ({
     darkMode,
     uniqueDates,
     formatValue,
-    getMetaStyle,
     editingCell,
     setEditingCell,
     setDataHasBeenAltered,
@@ -65,10 +63,14 @@ const TableBody: React.FC<TableBodyProps> = ({
         if (category === "estudos" || category === "custos" || category === "receitas") {
             setupProfitLossCategoryData();
         }
-
         setData((prev) => {
             const updatedData = { ...prev };
-            updatedData[category][id].values[date] = value;
+            updatedData[category][id].values[date] = value ? value : 0;
+            let total = 0
+            uniqueDates.forEach((date) => {
+                total += parseFloat(updatedData[category][id].values[date])
+            })
+            updatedData[category][id].firstMeta = total
             return updatedData;
         });
         setDataHasBeenAltered(true);
@@ -189,19 +191,9 @@ const TableBody: React.FC<TableBodyProps> = ({
                             style={{ width: '200px', maxWidth: '200px', minWidth: '200px' }}
                             onClick={() => handleEditClick(parseInt(id), 'firstMeta')}
                         >
-                            {editingCell?.id === parseInt(id) && editingCell?.date === "firstMeta" ? (
-                                <input
-                                    type="text"
-                                    value={data[category]?.[id]?.firstMeta || ""}
-                                    onChange={(e) => handleChange(e, parseInt(id), "firstMeta")}
-                                    onBlur={handleBlur}
-                                    className="w-full bg-transparent text-center"
-                                />
-                            ) : (
-                                <span className={getMetaStyle(data[category]?.[id]?.firstMeta)}>
-                                    {formatValue(data[category]?.[id]?.firstMeta || 0)}
-                                </span>
-                            )}
+                            <span className={'font-bold'}>
+                                {formatValue(data[category]?.[id]?.firstMeta || 0)}
+                            </span>
                         </td>
                     )}
                 </tr>

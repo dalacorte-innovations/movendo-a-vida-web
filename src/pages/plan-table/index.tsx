@@ -169,15 +169,18 @@ const LifePlanTable = () => {
     
         categories.forEach(category => {
             Object.keys(newOrganizedData[category]).forEach((name) => {
+                let rowTotal = 0
                 uniqueDates.forEach( date => {
-                    if(!newOrganizedData[category][name].values[date]) {
+                    if(newOrganizedData[category][name].values[date]) {
+                        rowTotal += parseFloat(newOrganizedData[category][name].values[date]);
+                    } else {
                         newOrganizedData[category][name].values[date] = 0;
                     }
                 })
                 finalOrganizedData[category][rowIndex] = {
                     name: name,
                     values: newOrganizedData[category][name].values,
-                    firstMeta: newOrganizedData[category][name].firstMeta
+                    firstMeta: rowTotal
                 };
                 rowIndex++;
             });
@@ -203,10 +206,6 @@ const LifePlanTable = () => {
     
     const formatValue = (value) => {
         return parseFloat(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    };
-
-    const getMetaStyle = (meta) => {
-        return parseFloat(meta) > 0 ? 'text-yellow-600 font-bold' : 'text-green-600 font-bold';
     };
 
     const handleGeneratePDF = async () => {
@@ -348,7 +347,7 @@ const LifePlanTable = () => {
                                                     </th>
                                                 );
                                             })}
-                                            <th className={`px-4 py-2 border text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>Meta</th>
+                                            <th className={`px-4 py-2 border text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>Total</th>
                                         </tr>
                                     </thead>
                                     <TableBody
@@ -356,7 +355,6 @@ const LifePlanTable = () => {
                                         setData={setOrganizedData}
                                         category={category}
                                         formatValue={formatValue}
-                                        getMetaStyle={getMetaStyle}
                                         darkMode={darkMode}
                                         uniqueDates={uniqueDates}
                                         editingCell={editingCell}
