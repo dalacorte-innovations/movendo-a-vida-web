@@ -126,6 +126,7 @@ const TableBody: React.FC<TableBodyProps> = ({
                     </div>
                     <td
                         className="px-4 py-2 border"
+                        style={{ width: '200px', maxWidth: '200px', minWidth: '200px' }}
                         onClick={() => {
                             if (EDIT_BLOCKED_CATEGORIES.includes(category)) return;
                             handleEditClick(parseInt(id), 'name');
@@ -138,15 +139,21 @@ const TableBody: React.FC<TableBodyProps> = ({
                                 onChange={(e) => handleChange(e, parseInt(id), 'name')}
                                 onBlur={handleBlur}
                                 className="w-full bg-transparent text-center"
-                                style={{ width: '100px' }}
                             />
                         ) : (
-                            data[category]?.[id]?.name || ""
+                            <div>
+                                {data[category]?.[id]?.name 
+                                    ? data[category]?.[id]?.name.length >= 12 ?
+                                            `${data[category][id].name.slice(0, 15)}...`
+                                        :   data[category]?.[id]?.name
+                                    : ""}
+                            </div>
                         )}
                     </td>
                     {uniqueDates.map(date => (
                         <td
                             key={date}
+                            style={{ width: '200px', maxWidth: '200px', minWidth: '200px' }}
                             className={`px-4 py-2 border text-center ${
                                 category === "lucroPrejuizo" 
                                     ? parseFloat(data[category]?.[id]?.values?.[date] || 0) < 0 
@@ -166,11 +173,12 @@ const TableBody: React.FC<TableBodyProps> = ({
                                     onChange={(e) => handleChange(e, parseInt(id), date)}
                                     onBlur={handleBlur}
                                     className="w-full bg-transparent text-center"
-                                    style={{ width: '60px' }}
                                 />
                             ) : (
                                 data[category]?.[id]?.values?.[date]
-                                    ? formatValue(data[category]?.[id]?.values?.[date])
+                                    ? formatValue(data[category]?.[id]?.values?.[date]).length > 21 ?
+                                        `${formatValue(data[category]?.[id]?.values?.[date]).slice(0, 21)}...`
+                                        : formatValue(data[category]?.[id]?.values?.[date])
                                     : 'N/A'
                             )}
                         </td>
@@ -178,7 +186,7 @@ const TableBody: React.FC<TableBodyProps> = ({
                     {category !== "lucroPrejuizo" && (
                         <td
                             className="px-4 py-2 border text-center"
-                            style={{ width: '60px' }}
+                            style={{ width: '200px', maxWidth: '200px', minWidth: '200px' }}
                             onClick={() => handleEditClick(parseInt(id), 'firstMeta')}
                         >
                             {editingCell?.id === parseInt(id) && editingCell?.date === "firstMeta" ? (
@@ -210,7 +218,11 @@ const TableBody: React.FC<TableBodyProps> = ({
                     <td className="px-4 py-2 border text-center">Subtotal</td>
                     {uniqueDates.map(date => (
                         <td key={date} className="px-4 py-2 border text-center">
-                            {formatValue(getUniqueDateSubtotal(date))}
+                            {
+                                formatValue(getUniqueDateSubtotal(date)).length > 21 ?
+                                    `${formatValue(getUniqueDateSubtotal(date)).slice(0, 21)}...`
+                                    : formatValue(getUniqueDateSubtotal(date))
+                            }
                         </td>
                     ))}
                 </tr>
