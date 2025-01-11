@@ -33,7 +33,7 @@ const TableBody: React.FC<TableBodyProps> = ({
     const EDIT_BLOCKED_CATEGORIES = ["lucroPrejuizo"];
     const handleEditClick = (id: number, date: string) => {
         if (EDIT_BLOCKED_CATEGORIES.includes(category)) return;
-        if (category === "investimentos" && data[category][id]?.name === "Reserva Inicial" && date === "name") {
+        if (category === "investimentos" && data[category][id]?.name === "Reserva Inicial" && date === "name" || date !== uniqueDates[0]) {
             return;
         }
         setEditingCell({ id, date });
@@ -111,7 +111,7 @@ const TableBody: React.FC<TableBodyProps> = ({
 
     const getUniqueDateSubtotal = (date: string) => {
         let subtotal = 0;
-        
+
         if(category === "investimentos") {
             Object.keys(data[category] || {}).slice(1).forEach((id) => {
                 if (data[category]?.[id]?.values?.[date]) {
