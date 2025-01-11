@@ -189,13 +189,17 @@ const LifePlanTable = () => {
         categories.forEach(category => {
             Object.keys(newOrganizedData[category]).forEach((name) => {
                 let rowTotal = 0
-                uniqueDates.forEach( date => {
-                    if(newOrganizedData[category][name].values[date]) {
-                        rowTotal += parseFloat(newOrganizedData[category][name].values[date]);
-                    } else {
-                        newOrganizedData[category][name].values[date] = 0;
-                    }
-                })
+                if(category === "investimentos") {
+                    rowTotal = newOrganizedData[category][name].values[uniqueDates[uniqueDates.length - 1]];
+                } else {
+                    uniqueDates.forEach( date => {
+                        if(newOrganizedData[category][name].values[date]) {
+                            rowTotal += parseFloat(newOrganizedData[category][name].values[date]);
+                        } else {
+                            newOrganizedData[category][name].values[date] = 0;
+                        }
+                    })
+                }
                 finalOrganizedData[category][rowIndex] = {
                     name: name,
                     values: newOrganizedData[category][name].values,
@@ -307,13 +311,13 @@ const LifePlanTable = () => {
             uniqueDates.slice(1).forEach((date) => {
                 finalReserveValues[date] = newReserveValues.shift()
             })
-            console.log(organizedData['investimentos'])
             setOrganizedData({
                 ...organizedData,
                 investimentos: {
                     ...organizedData['investimentos'],
                     0: {
                         ...organizedData['investimentos'][0],
+                        firstMeta: organizedData['investimentos'][0].values[uniqueDates[uniqueDates.length - 1]],
                         values: {
                             [uniqueDates[0]]: organizedData['investimentos'][0].values[uniqueDates[0]],
                             ...finalReserveValues

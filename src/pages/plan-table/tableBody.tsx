@@ -33,7 +33,7 @@ const TableBody: React.FC<TableBodyProps> = ({
     const EDIT_BLOCKED_CATEGORIES = ["lucroPrejuizo"];
     const handleEditClick = (id: number, date: string) => {
         if (EDIT_BLOCKED_CATEGORIES.includes(category)) return;
-        if (category === "investimentos" && data[category][id]?.name === "Reserva Inicial" && date === "name" || date !== uniqueDates[0]) {
+        if (category === "investimentos" && id === 0 && date !== uniqueDates[0]) {
             return;
         }
         setEditingCell({ id, date });
@@ -86,10 +86,15 @@ const TableBody: React.FC<TableBodyProps> = ({
             const updatedData = { ...prev };
             updatedData[category][id].values[date] = value ? value : 0;
             let total = 0
-            uniqueDates.forEach((date) => {
-                total += parseFloat(updatedData[category][id].values[date])
-            })
+            if(category === "investimentos") {
+                total = parseFloat(updatedData[category][id].values[uniqueDates[uniqueDates.length - 1]])
+            } else {
+                uniqueDates.forEach((date) => {
+                    total += parseFloat(updatedData[category][id].values[date])
+                })
+            }
             updatedData[category][id].firstMeta = total
+            
             return updatedData;
         });
         setDataHasBeenAltered(true);
