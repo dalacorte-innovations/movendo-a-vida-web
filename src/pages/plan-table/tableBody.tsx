@@ -31,8 +31,11 @@ const TableBody: React.FC<TableBodyProps> = ({
     setupProfitLossCategoryData
 }) => {
     const EDIT_BLOCKED_CATEGORIES = ["lucroPrejuizo"];
-    
     const handleEditClick = (id: number, date: string) => {
+        if (EDIT_BLOCKED_CATEGORIES.includes(category)) return;
+        if (category === "investimentos" && data[category][id]?.name === "Reserva" && date === "name") {
+            return;
+        }
         setEditingCell({ id, date });
     };
 
@@ -40,6 +43,11 @@ const TableBody: React.FC<TableBodyProps> = ({
         const value = e.target.value;
 
         if (date === "name") {
+            //user cant edit row name "Reserva" from "Investimentos" category
+            if (category === "investimentos" && data[category][id]?.name === "Reserva") {
+                return;
+            }
+
             let nameOccurrences = 0;
             Object.keys(data[category] || {}).forEach((key) => {
                 if (data[category][key]?.name === value) {

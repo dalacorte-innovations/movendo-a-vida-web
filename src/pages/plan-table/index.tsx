@@ -90,7 +90,7 @@ const LifePlanTable = () => {
 
     const defaultCategoryRows: { [key: string]: { name: string, values: any, firstMeta: number }[] } = {
         investimentos: [
-            { name: "Poupança", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Reserva", values: generateEmptyValues(), firstMeta: 0 },
             { name: "Investimentos Planos de 12 meses", values: generateEmptyValues(), firstMeta: 0 },
             { name: "Investimentos Planos de 10 Anos", values: generateEmptyValues(), firstMeta: 0 },
             { name: "Investimentos Planos de Aposentadoria", values: generateEmptyValues(), firstMeta: 0 },
