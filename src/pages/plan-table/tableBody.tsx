@@ -38,6 +38,17 @@ const TableBody: React.FC<TableBodyProps> = ({
         }
         setEditingCell({ id, date });
     };
+    
+    const handleInvestmentChange = (e, id: number, date: string) => {
+        const value = e.target.value
+        const subtotal = getUniqueDateSubtotal(date) - parseFloat(data['investimentos'][id].values[date])
+        const maximum = parseFloat(data['investimentos'][0].values[date])
+        if((parseFloat(value) + subtotal) > maximum) {
+            toast.error(`A soma dos valores desta coluna não deve ultrapassar ${formatValue(parseInt(data['investimentos'][0].values[date]))}`)
+            return
+        }
+        handleChange(e, id, date)
+    }
 
     const handleChange = (e, id: number, date: string) => {
         const value = e.target.value;
@@ -193,7 +204,13 @@ const TableBody: React.FC<TableBodyProps> = ({
                                 <input
                                     type="text"
                                     value={data[category]?.[id]?.values?.[date] || ""}
-                                    onChange={(e) => handleChange(e, parseInt(id), date)}
+                                    onChange={(e) => {
+                                        if(category === "investimentos" && parseInt(id) !== 0) {
+                                            handleInvestmentChange(e, parseInt(id), date)
+                                        } else {
+                                            handleChange(e, parseInt(id), date)
+                                        }
+                                    }}
                                     onBlur={handleBlur}
                                     className="w-full bg-transparent text-center"
                                 />
