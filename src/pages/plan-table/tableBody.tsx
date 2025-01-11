@@ -33,7 +33,7 @@ const TableBody: React.FC<TableBodyProps> = ({
     const EDIT_BLOCKED_CATEGORIES = ["lucroPrejuizo"];
     const handleEditClick = (id: number, date: string) => {
         if (EDIT_BLOCKED_CATEGORIES.includes(category)) return;
-        if (category === "investimentos" && data[category][id]?.name === "Reserva" && date === "name") {
+        if (category === "investimentos" && data[category][id]?.name === "Reserva Inicial" && date === "name") {
             return;
         }
         setEditingCell({ id, date });
@@ -44,7 +44,7 @@ const TableBody: React.FC<TableBodyProps> = ({
 
         if (date === "name") {
             //user cant edit row name "Reserva" from "Investimentos" category
-            if (category === "investimentos" && data[category][id]?.name === "Reserva") {
+            if (category === "investimentos" && data[category][id]?.name === "Reserva Inicial") {
                 return;
             }
 
@@ -111,11 +111,20 @@ const TableBody: React.FC<TableBodyProps> = ({
 
     const getUniqueDateSubtotal = (date: string) => {
         let subtotal = 0;
-        Object.keys(data[category] || {}).forEach((id) => {
-            if (data[category]?.[id]?.values?.[date]) {
-                subtotal += parseFloat(data[category]?.[id]?.values?.[date]);
-            }
-        });
+        
+        if(category === "investimentos") {
+            Object.keys(data[category] || {}).slice(1).forEach((id) => {
+                if (data[category]?.[id]?.values?.[date]) {
+                    subtotal += parseFloat(data[category]?.[id]?.values?.[date]);
+                }
+            });
+        } else {
+            Object.keys(data[category] || {}).forEach((id) => {
+                if (data[category]?.[id]?.values?.[date]) {
+                    subtotal += parseFloat(data[category]?.[id]?.values?.[date]);
+                }
+            });
+        }
         return subtotal;
     };
 

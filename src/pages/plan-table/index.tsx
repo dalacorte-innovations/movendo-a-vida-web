@@ -90,7 +90,7 @@ const LifePlanTable = () => {
 
     const defaultCategoryRows: { [key: string]: { name: string, values: any, firstMeta: number }[] } = {
         investimentos: [
-            { name: "Reserva", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Reserva Inicial", values: generateEmptyValues(), firstMeta: 0 }, // IT IS IMPORTANT THAT "Reserva" IS THE FIRST ROW
             { name: "Investimentos Planos de 12 meses", values: generateEmptyValues(), firstMeta: 0 },
             { name: "Investimentos Planos de 10 Anos", values: generateEmptyValues(), firstMeta: 0 },
             { name: "Investimentos Planos de Aposentadoria", values: generateEmptyValues(), firstMeta: 0 },
@@ -287,6 +287,42 @@ const LifePlanTable = () => {
         setDataHasBeenAltered(false);
     }
     
+    useEffect(() => {
+        if(organizedData['lucroPrejuizo'][0]){
+            const profitLossValues = Object.values(organizedData['lucroPrejuizo'][0].values);
+            const newReserveValues: number[] = []
+            let totalReserveValue = 0
+            profitLossValues.slice(0,-1).forEach((value, index) => {
+                if(index === 0){
+                    const reserveValue = parseFloat(organizedData['investimentos'][0].values[uniqueDates[0]]) + parseFloat(value)
+                    newReserveValues.push(reserveValue)
+                    totalReserveValue += reserveValue
+                } else {
+                    const reserveValue = totalReserveValue + parseFloat(value)
+                    totalReserveValue += parseFloat(value)
+                    newReserveValues.push(reserveValue)
+                }
+            })
+            const finalReserveValues = {}
+            uniqueDates.slice(1).forEach((date) => {
+                finalReserveValues[date] = newReserveValues.shift()
+            })
+            console.log(organizedData['investimentos'])
+            setOrganizedData({
+                ...organizedData,
+                investimentos: {
+                    ...organizedData['investimentos'],
+                    0: {
+                        ...organizedData['investimentos'][0],
+                        values: {
+                            [uniqueDates[0]]: organizedData['investimentos'][0].values[uniqueDates[0]],
+                            ...finalReserveValues
+                        }
+                    }
+                }
+            })
+        }
+    },[organizedData['investimentos']?.[0]?.values?.[uniqueDates[0]]])
 
     return (
         <div className={`flex flex-col md:flex-row ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'} h-screen`}>
