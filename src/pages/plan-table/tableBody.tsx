@@ -250,7 +250,7 @@ const TableBody: React.FC<TableBodyProps> = ({
                         onClick={() => handleRemoveItem(parseInt(id))}
                         style={{width: category ==="lucroPrejuizo" ?  '20px' : ''}}
                     >
-                        { category !== "lucroPrejuizo" &&
+                        { category !== "lucroPrejuizo" && !(category === "investimentos" && parseInt(id) === 0) &&
                             <IoTrashBin size={20} color='red' />
                         }
                     </div>
