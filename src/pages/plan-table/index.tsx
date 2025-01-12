@@ -290,43 +290,6 @@ const LifePlanTable = () => {
         setResetData(!resetData);
         setDataHasBeenAltered(false);
     }
-    
-    useEffect(() => {
-        if(organizedData['lucroPrejuizo'][0]){
-            const profitLossValues = Object.values(organizedData['lucroPrejuizo'][0].values);
-            const newReserveValues: number[] = []
-            let totalReserveValue = 0
-            profitLossValues.slice(0,-1).forEach((value, index) => {
-                if(index === 0){
-                    const reserveValue = parseFloat(organizedData['investimentos'][0].values[uniqueDates[0]]) + parseFloat(value)
-                    newReserveValues.push(reserveValue)
-                    totalReserveValue += reserveValue
-                } else {
-                    const reserveValue = totalReserveValue + parseFloat(value)
-                    totalReserveValue += parseFloat(value)
-                    newReserveValues.push(reserveValue)
-                }
-            })
-            const finalReserveValues = {}
-            uniqueDates.slice(1).forEach((date) => {
-                finalReserveValues[date] = newReserveValues.shift()
-            })
-            setOrganizedData({
-                ...organizedData,
-                investimentos: {
-                    ...organizedData['investimentos'],
-                    0: {
-                        ...organizedData['investimentos'][0],
-                        firstMeta: organizedData['investimentos'][0].values[uniqueDates[uniqueDates.length - 1]],
-                        values: {
-                            [uniqueDates[0]]: organizedData['investimentos'][0].values[uniqueDates[0]],
-                            ...finalReserveValues
-                        }
-                    }
-                }
-            })
-        }
-    },[organizedData['investimentos']?.[0]?.values?.[uniqueDates[0]]])
 
     return (
         <div className={`flex flex-col md:flex-row ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'} h-screen`}>

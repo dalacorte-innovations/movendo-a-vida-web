@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import { OrganizedData } from "../../types/life-plan/lifePlan";
 import { toast } from 'react-toastify';
 import { IoAdd, IoTrashBin } from 'react-icons/io5';
@@ -31,6 +31,50 @@ const TableBody: React.FC<TableBodyProps> = ({
     setupProfitLossCategoryData
 }) => {
     const EDIT_BLOCKED_CATEGORIES = ["lucroPrejuizo"];
+
+    const categories = [
+        "custos",
+        "empresas",
+        "estudos",
+        "intercambio",
+        "investimentos",
+        "lucroPrejuizo",
+        "pessoais",
+        "realizacoes",
+        "receitas"
+    ];
+
+    const getUniqueDateSubtotal = (date: string, customCategory?: string) => {
+        let subtotal = 0;
+        if(!customCategory){
+            customCategory = category
+        }
+        if(customCategory === "investimentos") {
+            Object.keys(data[customCategory] || {}).slice(1).forEach((id) => {
+                if (data[customCategory]?.[id]?.values?.[date]) {
+                    subtotal += parseFloat(data[customCategory]?.[id]?.values?.[date]);
+                }
+            });
+        } else {
+            Object.keys(data[customCategory] || {}).forEach((id) => {
+                if (data[customCategory]?.[id]?.values?.[date]) {
+                    subtotal += parseFloat(data[customCategory]?.[id]?.values?.[date]);
+                }
+            });
+        }
+        return subtotal;
+    };
+
+    const [subtotals, setSubtotals] = React.useState(() => 
+        categories.reduce((acc, category) => {
+            acc[category] = uniqueDates.reduce((dateAcc, date) => {
+                dateAcc[date] = getUniqueDateSubtotal(date, category);
+                return dateAcc;
+            }, {} as Record<string, number>);
+            return acc;
+        }, {} as Record<string, Record<string, number>>)
+    );
+
     const handleEditClick = (id: number, date: string) => {
         if (EDIT_BLOCKED_CATEGORIES.includes(category)) return;
         if (category === "investimentos" && id === 0 && date !== uniqueDates[0]) {
@@ -76,6 +120,11 @@ const TableBody: React.FC<TableBodyProps> = ({
                 return updatedData;
             });
             setDataHasBeenAltered(true);
+            setSubtotals((prev) => {
+                const updatedSubtotals = { ...prev };
+                updatedSubtotals[category][date] = getUniqueDateSubtotal(date, category);
+                return updatedSubtotals;
+            })
             return;
         }
 
@@ -97,6 +146,11 @@ const TableBody: React.FC<TableBodyProps> = ({
             
             return updatedData;
         });
+        setSubtotals((prev) => {
+            const updatedSubtotals = { ...prev };
+            updatedSubtotals[category][date] = getUniqueDateSubtotal(date, category);
+            return updatedSubtotals;
+        })
         setDataHasBeenAltered(true);
     };
 
@@ -125,29 +179,67 @@ const TableBody: React.FC<TableBodyProps> = ({
         setDataHasBeenAltered(true);
     };
 
-    const getUniqueDateSubtotal = (date: string) => {
-        let subtotal = 0;
-
-        if(category === "investimentos") {
-            Object.keys(data[category] || {}).slice(1).forEach((id) => {
-                if (data[category]?.[id]?.values?.[date]) {
-                    subtotal += parseFloat(data[category]?.[id]?.values?.[date]);
-                }
-            });
-        } else {
-            Object.keys(data[category] || {}).forEach((id) => {
-                if (data[category]?.[id]?.values?.[date]) {
-                    subtotal += parseFloat(data[category]?.[id]?.values?.[date]);
-                }
-            });
-        }
-        return subtotal;
-    };
-
     if (!data[category]) {
         console.warn(`Category "${category}" does not exist in data.`);
         return null;
     }
+
+    useEffect(() => {
+        if(data['lucroPrejuizo'][0]){
+            const profitLossValues = data['lucroPrejuizo'][0].values;
+            const newReserveValues: number[] = []
+            let totalReserveValue = 0
+            uniqueDates.slice(1).forEach((date) => {
+                let dateProfit = profitLossValues[date]
+                let previousDateReserve = newReserveValues[newReserveValues.length - 1] || parseFloat(data['investimentos'][0].values[uniqueDates[0]])
+                let dateRealizations = subtotals['realizacoes'][date]
+                let dateCompanyCosts = subtotals['empresas'][date]
+                let datePersonalCosts = subtotals['pessoais'][date]
+                let dateExchange = subtotals['intercambio'][date]
+                const dateCosts = dateCompanyCosts + datePersonalCosts + dateExchange + dateRealizations
+                if(date === uniqueDates[1]) {
+                    let firstRealization = subtotals['realizacoes'][uniqueDates[0]]
+                    let firstCompanyCost = subtotals['empresas'][uniqueDates[0]]
+                    let firstPersonalCost = subtotals['pessoais'][uniqueDates[0]]
+                    let firstExchange = subtotals['intercambio'][uniqueDates[0]]
+                    const firstDateCosts = firstCompanyCost + firstPersonalCost + firstExchange + firstRealization 
+                    newReserveValues.push( previousDateReserve + parseFloat(dateProfit) - firstDateCosts - dateCosts)
+                } else {
+                    newReserveValues.push(previousDateReserve + parseFloat(dateProfit) - dateCosts)
+                }
+            })
+            const finalReserveValues = {}
+            uniqueDates.slice(1).forEach((date) => {
+                finalReserveValues[date] = newReserveValues.shift()
+            })
+            setData({
+                ...data,
+                investimentos: {
+                    ...data['investimentos'],
+                    0: {
+                        ...data['investimentos'][0],
+                        firstMeta: data['investimentos'][0].values[uniqueDates[uniqueDates.length - 1]],
+                        values: {
+                            [uniqueDates[0]]: data['investimentos'][0].values[uniqueDates[0]],
+                            ...finalReserveValues
+                        }
+                    }
+                }
+            })
+        }
+    },[data['investimentos']?.[0]?.values?.[uniqueDates[0]], subtotals['realizacoes'], subtotals['empresas'], subtotals['pessoais'], subtotals['intercambio']])
+
+    useEffect(() => {
+        setSubtotals(
+            categories.reduce((acc, category) => {
+                acc[category] = uniqueDates.reduce((dateAcc, date) => {
+                    dateAcc[date] = getUniqueDateSubtotal(date, category);
+                    return dateAcc;
+                }, {} as Record<string, number>);
+                return acc;
+            }, {} as Record<string, Record<string, number>>)
+        )
+    },[data])
 
     return (
         <tbody>
@@ -256,9 +348,9 @@ const TableBody: React.FC<TableBodyProps> = ({
                     {uniqueDates.map(date => (
                         <td key={date} className="px-4 py-2 border text-center">
                             {
-                                formatValue(getUniqueDateSubtotal(date)).length > 21 ?
-                                    `${formatValue(getUniqueDateSubtotal(date)).slice(0, 21)}...`
-                                    : formatValue(getUniqueDateSubtotal(date))
+                                formatValue(subtotals[category][date]).length > 21 ?
+                                    `${formatValue(subtotals[category][date]).slice(0, 21)}...`
+                                    : formatValue(subtotals[category][date])
                             }
                         </td>
                     ))}
