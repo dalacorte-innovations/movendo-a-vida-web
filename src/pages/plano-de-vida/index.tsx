@@ -8,6 +8,7 @@ import { IoCaretBack, IoCaretForward } from 'react-icons/io5';
 import { useTranslation } from 'react-i18next';
 import Slider from '@mui/material/Slider';
 import { Typography } from '@mui/material';
+import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinnerNotTimer.jsx';
 
 interface Plan {
     name: string;
@@ -19,7 +20,8 @@ const LifePlanPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const { t } = useTranslation();
-    const [plan, setPlan] = useState<Plan>({ name: '', term: 1});
+    const [plan, setPlan] = useState<Plan>({ name: '', term: 1 });
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -31,6 +33,7 @@ const LifePlanPage = () => {
                     });
                     if (!response.ok) throw new Error(t('Erro ao carregar o plano de vida'));
                     const data = await response.json();
+                    setPlan(data); 
                 } catch (error) {
                     console.error(error);
                 }
@@ -40,54 +43,53 @@ const LifePlanPage = () => {
     }, [id]);
 
     const handleSubmitPlan = async () => {
-        if(!plan.name) {
+        if (!plan.name) {
             toast.error(t('O nome do plano é obrigatório'));
             return;
         }
+    
+        try {
+            setIsLoading(true);
+            const method = id ? 'PATCH' : 'POST';
+            const url = id
+                ? `${configBackendConnection.baseURL}/${endpoints.lifePlanAPI}${id}/`
+                : `${configBackendConnection.baseURL}/${endpoints.lifePlanAPI}`;
+            
+            const currentYear = new Date().getFullYear();
+            const years = Array.from({ length: plan.term }, (_, i) => currentYear + i);
 
-        // THIS IS THE PREVIOUS IMPLEMENTATION, IT SHALL BE REPLACED BY A PROPER IMPLEMENTATION
-        // THAT TAKES INTO ACCOUNT THAT NOW WE ONLY GET THE PLAN NAME AND TERM BEFORE
-        // CREATING THE PLAN AND REDIRECTING THE USER TO THE NEXT PAGE
+            const payload = id
+                ? { name: plan.name }
+                : { name: plan.name, years };
 
-        // try {
-        //     const method = id ? 'PATCH' : 'POST';
-        //     const url = id
-        //         ? `${configBackendConnection.baseURL}/${endpoints.lifePlanAPI}${id}/`
-        //         : `${configBackendConnection.baseURL}/${endpoints.lifePlanAPI}`;
-
-        //     const response = await fetch(url, {
-        //         method,
-        //         headers: {
-        //             ...getAuthHeaders(),
-        //             'Content-Type': 'application/json'
-        //         },
-        //         body: JSON.stringify(plan),
-        //     });
-
-        //     if (!response.ok) throw new Error(id ? t('Erro ao atualizar o plano de vida') : t('Erro ao criar o plano de vida'));
-        //     navigate('/life-plan/dashboard');
-        //     toast.success(id ? t('Plano de vida atualizado com sucesso!') : t('Plano de vida criado com sucesso!'));
-        // } catch (error) {
-        //     console.error(error);
-        //     toast.error(id ? t('Erro ao atualizar o plano de vida.') : t('Erro ao criar o plano de vida.'));
-        // }
-
-        // THE CREATE METHOD SHOULD RETURN THE DATA OF THE CREATED PLAN
-        // THIS IS ONLY A MOCK IMPLEMENTATION
-        const createdLifePlan = {
-            id: 3,
-        };
-
-        // FOR THIS TO WORK CORRECTLY THE API SHOULD CREATE A PLAN WITH EMPTY ITEMS
-        // FOR EACH CATEGORY BASED ON THE AMOUNT OF YEARS.
-        // AND WHEN THIS IS DONE THIS NAVIGATE SHOULD IMPLEMENT THE FOLLOWING STATE LOGIC.
-        // navigate(`/life-plan/${createdLifePlan.id}/table`, { state: { createdLifePlan } });
-        navigate(`/life-plan/${createdLifePlan.id}/table`);
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+    
+            if (!response.ok) {
+                throw new Error(id ? t('Erro ao atualizar o plano de vida') : t('Erro ao criar o plano de vida'));
+            }
+    
+            const data = await response.json();
+            toast.success(id ? t('Plano de vida atualizado com sucesso!') : t('Plano de vida criado com sucesso!'));
+            navigate(`/life-plan/${data.id}/table`, { state: { plan: data } });
+        } catch (error) {
+            console.error(error);
+            toast.error(id ? t('Erro ao atualizar o plano de vida.') : t('Erro ao criar o plano de vida.'));
+        } finally {
+            setIsLoading(false);
+        }
     };
         
     return (
         <div className={`flex h-screen overflow-y-auto ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'}`}>
             <Sidebar />
+            <LoadingSpinner isLoading={isLoading} />
             <main
                 className="flex flex-col flex-grow p-6 overflow-y-scroll m-auto justify-between items-center"
                 style={{ maxHeight: '90vh', maxWidth: '500px', minHeight: '400px', overflowY: 'hidden'}}
@@ -105,10 +107,10 @@ const LifePlanPage = () => {
                     <Typography className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`} >{t("Prazo em anos")}</Typography>
                     <div className="flex flex-col px-2">
                         <Slider
-                            aria-label="Temperature"
-                            defaultValue={1}
+                            aria-label="Prazo"
+                            value={plan.term}
+                            onChange={(e, value) => setPlan({ ...plan, term: value as number })}
                             valueLabelDisplay="auto"
-                            shiftStep={1}
                             step={1}
                             min={1}
                             max={20}
@@ -150,7 +152,6 @@ const LifePlanPage = () => {
                         <IoCaretForward className="ml-2" size={20} />
                     </button>
                 </div>
-
             </main>
         </div>
     );
