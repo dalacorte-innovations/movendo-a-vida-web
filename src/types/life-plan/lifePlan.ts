@@ -47,4 +47,5 @@ export type OrganizedData = {
     realizacoes: CategoryData;
     intercambio: CategoryData;
     empresas: CategoryData;
+    pessoais: CategoryData;
 };
