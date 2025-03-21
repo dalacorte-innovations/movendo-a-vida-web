@@ -35,10 +35,12 @@ module.exports = {
   ],
   variants: {
     extend: {
+      scrollbar: ['rounded'],
       appearance: ['hover', 'focus'],
     },
   },
   plugins: [
+    require('tailwind-scrollbar')({ nocompatible: true }),
     function({ addUtilities }) {
       addUtilities({
         '.no-arrows': {

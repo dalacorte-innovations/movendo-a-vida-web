@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar';
 import { ThemeContext } from '../../utils/ThemeContext.jsx';
@@ -11,6 +11,7 @@ import { OrganizedData } from '../../types/life-plan/lifePlan.js';
 import TableBody from './tableBody.js';
 import { t } from 'i18next';
 import { Box } from '@mui/material';
+import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinnerNotTimer.jsx';
 
 const months = [
     { full: "Janeiro", abbr: "jan" },
@@ -37,19 +38,19 @@ const categories = [
     "intercambio",
     "empresas",
     "pessoais"
-]
+];
 
 const LifePlanTable = () => {
     const { darkMode } = useContext(ThemeContext);
+    const [isLoading, setIsLoading] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
-    const { plan } = location.state || { plan: { items: [] } };
-    const [resetData, setResetData] = useState(false); // THIS WILL FORCE THE RELOAD OF THE ORGANIZED DATA WHEN ALTERED
+    const plan = location.state?.plan || { items: [] };
+    const [resetData, setResetData] = useState(false);
     const [dataHasBeenAltered, setDataHasBeenAltered] = useState(false);
-    const [editingCell, setEditingCell] = useState<{id: number, date: string} | null>(null); // Track the cell being edited
-  
+    const [editingCell, setEditingCell] = useState<{ id: number, date: string } | null>(null);
     const allDates: string[] = plan.items.map(item => item.date.split('-').slice(0, 2).join('-'));
-    const uniqueDates: string[] = Array.from(new Set(allDates)).sort();
+    const uniqueDates: string[] = useMemo(() => Array.from(new Set(allDates)).sort(), [allDates]);
 
     const formatCategoryName = (category: string) => {
         const formattedCategories: { [key: string]: string } = {
@@ -72,39 +73,53 @@ const LifePlanTable = () => {
             estudos: {},
             custos: {},
             lucroPrejuizo: {},
-            investimentos: {
-                "Poupança": { name: "Poupança", values: {}, firstMeta: 0 },
-                "Investimentos Planos de 12 meses": { name: "Investimentos Planos de 12 meses", values: {}, firstMeta: 0 },
-                "Investimentos Planos de 10 Anos": { name: "Investimentos Planos de 10 Anos", values: {}, firstMeta: 0 },
-                "Investimentos Planos de Aposentadoria": { name: "Investimentos Planos de Aposentadoria", values: {}, firstMeta: 0 },
-                "Poupança Intercâmbio": { name: "Poupança Intercâmbio", values: {}, firstMeta: 0 }
-            },
+            investimentos: {},
             realizacoes: {},
             intercambio: {},
-            empresas: {
-                "Criar Empresas": { name: "Criar Empresas", values: {}, firstMeta: 0 },
-                "Comprar Empresas": { name: "Comprar Empresas", values: {}, firstMeta: 0 }
-            },
-            pessoais: {
-                "Reforma no Apartamento": { name: "Reforma no Apartamento", values: {}, firstMeta: 0 },
-                "Casamento": { name: "Casamento", values: {}, firstMeta: 0 },
-                "Novo Apartamento": { name: "Novo Apartamento", values: {}, firstMeta: 0 },
-                "carroCarro NovoNovo": { name: "Carro Novo", values: {}, firstMeta: 0 },
-                "Filhos": { name: "Filhos", values: {}, firstMeta: 0 },
-                "Casa na Praia": { name: "Casa na Praia", values: {}, firstMeta: 0 }
-            }
+            empresas: {},
+            pessoais: {}
         };
     };
-    
+
+    const generateEmptyValues = () => {
+        const returnalValue = {};
+        uniqueDates.forEach(date => {
+            returnalValue[date] = 0;
+        });
+        return returnalValue;
+    };
+
+    const defaultCategoryRows: { [key: string]: { name: string, values: any, firstMeta: number }[] } = {
+        investimentos: [
+            { name: "Reserva Inicial", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Investimentos Planos de 12 meses", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Investimentos Planos de 10 Anos", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Investimentos Planos de Aposentadoria", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Poupança Intercâmbio", values: generateEmptyValues(), firstMeta: 0 }
+        ],
+        empresas: [
+            { name: "Criar Empresas", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Comprar Empresas", values: generateEmptyValues(), firstMeta: 0 }
+        ],
+        pessoais: [
+            { name: "Reforma no Apartamento", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Casamento", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Novo Apartamento", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Carro Novo", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Filhos", values: generateEmptyValues(), firstMeta: 0 },
+            { name: "Casa na Praia", values: generateEmptyValues(), firstMeta: 0 }
+        ]
+    };
+
     const [organizedData, setOrganizedData] = useState<OrganizedData>(generateEmptyOrganizedData());
 
     const getNewIndex = () => {
         let newIndex = 0;
         categories.forEach(category => (
             newIndex += Object.keys(organizedData[category]).length
-        ))
+        ));
         return newIndex;
-    }
+    };
 
     const sumAllValuesByDate = (date: string, category: string) => {
         let sum = 0;
@@ -113,40 +128,40 @@ const LifePlanTable = () => {
                 sum += parseFloat(organizedData[category][id].values[date]);
             }
         });
-        return sum
-    }
+        return sum;
+    };
 
     const getTotalMonthProfit = (date: string) => {
         const totalMonthProfitEstudos = sumAllValuesByDate(date, "estudos");
         const totalMonthProfitReceitas = sumAllValuesByDate(date, "receitas");
         const totalMonthProfitCustos = sumAllValuesByDate(date, "custos");
-    
+
         return totalMonthProfitReceitas - totalMonthProfitCustos - totalMonthProfitEstudos;
     };
 
-    const setupProfitLossCategoryData = () => {
+    const setupProfitLossCategoryData = useCallback(() => {
         const newProfitLossCategoryData = {};
         const index = getNewIndex();
-        const newProfitLossValues: {[key: string]: number} = {}
+        const newProfitLossValues: { [key: string]: number } = {};
         uniqueDates.forEach((date) => {
             newProfitLossValues[date] = getTotalMonthProfit(date);
         });
-        let totalProfit = 0
+        let totalProfit = 0;
         Object.values(newProfitLossValues).forEach((value) => {
             totalProfit += value;
-        })
+        });
         newProfitLossCategoryData[index] = { name: totalProfit > 0 ? "Lucro" : "Prejuízo", values: newProfitLossValues, firstMeta: 0 };
-        setOrganizedData({
-            ...organizedData,
+        setOrganizedData(prev => ({
+            ...prev,
             lucroPrejuizo: {
                 ...newProfitLossCategoryData
             }
-        })
-    }
- 
+        }));
+    }, [uniqueDates, organizedData]);
+
     useEffect(() => {
         setupProfitLossCategoryData();
-    },[plan])
+    }, [setupProfitLossCategoryData]);
 
     useEffect(() => {
         const newOrganizedData = generateEmptyOrganizedData();
@@ -167,12 +182,22 @@ const LifePlanTable = () => {
         const finalOrganizedData: OrganizedData = generateEmptyOrganizedData();
         let rowIndex = 0;
     
+        // Adiciona os dados do plano ao organizedData
         categories.forEach(category => {
             Object.keys(newOrganizedData[category]).forEach((name) => {
+                let rowTotal = 0;
+                uniqueDates.forEach(date => {
+                    if (newOrganizedData[category][name].values[date]) {
+                        rowTotal += parseFloat(newOrganizedData[category][name].values[date]);
+                    } else {
+                        newOrganizedData[category][name].values[date] = 0;
+                    }
+                });
+    
                 finalOrganizedData[category][rowIndex] = {
                     name: name,
                     values: newOrganizedData[category][name].values,
-                    firstMeta: newOrganizedData[category][name].firstMeta
+                    firstMeta: rowTotal
                 };
                 rowIndex++;
             });
@@ -196,14 +221,9 @@ const LifePlanTable = () => {
     
         setOrganizedData(finalOrganizedData);
     }, [plan, resetData]);
-    
-    
+
     const formatValue = (value) => {
         return parseFloat(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    };
-
-    const getMetaStyle = (meta) => {
-        return parseFloat(meta) > 0 ? 'text-yellow-600 font-bold' : 'text-green-600 font-bold';
     };
 
     const handleGeneratePDF = async () => {
@@ -253,22 +273,69 @@ const LifePlanTable = () => {
             toast.error("Erro ao baixar o CSV");
         }
     };
+    const [isSaving, setIsSaving] = useState(false);
 
-    const handleSaveEdit = () => {
-        // ALL EDITED CELLS VALUES ARE IMPLEMENTED TO organizedData SO THE LOGIC
-        // OF THIS FUNCTION SHOULD TAKE THIS VALUE AND SEND TO THE BACKEND
-        toast.info('this functionality has not been implemented for now')
-
-    }
+    const handleSaveEdit = async () => {
+        try {
+            if (!dataHasBeenAltered) {
+                toast.info('Nenhuma alteração para salvar.');
+                return;
+            }
+    
+            setIsLoading(true);
+    
+            const itemsForPlan = {};
+    
+            categories.forEach(category => {
+                itemsForPlan[category] = {
+                    items: Object.keys(organizedData[category]).map(id => {
+                        const item = organizedData[category][id];
+                        return uniqueDates.map(date => ({
+                            category: category,
+                            name: item.name,
+                            value: parseFloat(item.values[date] || 0),
+                            date: `${date}-01`,
+                            meta: item.firstMeta
+                        }));
+                    }).flat()
+                };
+            });
+    
+            const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.lifePlanAPI}${plan.id}/`, {
+                method: 'PATCH',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: plan.name,
+                    items_for_plan: itemsForPlan
+                })
+            });
+    
+            if (!response.ok) {
+                throw new Error('Erro ao salvar as alterações.');
+            }
+    
+            setDataHasBeenAltered(false);
+            toast.success('Alterações salvas com sucesso!');
+        } catch (error) {
+            console.error('Erro ao salvar as alterações:', error);
+            toast.error('Erro ao salvar as alterações.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleResetEdit = () => {
         setResetData(!resetData);
         setDataHasBeenAltered(false);
-    }
-    
+    };
 
     return (
         <div className={`flex flex-col md:flex-row ${darkMode ? 'bg-primaryGray' : 'bg-gray-100'} h-screen`}>
+            <LoadingSpinner isLoading={isLoading} />
+            
             <div className={`fixed md:relative ${darkMode ? 'bg-darkGray' : 'bg-gray-200'} h-full`}>
                 <Sidebar />
             </div>
@@ -300,7 +367,7 @@ const LifePlanTable = () => {
                         </button>
                     </div>
                 </div>
-                
+
                 <div className="space-y-8">
                     {dataHasBeenAltered && (
                         <Box
@@ -313,9 +380,12 @@ const LifePlanTable = () => {
                             <button
                                 className="flex items-center justify-center text-green-600 hover:text-green-700 transition-colors"
                                 onClick={handleSaveEdit}
+                                disabled={isSaving}
                             >
                                 <IoSave size={20} />
-                                <span className="ml-1">{t('Salvar Alterações')}</span>
+                                <span className="ml-1">
+                                    {t('Salvar Alterações')}
+                                </span>
                             </button>
                             <button
                                 className="flex items-center justify-center text-red-600 hover:text-red-700 transition-colors"
@@ -326,26 +396,30 @@ const LifePlanTable = () => {
                             </button>
                         </Box>
                     )}
-                    {categories.map(category =>(
+                    {categories.map(category => (
                         <div key={category}>
                             <h3 className={`text-lg font-semibold mb-2 ${darkMode ? 'text-white' : 'text-black'}`}>
                                 Categoria: {formatCategoryName(category)}
                             </h3>
-                            <div className="overflow-x-auto">
-                                <table className="table-auto w-full text-sm border-collapse shadow-lg" style={{ backgroundColor: 'transparent' }}>
+
+                            <div className="overflow-x-auto" style={{ paddingBottom: '30px', }}>
+                                <table className="table-auto w-full text-sm border-collapse shadow-lg" style={{ backgroundColor: 'transparent',  }}>
                                     <thead>
                                         <tr>
-                                            <th className="" style={{width: '30px', backgroundColor: 'transparent'}}></th> {/**This is only a component to push the header one cell to the right */}
+                                            <th className="" style={{ width: '30px', backgroundColor: 'transparent' }}></th>
                                             <th className={`px-4 py-2 border ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>Nome</th>
                                             {uniqueDates.map(date => {
                                                 const [year, month] = date.split("-");
                                                 return (
-                                                    <th key={date} className={`px-4 py-2 border text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
+                                                    <th key={date}
+                                                        className={`px-4 py-2 border text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}
+                                                        style={{ minWidth: '180px',}}
+                                                    >
                                                         {months[parseInt(month, 10) - 1].abbr} - {year}
                                                     </th>
                                                 );
                                             })}
-                                            <th className={`px-4 py-2 border text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>Meta</th>
+                                            <th className={`px-4 py-2 border text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>Total</th>
                                         </tr>
                                     </thead>
                                     <TableBody
@@ -353,7 +427,6 @@ const LifePlanTable = () => {
                                         setData={setOrganizedData}
                                         category={category}
                                         formatValue={formatValue}
-                                        getMetaStyle={getMetaStyle}
                                         darkMode={darkMode}
                                         uniqueDates={uniqueDates}
                                         editingCell={editingCell}
