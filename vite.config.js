@@ -21,9 +21,4 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 3033,
   },
-  build: {
-    rollupOptions: {
-      input: 'src/main.jsx'
-    }
-  }
 });
