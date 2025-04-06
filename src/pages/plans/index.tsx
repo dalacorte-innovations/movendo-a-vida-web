@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useContext, useRef } from "react"
-import { FaCircleCheck, FaRegCircleXmark } from "react-icons/fa6"
+import { FaCircleCheck } from "react-icons/fa6"
 import {
   IoRocketSharp,
   IoLeafOutline,
@@ -21,11 +21,21 @@ import { useTranslation } from "react-i18next"
 const plans = [
   {
     title: "Iniciante",
-    price: "R$59,00",
-    description: "Melhor opção para quem possui um perfil de investidor conservador e busca uma experiência segura",
-    features: ["Plano de Vida", "Plano de Viagem", "Exportar PDV", "Exportar Excel", "Gráficos", "Agenda"],
-    availableFeatures: [true, true, true, true, false, false],
-    buttonColor: "bg-gray-800",
+    price: "R$79,00",
+    paymentType: "Pagamento Único",
+    accessPeriod: "Acesso por 1 ano",
+    description:
+      "Para quem está começando sua jornada com o essencial e deseja aprender a usar a plataforma com clareza.",
+    features: [
+      "Plano de Vida",
+      "Exportar PDF",
+      "Gráficos",
+      "Guia prático de uso da plataforma",
+      "Acesso à indicação de Coaches de Planejamento de Vida",
+    ],
+    availableFeatures: [true, true, true, true, true, false, false, false, false, false, false],
+    buttonColor: "bg-emerald-600",
+    buttonText: "Começar Agora",
     popular: false,
     plan_name: "Plano Iniciante",
     icon: IoLeafOutline,
@@ -33,29 +43,55 @@ const plans = [
   },
   {
     title: "Avançado",
-    price: "R$100,00",
-    description:
-      "Melhor opção para quem possui um perfil de investidor moderado e busca mais ferramentas para planejar seu futuro",
-    features: ["Plano de Vida", "Plano de Viagem", "Exportar PDV", "Exportar Excel", "Gráficos", "Agenda"],
-    availableFeatures: [true, true, true, true, true, false],
+    price: "R$98,80",
+    paymentType: "Pagamento Único",
+    accessPeriod: "Acesso por 2 ano",
+    description: "Ideal para quem busca mais recursos, quer se organizar melhor e ainda ganhar por indicações.",
+    features: [
+      "Plano de Vida",
+      "Exportar PDF",
+      "Gráficos",
+      "Guia prático de uso da plataforma",
+      "Benefício: Ganhe R$20 por cada nova indicação aprovada",
+      "Plano de Viagem com integração via Trello",
+      "Acesso antecipado a novos recursos",
+      "Agenda inteligente para organização de metas e tarefas",
+      "Acesso à indicação de Coaches de Planejamento de Vida",
+      "Opcional: Acesso à Inteligência Artificial por R$ 20/mês por conta",
+    ],
+    availableFeatures: [true, true, true, true, true, true, true, true, true, true],
     buttonColor: "bg-blue-600",
+    buttonText: "Quero Esse Plano",
     popular: true,
     plan_name: "Plano Avançado",
     icon: IoRocketSharp,
     color: "blue",
   },
   {
-    title: "Profissional",
-    price: "R$200,00",
+    title: "Profissional (Coach)",
+    price: "R$2.798,00",
+    paymentType: "Pagamento Único",
+    accessPeriod: "Acesso por 1 ano",
+    accountsIncluded: "Até 50 contas inclusas",
     description:
-      "A escolha ideal para quem quer aproveitar todos os benefícios com um planejamento completo e detalhado",
-    features: ["Plano de Vida", "Plano de Viagem", "Exportar PDV", "Exportar Excel", "Gráficos", "Agenda"],
-    availableFeatures: [true, true, true, true, true, true],
-    buttonColor: "bg-gray-800",
+      "Para coaches de planejamento de vida que desejam escalar seu impacto com personalização e presença profissional.",
+    features: [
+      "Acesso à 50 Plataformas Avançado",
+      "Plataforma personalizada com logo e nome do coach",
+      "Indicação como Coach parceiro oficial",
+      "Destaque na página inicial da plataforma",
+      "Dashboard exclusivo para gestão dos clientes",
+      "Suporte dedicado",
+      "Agenda inteligente para Coach e seus clientes",
+      "Opcional: Acesso à Inteligência Artificial por R$ 20/mês por conta",
+    ],
+    availableFeatures: [true, true, true, true, true, true, true, true],
+    buttonColor: "bg-purple-600",
+    buttonText: "Sou Coach Profissional",
     popular: false,
     plan_name: "Plano Profissional",
     icon: IoSparkles,
-    color: "amber",
+    color: "purple",
   },
 ]
 
@@ -327,28 +363,30 @@ const PlansPage = () => {
         hoverBg: darkMode ? "bg-blue-900/50" : "bg-blue-200/70",
         gradient: darkMode ? "from-blue-600 to-indigo-600" : "from-blue-500 to-indigo-500",
       },
-      amber: {
-        bg: darkMode ? "bg-amber-900/30" : "bg-amber-100",
-        text: darkMode ? "text-amber-400" : "text-amber-600",
-        border: darkMode ? "border-amber-800/30" : "border-amber-200",
-        hoverBg: darkMode ? "bg-amber-900/50" : "bg-amber-200/70",
-        gradient: darkMode ? "from-amber-600 to-orange-600" : "from-amber-500 to-orange-500",
+      purple: {
+        bg: darkMode ? "bg-purple-900/30" : "bg-purple-100",
+        text: darkMode ? "text-purple-400" : "text-purple-600",
+        border: darkMode ? "border-purple-800/30" : "border-purple-200",
+        hoverBg: darkMode ? "bg-purple-900/50" : "bg-purple-200/70",
+        gradient: darkMode ? "from-purple-600 to-violet-600" : "from-purple-500 to-violet-500",
       },
     }
 
-    const color = plan.color || (index === 0 ? "emerald" : index === 1 ? "blue" : "amber")
+    const color = plan.color || (index === 0 ? "emerald" : index === 1 ? "blue" : "purple")
     return colorMap[color]
   }
 
   return (
     <div className={`flex h-screen overflow-hidden ${darkMode ? "bg-[#0F172A]" : "bg-[#f0f7ff]"}`}>
-      <div
-        className={`fixed md:relative ${
-          darkMode ? "bg-slate-800/70 border-r border-slate-700/50" : "bg-white/80 border-r border-blue-100"
-        } h-full z-10`}
-      >
-        <Sidebar />
-      </div>
+      {isAuthenticated && (
+        <div
+          className={`fixed md:relative ${
+            darkMode ? "bg-slate-800/70 border-r border-slate-700/50" : "bg-white/80 border-r border-blue-100"
+          } h-full z-10`}
+        >
+          <Sidebar />
+        </div>
+      )}
 
       <canvas ref={waveCanvasRef} className="fixed inset-0 pointer-events-none z-0" />
       <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
@@ -479,7 +517,7 @@ const PlansPage = () => {
                       </div>
 
                       <div
-                        className={`text-3xl font-bold mb-4 ${
+                        className={`text-3xl font-bold mb-2 ${
                           isHovered
                             ? darkMode
                               ? "text-pink-400"
@@ -490,9 +528,13 @@ const PlansPage = () => {
                         } transition-colors duration-300`}
                       >
                         {plan.price}
-                        <span className={`text-sm font-normal ml-1 ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
-                          {t("/mês")}
-                        </span>
+                      </div>
+
+                      <div className={`mb-4 text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
+                        {plan.paymentType} – {plan.accessPeriod}
+                        {plan.accountsIncluded && (
+                          <div className="mt-1 font-medium text-sm">🎯 {plan.accountsIncluded}</div>
+                        )}
                       </div>
 
                       <p className={`mb-6 text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
@@ -513,7 +555,7 @@ const PlansPage = () => {
                             <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
                           </>
                         )}
-                        <span className="relative z-10">{isDisabled ? t("Plano Atual") : t("Selecionar Plano")}</span>
+                        <span className="relative z-10">{isDisabled ? t("Plano Atual") : t(plan.buttonText)}</span>
                       </button>
 
                       <div className={`h-px my-6 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`}></div>
@@ -521,25 +563,15 @@ const PlansPage = () => {
                       <ul className="space-y-3">
                         {plan.features.map((feature, featureIndex) => (
                           <li key={featureIndex} className="flex items-center">
-                            {plan.availableFeatures[featureIndex] ? (
-                              <div
-                                className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
-                                  darkMode ? "bg-emerald-900/30" : "bg-emerald-100"
-                                } mr-3`}
-                              >
-                                <FaCircleCheck
-                                  className={`text-xs ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}
-                                />
-                              </div>
-                            ) : (
-                              <div
-                                className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
-                                  darkMode ? "bg-red-900/30" : "bg-red-100"
-                                } mr-3`}
-                              >
-                                <FaRegCircleXmark className={`text-xs ${darkMode ? "text-red-400" : "text-red-600"}`} />
-                              </div>
-                            )}
+                            <div
+                              className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
+                                darkMode ? "bg-emerald-900/30" : "bg-emerald-100"
+                              } mr-3`}
+                            >
+                              <FaCircleCheck
+                                className={`text-xs ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}
+                              />
+                            </div>
                             <span className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
                               {t(feature)}
                             </span>
@@ -578,12 +610,25 @@ const PlansPage = () => {
                 )}
               </p>
 
-              <button
-                className={`font-medium text-sm hover:underline ${darkMode ? "text-pink-400" : "text-blue-600"}`}
-                onClick={() => navigate("/")}
-              >
-                {t("Voltar para o site")}
-              </button>
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={() => navigate("/")}
+                  className={`group relative flex items-center justify-center py-3.5 px-6 rounded-xl font-medium text-sm text-white overflow-hidden transition-all duration-300`}
+                >
+                  <div
+                    className={`absolute inset-0 ${
+                      darkMode
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600"
+                        : "bg-gradient-to-r from-blue-600 to-indigo-600"
+                    } transition-transform duration-300 group-hover:scale-105`}
+                  />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300" />
+                  <span className="relative z-10 flex items-center">
+                    <IoArrowBack className="mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
+                    {t("Voltar para o site")}
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

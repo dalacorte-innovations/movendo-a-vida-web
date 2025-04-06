@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { useState, useEffect, useRef, useContext } from "react"
 import { MdEmail, MdPerson } from "react-icons/md"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
@@ -11,6 +12,16 @@ import RegisterWithGoogle from "../../components/Google/registerGoogle.tsx"
 import RegisterWithFacebook from "../../components/Facebook/registerFacebook.tsx"
 import { useTranslation } from "react-i18next"
 import { ThemeContext } from "../../utils/ThemeContext.jsx"
+
+interface Particle {
+  x: number
+  y: number
+  size: number
+  speedX: number
+  speedY: number
+  connections: number[]
+  opacity: number
+}
 
 const RegisterPage = () => {
   const { t } = useTranslation()
@@ -36,6 +47,8 @@ const RegisterPage = () => {
   const waveCanvasRef = useRef(null)
   const animationRef = useRef(null)
   const waveAnimationRef = useRef(null)
+
+  const particles: Particle[] = []
 
   useEffect(() => {
     setAnimateIn(true)
@@ -268,61 +281,45 @@ const RegisterPage = () => {
     setIsRepeatPasswordVisible(!isRepeatPasswordVisible)
   }
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
+  const handleSubmit = async e => {
+    e.preventDefault()
     setUsernameError("")
     setNameError("")
     setPasswordError("")
     setRepeatPasswordError("")
-
     let canSubmit = true
-
-    if (username === "") {
-      setUsernameError(t("Campo obrigatório*"))
-      canSubmit = false
+    if (!username) { setUsernameError(t("Campo obrigatório*")); canSubmit = false }
+    if (!name) { setNameError(t("Campo obrigatório*")); canSubmit = false }
+    if (!password) { setPasswordError(t("Campo obrigatório*")); canSubmit = false }
+    else {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).+$/
+      if (!passwordRegex.test(password)) { setPasswordError(t("Senha não atende aos requisitos de formato*")); canSubmit = false }
     }
-
-    if (name === "") {
-      setNameError(t("Campo obrigatório*"))
-      canSubmit = false
-    }
-
-    if (password === "") {
-      setPasswordError(t("Campo obrigatório*"))
-      canSubmit = false
-    }
-
-    if (repeatPassword === "" || repeatPassword !== password) {
-      setRepeatPasswordError(t("Senhas não coincidem*"))
-      canSubmit = false
-    }
-
-    if (canSubmit) {
-      setIsLoading(true)
-
-      try {
-        const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.registerUser}`, {
-          method: "POST",
-          headers: configBackendConnection.headersDefault,
-          body: JSON.stringify({
-            email: username,
-            first_name: name,
-            password: password,
-            referral_code: referral_code || null,
-          }),
+    if (!repeatPassword || repeatPassword !== password) { setRepeatPasswordError(t("Senhas não coincidem*")); canSubmit = false }
+    if (!canSubmit) return
+    setIsLoading(true)
+    try {
+      const response = await fetch(`${configBackendConnection.baseURL}/${endpoints.registerUser}`, {
+        method: "POST",
+        headers: configBackendConnection.headersDefault,
+        body: JSON.stringify({
+          email: username,
+          first_name: name,
+          password,
+          referral_code: referral_code || undefined
         })
-
-        if (response.status === 201) {
-          toast.success(t("Cadastro bem-sucedido!"))
-          navigate("/login")
-        } else {
-          toast.error(t("Erro ao realizar o cadastro."))
-        }
-      } catch (error) {
-        toast.error(t("Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde."))
-      } finally {
-        setIsLoading(false)
+      })
+      if (response.status === 201) {
+        toast.success(t("Cadastro bem-sucedido!"))
+        navigate("/login")
+      } else {
+        const data = await response.json()
+        Object.values(data).flat().forEach(msg => toast.error(msg))
       }
+    } catch {
+      toast.error(t("Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde."))
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -407,209 +404,41 @@ const RegisterPage = () => {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <div className="flex items-center mb-2">
-                    <MdEmail className={`${darkMode ? "text-pink-500" : "text-blue-500"} mr-2`} size={20} />
-                    <label htmlFor="username" className={`block ${darkMode ? "text-white" : "text-slate-800"} text-sm`}>
-                      {t("E-mail")}
-                    </label>
-                  </div>
-                  <div
-                    className={`relative rounded-xl overflow-hidden transition-all duration-300 ${
-                      usernameError
-                        ? "ring-2 ring-red-500"
-                        : darkMode
-                          ? "focus-within:ring-2 focus-within:ring-pink-500"
-                          : "focus-within:ring-2 focus-within:ring-blue-500"
-                    }`}
-                  >
-                    <input
-                      type="email"
-                      id="username"
-                      className={`w-full pl-4 pr-4 py-3 ${
-                        darkMode
-                          ? "bg-slate-700/50 text-white border-slate-600"
-                          : "bg-white text-slate-800 border-slate-200"
-                      } rounded-xl border focus:outline-none`}
-                      placeholder={t("Insira seu e-mail")}
-                      value={username}
-                      onChange={handleUsernameChange}
-                    />
+                  <div className="flex items-center mb-2"><MdEmail className={`${darkMode ? "text-pink-500" : "text-blue-500"} mr-2`} size={20} /><label htmlFor="username" className={`block ${darkMode ? "text-white" : "text-slate-800"} text-sm`}>{t("E-mail")}</label></div>
+                  <div className={`relative rounded-xl overflow-hidden transition-all duration-300 ${usernameError ? "ring-2 ring-red-500" : darkMode ? "focus-within:ring-2 focus-within:ring-pink-500" : "focus-within:ring-2 focus-within:ring-blue-500"}`}>
+                    <input type="email" id="username" className={`w-full pl-4 pr-4 py-3 ${darkMode ? "bg-slate-700/50 text-white border-slate-600" : "bg-white text-slate-800 border-slate-200"} rounded-xl border focus:outline-none`} placeholder={t("Insira seu e-mail")} value={username} onChange={handleUsernameChange} />
                   </div>
                   {usernameError && <p className="text-red-500 text-sm mt-1">{usernameError}</p>}
                 </div>
-
                 <div>
-                  <div className="flex items-center mb-2">
-                    <MdPerson className={`${darkMode ? "text-pink-500" : "text-blue-500"} mr-2`} size={20} />
-                    <label htmlFor="name" className={`block ${darkMode ? "text-white" : "text-slate-800"} text-sm`}>
-                      {t("Nome")}
-                    </label>
-                  </div>
-                  <div
-                    className={`relative rounded-xl overflow-hidden transition-all duration-300 ${
-                      nameError
-                        ? "ring-2 ring-red-500"
-                        : darkMode
-                          ? "focus-within:ring-2 focus-within:ring-pink-500"
-                          : "focus-within:ring-2 focus-within:ring-blue-500"
-                    }`}
-                  >
-                    <input
-                      type="text"
-                      id="name"
-                      className={`w-full pl-4 pr-4 py-3 ${
-                        darkMode
-                          ? "bg-slate-700/50 text-white border-slate-600"
-                          : "bg-white text-slate-800 border-slate-200"
-                      } rounded-xl border focus:outline-none`}
-                      placeholder={t("Insira seu nome")}
-                      value={name}
-                      onChange={handleNameChange}
-                    />
+                  <div className="flex items-center mb-2"><MdPerson className={`${darkMode ? "text-pink-500" : "text-blue-500"} mr-2`} size={20} /><label htmlFor="name" className={`block ${darkMode ? "text-white" : "text-slate-800"} text-sm`}>{t("Nome")}</label></div>
+                  <div className={`relative rounded-xl overflow-hidden transition-all duration-300 ${nameError ? "ring-2 ring-red-500" : darkMode ? "focus-within:ring-2 focus-within:ring-pink-500" : "focus-within:ring-2 focus-within:ring-blue-500"}`}>
+                    <input type="text" id="name" className={`w-full pl-4 pr-4 py-3 ${darkMode ? "bg-slate-700/50 text-white border-slate-600" : "bg-white text-slate-800 border-slate-200"} rounded-xl border focus:outline-none`} placeholder={t("Insira seu nome")} value={name} onChange={handleNameChange} />
                   </div>
                   {nameError && <p className="text-red-500 text-sm mt-1">{nameError}</p>}
                 </div>
-
                 <div>
-                  <div className="flex items-center mb-2">
-                    <RiLock2Fill className={`${darkMode ? "text-pink-500" : "text-blue-500"} mr-2`} size={20} />
-                    <label htmlFor="password" className={`block ${darkMode ? "text-white" : "text-slate-800"} text-sm`}>
-                      {t("Senha")}
-                    </label>
-                  </div>
-                  <div
-                    className={`relative rounded-xl overflow-hidden transition-all duration-300 ${
-                      passwordError
-                        ? "ring-2 ring-red-500"
-                        : darkMode
-                          ? "focus-within:ring-2 focus-within:ring-pink-500"
-                          : "focus-within:ring-2 focus-within:ring-blue-500"
-                    }`}
-                  >
-                    <input
-                      type={isPasswordVisible ? "text" : "password"}
-                      id="password"
-                      className={`w-full pl-4 pr-10 py-3 ${
-                        darkMode
-                          ? "bg-slate-700/50 text-white border-slate-600"
-                          : "bg-white text-slate-800 border-slate-200"
-                      } rounded-xl border focus:outline-none`}
-                      placeholder={t("Insira sua senha")}
-                      value={password}
-                      onChange={handlePasswordChange}
-                    />
-                    <button
-                      type="button"
-                      className={`absolute right-3 top-1/2 -translate-y-1/2 ${
-                        darkMode ? "text-slate-400 hover:text-slate-300" : "text-slate-500 hover:text-slate-700"
-                      } transition-colors`}
-                      onClick={togglePasswordVisibility}
-                    >
-                      {isPasswordVisible ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-                    </button>
+                  <div className="flex items-center mb-2"><RiLock2Fill className={`${darkMode ? "text-pink-500" : "text-blue-500"} mr-2`} size={20} /><label htmlFor="password" className={`block ${darkMode ? "text-white" : "text-slate-800"} text-sm`}>{t("Senha")}</label></div>
+                  <div className={`relative rounded-xl overflow-hidden transition-all duration-300 ${passwordError ? "ring-2 ring-red-500" : darkMode ? "focus-within:ring-2 focus-within:ring-pink-500" : "focus-within:ring-2 focus-within:ring-blue-500"}`}>
+                    <input type={isPasswordVisible ? "text" : "password"} id="password" className={`w-full pl-4 pr-10 py-3 ${darkMode ? "bg-slate-700/50 text-white border-slate-600" : "bg-white text-slate-800 border-slate-200"} rounded-xl border focus:outline-none`} placeholder={t("Insira sua senha")} value={password} onChange={handlePasswordChange} />
+                    <button type="button" className={`absolute right-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-slate-400 hover:text-slate-300" : "text-slate-500 hover:text-slate-700"} transition-colors`} onClick={togglePasswordVisibility}>{isPasswordVisible ? <FaEyeSlash size={20} /> : <FaEye size={20} />}</button>
                   </div>
                   {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
+                  <p className={`text-xs mt-1 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>{t("Formato: Uma letra maiúscula, uma minúscula, caracteres especiais (. * @) e número")}</p>
                 </div>
-
                 <div>
-                  <div className="flex items-center mb-2">
-                    <RiLock2Fill className={`${darkMode ? "text-pink-500" : "text-blue-500"} mr-2`} size={20} />
-                    <label
-                      htmlFor="repeatPassword"
-                      className={`block ${darkMode ? "text-white" : "text-slate-800"} text-sm`}
-                    >
-                      {t("Repita sua senha")}
-                    </label>
-                  </div>
-                  <div
-                    className={`relative rounded-xl overflow-hidden transition-all duration-300 ${
-                      repeatPasswordError
-                        ? "ring-2 ring-red-500"
-                        : darkMode
-                          ? "focus-within:ring-2 focus-within:ring-pink-500"
-                          : "focus-within:ring-2 focus-within:ring-blue-500"
-                    }`}
-                  >
-                    <input
-                      type={isRepeatPasswordVisible ? "text" : "password"}
-                      id="repeatPassword"
-                      className={`w-full pl-4 pr-10 py-3 ${
-                        darkMode
-                          ? "bg-slate-700/50 text-white border-slate-600"
-                          : "bg-white text-slate-800 border-slate-200"
-                      } rounded-xl border focus:outline-none`}
-                      placeholder={t("Confirme sua senha")}
-                      value={repeatPassword}
-                      onChange={handleRepeatPasswordChange}
-                    />
-                    <button
-                      type="button"
-                      className={`absolute right-3 top-1/2 -translate-y-1/2 ${
-                        darkMode ? "text-slate-400 hover:text-slate-300" : "text-slate-500 hover:text-slate-700"
-                      } transition-colors`}
-                      onClick={toggleRepeatPasswordVisibility}
-                    >
-                      {isRepeatPasswordVisible ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-                    </button>
+                  <div className="flex items-center mb-2"><RiLock2Fill className={`${darkMode ? "text-pink-500" : "text-blue-500"} mr-2`} size={20} /><label htmlFor="repeatPassword" className={`block ${darkMode ? "text-white" : "text-slate-800"} text-sm`}>{t("Repita sua senha")}</label></div>
+                  <div className={`relative rounded-xl overflow-hidden transition-all duration-300 ${repeatPasswordError ? "ring-2 ring-red-500" : darkMode ? "focus-within:ring-2 focus-within:ring-pink-500" : "focus-within:ring-2 focus-within:ring-blue-500"}`}>
+                    <input type={isRepeatPasswordVisible ? "text" : "password"} id="repeatPassword" className={`w-full pl-4 pr-10 py-3 ${darkMode ? "bg-slate-700/50 text-white border-slate-600" : "bg-white text-slate-800 border-slate-200"} rounded-xl border focus:outline-none`} placeholder={t("Confirme sua senha")} value={repeatPassword} onChange={handleRepeatPasswordChange} />
+                    <button type="button" className={`absolute right-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-slate-400 hover:text-slate-300" : "text-slate-500 hover:text-slate-700"} transition-colors`} onClick={toggleRepeatPasswordVisibility}>{isRepeatPasswordVisible ? <FaEyeSlash size={20} /> : <FaEye size={20} />}</button>
                   </div>
                   {repeatPasswordError && <p className="text-red-500 text-sm mt-1">{repeatPasswordError}</p>}
                 </div>
-
-                <button
-                  type="submit"
-                  className={`w-full py-3 px-4 ${
-                    darkMode
-                      ? "bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700"
-                      : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                  } text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-[1.02] ${
-                    isLoading ? "opacity-70 cursor-not-allowed" : ""
-                  }`}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center">
-                      <svg
-                        className="animate-spin h-5 w-5 mr-3 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.373A8.008 8.008 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.565z"
-                        ></path>
-                      </svg>
-                      {t("Efetuando cadastro...")}
-                    </div>
-                  ) : (
-                    t("Efetuar cadastro")
-                  )}
+                <button type="submit" className={`w-full py-3 px-4 ${darkMode ? "bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700" : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"} text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-[1.02] ${isLoading ? "opacity-70 cursor-not-allowed" : ""}`} disabled={isLoading}>
+                  {isLoading ? <div className="flex items-center justify-center"><svg className="animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.373A8.008 8.008 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.565z"></path></svg>{t("Efetuando cadastro...")}</div> : t("Efetuar cadastro")}
                 </button>
-
-                <div className="relative flex items-center justify-center my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className={`w-full border-t ${darkMode ? "border-slate-700" : "border-slate-200"}`}></div>
-                  </div>
-                  <div
-                    className={`relative px-4 ${darkMode ? "bg-slate-800 text-slate-400" : "bg-white text-slate-500"} text-sm`}
-                  >
-                    {t("Ou continue com")}
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center space-x-4">
-                  <RegisterWithFacebook />
-                  <RegisterWithGoogle />
-                </div>
+                <div className="relative flex items-center justify-center my-6"><div className="absolute inset-0 flex items-center"><div className={`w-full border-t ${darkMode ? "border-slate-700" : "border-slate-200"}`}></div></div><div className={`relative px-4 ${darkMode ? "bg-slate-800 text-slate-400" : "bg-white text-slate-500"} text-sm`}>{t("Ou continue com")}</div></div>
+                <div className="flex justify-between items-center space-x-4"><RegisterWithFacebook /><RegisterWithGoogle /></div>
               </form>
 
               <p className={`${darkMode ? "text-slate-400" : "text-slate-500"} mt-8 text-center text-sm`}>

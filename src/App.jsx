@@ -26,6 +26,14 @@ import ProtectedRoute from './components/Authentication/ProtectedRoute.tsx';
 import PublicRoute from './components/Authentication/PublicRoute.tsx';
 import LifePlanPage from './pages/plano-de-vida/index.tsx';
 
+import ExtraIncomePage from "./pages/extra-income/index.tsx"
+import SmartCalendarPage from "./pages/smart-calendar/index.tsx"
+import TutorialsGuidePage from "./pages/tutorials/index.tsx"
+import PrinciplesPage from "./pages/principles/index.tsx"
+import AIAssistantPage from "./pages/ai-assistant/index.tsx"
+import UpgradeAIPage from "./pages/upgrade-ai/index.tsx"
+import CoachRecommendationPage from "./pages/coach-recommendation/index.tsx"
+
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 function App() {
@@ -130,6 +138,17 @@ function App() {
                   path="/password_reset/confirm/:uidb64/:token"
                   element={<PublicRoute element={<ResetPasswordConfirm />} />}
                 />
+                <Route path="/extra-income" element={<ProtectedRoute element={<ExtraIncomePage />} />} />
+                <Route path="/smart-calendar" element={<ProtectedRoute element={<SmartCalendarPage />} />} />
+                <Route path="/tutorials" element={<ProtectedRoute element={<TutorialsGuidePage />} />} />
+                <Route path="/principles" element={<ProtectedRoute element={<PrinciplesPage />} />} />
+                <Route path="/ai-assistant" element={<ProtectedRoute element={<AIAssistantPage />} />} />
+                <Route path="/upgrade-ai" element={<ProtectedRoute element={<UpgradeAIPage />} />} />
+                <Route
+                  path="/coach-recommendation"
+                  element={<ProtectedRoute element={<CoachRecommendationPage />} />}
+                />
+
               </Routes>
             </div>
           </BrowserRouter>

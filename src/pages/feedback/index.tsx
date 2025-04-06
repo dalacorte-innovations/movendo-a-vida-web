@@ -33,6 +33,7 @@ const FeedbackPage = () => {
   const animationRef = useRef<number>()
   const waveCanvasRef = useRef<HTMLCanvasElement>(null)
   const waveAnimationRef = useRef<number>()
+  const [profession, setProfession] = useState("")
 
   const navigate = useNavigate()
 
@@ -263,6 +264,7 @@ const FeedbackPage = () => {
       comment: feedback,
       category,
       feedback_mode: isPublic ? "public" : "private",
+      profession: profession,
     }
 
     try {
@@ -439,6 +441,26 @@ const FeedbackPage = () => {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                <div
+                  className={`transform transition-all duration-500 ease-out ${animateIn ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
+                  style={{ transitionDelay: "250ms" }}
+                >
+                  <label className={`block mb-3 font-medium ${darkMode ? "text-white" : "text-slate-800"}`}>
+                    {t("Profissão")}
+                  </label>
+                  <input
+                    type="text"
+                    className={`w-full p-4 rounded-lg border-2 focus:outline-none ${
+                      darkMode
+                        ? "bg-slate-700/30 text-white placeholder-slate-400 border-slate-600/50 focus:border-pink-800/50"
+                        : "bg-white text-slate-800 placeholder-slate-400 border-slate-200 focus:border-blue-300"
+                    } transition-colors`}
+                    placeholder={t("Digite sua profissão...")}
+                    value={profession}
+                    onChange={(e) => setProfession(e.target.value)}
+                  />
                 </div>
 
                 <div

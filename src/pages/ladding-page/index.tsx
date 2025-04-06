@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import React from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import i18n from "../../../i18n"
@@ -13,19 +14,34 @@ import {
   IoMenuOutline,
   IoCloseOutline,
   IoRocketOutline,
-  IoCompassOutline,
   IoCalendarOutline,
+  IoChevronDownOutline,
 } from "react-icons/io5"
+import { getAuthHeaders, endpoints, configBackendConnection } from "../../utils/backendConnection"
+import { toast } from "react-toastify"
+import { ThemeContext } from "../../utils/ThemeContext.jsx"
+
+interface Testimonial {
+  stars: number
+  comment: string
+  image?: string
+  full_name: string
+  profession: string
+}
 
 const LandingPage = () => {
   const { t } = useTranslation()
+  const { darkMode } = useContext(ThemeContext)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const navigate = useNavigate()
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState("pt")
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [animateIn, setAnimateIn] = useState(false)
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>()
   const waveCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -40,6 +56,10 @@ const LandingPage = () => {
     const storedLanguage = localStorage.getItem("Language") || "pt"
     setSelectedLanguage(storedLanguage)
     i18n.changeLanguage(storedLanguage)
+
+    // Check if user is logged in
+    const token = localStorage.getItem("token")
+    setIsLoggedIn(!!token)
   }, [])
 
   useEffect(() => {
@@ -68,14 +88,13 @@ const LandingPage = () => {
     resizeCanvas()
     window.addEventListener("resize", resizeCanvas)
 
-    // Different wave colors based on theme
     const waves = [
       {
         amplitude: 50,
         period: 0.02,
         speed: 0.01,
         phase: 0,
-        color: "rgba(219, 39, 119, 0.3)", // Pink
+        color: "rgba(219, 39, 119, 0.3)",
         lineWidth: 3,
       },
       {
@@ -83,7 +102,7 @@ const LandingPage = () => {
         period: 0.03,
         speed: 0.015,
         phase: 2,
-        color: "rgba(139, 92, 246, 0.3)", // Purple
+        color: "rgba(139, 92, 246, 0.3)",
         lineWidth: 2,
       },
       {
@@ -91,7 +110,7 @@ const LandingPage = () => {
         period: 0.01,
         speed: 0.005,
         phase: 4,
-        color: "rgba(236, 72, 153, 0.2)", // Pink
+        color: "rgba(236, 72, 153, 0.2)",
         lineWidth: 4,
       },
     ]
@@ -167,6 +186,36 @@ const LandingPage = () => {
       })
     }
 
+    const fetchTestimonials = async () => {
+      setIsLoading(true)
+
+      const url = `${configBackendConnection.baseURL}/${endpoints.feedbackAPI}`
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            ...getAuthHeaders(),
+            "Content-Type": "application/json",
+          },
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+
+          console.log(data)
+          setTestimonials(data)
+        } else {
+          toast.error(t("Erro ao carregar feedbacks."))
+        }
+      } catch (error) {
+        toast.error(t("Erro de conexão. Tente novamente mais tarde."))
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchTestimonials()
+
     const connectParticles = () => {
       const maxDistance = 150
 
@@ -202,7 +251,7 @@ const LandingPage = () => {
 
         ctx.beginPath()
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(219, 39, 119, ${particle.opacity})` // Pink
+        ctx.fillStyle = `rgba(219, 39, 119, ${particle.opacity})`
         ctx.fill()
 
         particle.connections.forEach((connectedIndex) => {
@@ -215,7 +264,7 @@ const LandingPage = () => {
           ctx.beginPath()
           ctx.moveTo(particle.x, particle.y)
           ctx.lineTo(connectedParticle.x, connectedParticle.y)
-          ctx.strokeStyle = `rgba(236, 72, 153, ${opacity * 0.3})` // Pink
+          ctx.strokeStyle = `rgba(236, 72, 153, ${opacity * 0.3})`
           ctx.lineWidth = 1
           ctx.stroke()
         })
@@ -238,11 +287,12 @@ const LandingPage = () => {
     }
   }, [])
 
-  const handleLanguageChange = (language) => {
+  const handleLanguageChange = (language: string) => {
+    console.log(`Changing language to: ${language}`)
     i18n.changeLanguage(language)
     setSelectedLanguage(language)
     localStorage.setItem("Language", language)
-    setIsDropdownOpen(false)
+    setIsLanguageModalOpen(false)
   }
 
   const closeMenuOnOutsideClick = (event) => {
@@ -250,24 +300,6 @@ const LandingPage = () => {
       setIsMenuOpen(false)
     }
   }
-
-  const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setIsDropdownOpen(false)
-    }
-  }
-
-  useEffect(() => {
-    if (isDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isDropdownOpen])
 
   const benefits = [
     {
@@ -301,47 +333,6 @@ const LandingPage = () => {
         "Mantenha suas informações seguras e acessíveis apenas para você. Nosso sistema utiliza as melhores práticas de segurança para proteger seus dados.",
       ),
       color: "pink",
-    },
-  ]
-
-  const testimonials = [
-    {
-      name: "Mariana Oliveira",
-      profession: t("Empresária"),
-      text: t(
-        "Esta plataforma mudou a maneira como planejo meu futuro. Agora posso acompanhar o progresso das minhas metas com muito mais clareza.",
-      ),
-    },
-    {
-      name: "Paulo Ferreira",
-      profession: t("Consultor Financeiro"),
-      text: t(
-        "Fantástico! Com esta ferramenta, consegui organizar minhas finanças e meus objetivos de uma forma prática e eficiente.",
-      ),
-    },
-    {
-      name: "Ana Clara Souza",
-      profession: t("Engenheira"),
-      text: t("Nunca foi tão fácil definir metas de longo prazo e trabalhar para alcançá-las. Recomendo para todos!"),
-    },
-    {
-      name: "Rafael Menezes",
-      profession: t("Advogado"),
-      text: t(
-        "Ferramenta excelente para quem quer ter controle sobre os objetivos de vida. Me ajudou a planejar melhor meu futuro.",
-      ),
-    },
-    {
-      name: "Júlia Albuquerque",
-      profession: t("Médica"),
-      text: t(
-        "Recomendo esta plataforma a todos que buscam um planejamento eficiente e com foco em resultados. Excelente!",
-      ),
-    },
-    {
-      name: "Lucas Martins",
-      profession: t("Desenvolvedor de Software"),
-      text: t("Muito fácil de usar e extremamente útil para manter o foco nas minhas metas pessoais e profissionais."),
     },
   ]
 
@@ -401,97 +392,61 @@ const LandingPage = () => {
       <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
 
       <header className="w-full py-6 bg-slate-800/90 backdrop-blur-md flex justify-between items-center px-4 lg:px-16 relative z-10 border-b border-slate-700/50">
-        <div
-          className="text-white text-xl lg:text-2xl font-bold cursor-pointer flex items-center"
-          onClick={() => navigate("/")}
-        >
-          <IoCompassOutline className="mr-2 text-pink-400" />
-          {t("Plano de Vida")}
+        <div className="cursor-pointer flex items-center h-12 overflow-hidden" onClick={() => navigate("/")}>
+          <img src="src/assets/images/logo_mov.png" alt="Logo" className="h-24 object-contain" />
         </div>
 
         <nav className="hidden md:flex flex-1 justify-center space-x-4 md:space-x-8">
           <ul className="flex space-x-4 md:space-x-8">
             <li
-              className="cursor-pointer text-slate-400 font-medium text-sm hover:text-white transition-colors"
+              className="cursor-pointer font-medium text-sm hover:text-white transition-colors"
               onClick={() => navigate("/benefits")}
             >
-              {t("Benefícios")}
+              <span className="text-emerald-400 hover:text-emerald-300 transition-colors">{t("Benefícios")}</span>
             </li>
             <li
-              className="cursor-pointer text-slate-400 font-medium text-sm hover:text-white transition-colors"
+              className="cursor-pointer font-medium text-sm hover:text-white transition-colors"
               onClick={() => navigate("/plans")}
             >
-              {t("Planos")}
+              <span className="text-blue-400 hover:text-blue-300 transition-colors">{t("Planos")}</span>
             </li>
             <li
-              className="cursor-pointer text-slate-400 font-medium text-sm hover:text-white transition-colors"
+              className="cursor-pointer font-medium text-sm hover:text-white transition-colors"
               onClick={() => navigate("/contact")}
             >
-              {t("Contato")}
+              <span className="text-amber-400 hover:text-amber-300 transition-colors">{t("Contato")}</span>
             </li>
-            <li
-              className="relative group cursor-pointer text-slate-400 font-medium text-sm hover:text-white transition-colors"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              onMouseEnter={() => setIsDropdownOpen(true)}
-              ref={dropdownRef}
-            >
-              <span>{t("Idioma")}</span>
-              {isDropdownOpen && (
-                <ul className="absolute left-0 mt-1 bg-slate-800 text-white rounded-lg shadow-lg z-50 w-[7rem] border border-slate-700/50">
-                  <li
-                    className="p-2 hover:bg-slate-700 cursor-pointer flex items-center"
-                    onClick={() => handleLanguageChange("en")}
-                  >
-                    <img
-                      src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg"
-                      alt="English"
-                      className="w-5 h-5 mr-2"
-                    />
-                    English
-                  </li>
-                  <li
-                    className="p-2 hover:bg-slate-700 cursor-pointer flex items-center"
-                    onClick={() => handleLanguageChange("es")}
-                  >
-                    <img
-                      src="https://upload.wikimedia.org/wikipedia/en/9/9a/Flag_of_Spain.svg"
-                      alt="Español"
-                      className="w-5 h-5 mr-2"
-                    />
-                    Español
-                  </li>
-                  <li
-                    className="p-2 hover:bg-slate-700 cursor-pointer flex items-center"
-                    onClick={() => handleLanguageChange("pt")}
-                  >
-                    <img
-                      src="https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg"
-                      alt="Português"
-                      className="w-5 h-5 mr-2"
-                    />
-                    Português
-                  </li>
-                </ul>
-              )}
+            <li className="relative">
+              <button
+                className="flex items-center gap-1 font-medium text-sm cursor-pointer"
+                onClick={() => setIsLanguageModalOpen(!isLanguageModalOpen)}
+              >
+                <span className="text-pink-400 hover:text-pink-300 transition-colors">{t("Idioma")}</span>
+                <IoChevronDownOutline className="text-pink-400" />
+              </button>
             </li>
           </ul>
         </nav>
 
         <div className="flex gap-4 items-center">
-          <button
-            className="hidden md:block py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50"
-            onClick={() => navigate("/login")}
-          >
-            {t("Fazer login")}
-          </button>
-          <button
-            className="hidden md:block py-2 px-4 rounded-lg text-sm font-medium text-white overflow-hidden relative group"
-            onClick={() => navigate("/register")}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 transition-transform duration-300 group-hover:scale-105"></div>
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
-            <span className="relative z-10">{t("Cadastre-se")}</span>
-          </button>
+          {!isLoggedIn && (
+            <>
+              <button
+                className="hidden md:block py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50"
+                onClick={() => navigate("/login")}
+              >
+                {t("Fazer login")}
+              </button>
+              <button
+                className="hidden md:block py-2 px-4 rounded-lg text-sm font-medium text-white overflow-hidden relative group"
+                onClick={() => navigate("/register")}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 transition-transform duration-300 group-hover:scale-105"></div>
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
+                <span className="relative z-10">{t("Cadastre-se")}</span>
+              </button>
+            </>
+          )}
 
           <button className="block md:hidden text-white text-2xl" onClick={toggleMenu}>
             {isMenuOpen ? <IoCloseOutline /> : <IoMenuOutline />}
@@ -508,55 +463,57 @@ const LandingPage = () => {
           <div className="bg-slate-800/95 p-8 rounded-xl w-4/5 max-w-lg text-center border border-slate-700/50">
             <ul className="space-y-6">
               <li
-                className="cursor-pointer text-white font-medium text-lg hover:text-slate-300 transition-colors"
+                className="cursor-pointer font-medium text-lg transition-colors"
                 onClick={() => {
                   navigate("/benefits")
                   toggleMenu()
                 }}
               >
-                {t("Benefícios")}
+                <span className="text-emerald-400 hover:text-emerald-300 transition-colors">{t("Benefícios")}</span>
               </li>
               <li
-                className="cursor-pointer text-white font-medium text-lg hover:text-slate-300 transition-colors"
+                className="cursor-pointer font-medium text-lg transition-colors"
                 onClick={() => {
                   navigate("/plans")
                   toggleMenu()
                 }}
               >
-                {t("Planos")}
+                <span className="text-blue-400 hover:text-blue-300 transition-colors">{t("Planos")}</span>
               </li>
               <li
-                className="cursor-pointer text-white font-medium text-lg hover:text-slate-300 transition-colors"
+                className="cursor-pointer font-medium text-lg transition-colors"
                 onClick={() => {
                   navigate("/contact")
                   toggleMenu()
                 }}
               >
-                {t("Contato")}
+                <span className="text-amber-400 hover:text-amber-300 transition-colors">{t("Contato")}</span>
               </li>
             </ul>
-            <div className="flex flex-col mt-8 space-y-4">
-              <button
-                className="w-full py-2.5 px-4 rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50 transition-colors"
-                onClick={() => {
-                  navigate("/login")
-                  toggleMenu()
-                }}
-              >
-                {t("Fazer login")}
-              </button>
-              <button
-                className="w-full py-2.5 px-4 rounded-lg text-white relative group overflow-hidden"
-                onClick={() => {
-                  navigate("/register")
-                  toggleMenu()
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 transition-transform duration-300 group-hover:scale-105"></div>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
-                <span className="relative z-10">{t("Cadastre-se")}</span>
-              </button>
-            </div>
+            {!isLoggedIn && (
+              <div className="flex flex-col mt-8 space-y-4">
+                <button
+                  className="w-full py-2.5 px-4 rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50 transition-colors"
+                  onClick={() => {
+                    navigate("/login")
+                    toggleMenu()
+                  }}
+                >
+                  {t("Fazer login")}
+                </button>
+                <button
+                  className="w-full py-2.5 px-4 rounded-lg text-white relative group overflow-hidden"
+                  onClick={() => {
+                    navigate("/register")
+                    toggleMenu()
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 transition-transform duration-300 group-hover:scale-105"></div>
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
+                  <span className="relative z-10">{t("Cadastre-se")}</span>
+                </button>
+              </div>
+            )}
             <hr className="my-6 w-full border-slate-700/50" />
             <div className="flex justify-center space-x-4 mt-4">
               <button
@@ -590,6 +547,68 @@ const LandingPage = () => {
                 />
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {isLanguageModalOpen && (
+        <div
+          id="language-modal-background"
+          className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex justify-center items-center z-50"
+          onClick={(e) => {
+            if ((e.target as HTMLElement).id === "language-modal-background") {
+              setIsLanguageModalOpen(false)
+            }
+          }}
+        >
+          <div className="bg-slate-800/95 p-8 rounded-xl w-4/5 max-w-md text-center border border-slate-700/50">
+            <h3 className="text-xl font-bold text-white mb-6">{t("Selecione o idioma")}</h3>
+            <div className="flex flex-col gap-4">
+              <button
+                className={`flex items-center p-3 rounded-lg w-full ${
+                  selectedLanguage === "en" ? "bg-slate-700" : "hover:bg-slate-700/50"
+                }`}
+                onClick={() => handleLanguageChange("en")}
+              >
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg"
+                  alt="English"
+                  className="w-6 h-6 mr-3"
+                />
+                <span className="text-white">English</span>
+              </button>
+              <button
+                className={`flex items-center p-3 rounded-lg w-full ${
+                  selectedLanguage === "es" ? "bg-slate-700" : "hover:bg-slate-700/50"
+                }`}
+                onClick={() => handleLanguageChange("es")}
+              >
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/en/9/9a/Flag_of_Spain.svg"
+                  alt="Español"
+                  className="w-6 h-6 mr-3"
+                />
+                <span className="text-white">Español</span>
+              </button>
+              <button
+                className={`flex items-center p-3 rounded-lg w-full ${
+                  selectedLanguage === "pt" ? "bg-slate-700" : "hover:bg-slate-700/50"
+                }`}
+                onClick={() => handleLanguageChange("pt")}
+              >
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg"
+                  alt="Português"
+                  className="w-6 h-6 mr-3"
+                />
+                <span className="text-white">Português</span>
+              </button>
+            </div>
+            <button
+              className="mt-6 py-2 px-4 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50 transition-colors"
+              onClick={() => setIsLanguageModalOpen(false)}
+            >
+              {t("Fechar")}
+            </button>
           </div>
         </div>
       )}
@@ -628,9 +647,9 @@ const LandingPage = () => {
           </h1>
 
           <p className="text-slate-300 mb-8 max-w-2xl mx-auto">
-            {t(
-              "Defina sua trajetória com clareza e alcance cada marco em sua carreira e vida pessoal. Com um planejamento de 20 anos, você pode transformar seus sonhos em conquistas tangíveis.",
-            )}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 font-semibold">
+              {t("Sonhe grande, planeje com propósito e transforme sua jornada em um legado.")}
+            </span>
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -745,20 +764,24 @@ const LandingPage = () => {
                 </div>
 
                 <div className="flex items-center mb-4">
-                  <div className="flex items-center text-pink-400 text-xl">{"★".repeat(5)}</div>
-                  <span className="ml-2 text-slate-400 text-sm">5.0</span>
+                  <div className="flex items-center text-pink-400 text-xl">{"★".repeat(testimonial.stars)}</div>
+                  <span className="ml-2 text-slate-400 text-sm">{testimonial.stars}.0</span>
                 </div>
 
-                <p className="text-slate-300 mb-6">{testimonial.text}</p>
+                <p className="text-slate-300 mb-6">{testimonial.comment}</p>
 
                 <div className="flex items-center mt-auto">
                   <img
-                    src={`https://robohash.org/${testimonial.name}.png`}
-                    alt={`Avatar de ${testimonial.name}`}
+                    src={
+                      testimonial.image
+                        ? `${configBackendConnection.baseURL}/${testimonial.image}`
+                        : `https://robohash.org/${testimonial.full_name}.png`
+                    }
+                    alt={`Avatar de ${testimonial.full_name}`}
                     className="rounded-full w-10 h-10 mr-4 flex-shrink-0 border border-slate-700/50"
                   />
                   <div>
-                    <p className="text-white font-semibold">{testimonial.name}</p>
+                    <p className="text-white font-semibold">{testimonial.full_name}</p>
                     <p className="text-slate-400 text-sm">{testimonial.profession}</p>
                   </div>
                 </div>
@@ -798,17 +821,19 @@ const LandingPage = () => {
               )}
             </p>
 
-            <button
-              className="group relative inline-flex items-center justify-center py-3 px-6 rounded-lg font-medium text-sm text-white overflow-hidden"
-              onClick={() => navigate("/register")}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 transition-transform duration-300 group-hover:scale-105"></div>
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
-              <span className="relative z-10 flex items-center">
-                {t("Crie uma conta")}
-                <IoArrowForward className="ml-2 transition-transform duration-300 group-hover:translate-x-1" />
-              </span>
-            </button>
+            {!isLoggedIn && (
+              <button
+                className="group relative inline-flex items-center justify-center py-3 px-6 rounded-lg font-medium text-sm text-white overflow-hidden"
+                onClick={() => navigate("/register")}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 transition-transform duration-300 group-hover:scale-105"></div>
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
+                <span className="relative z-10 flex items-center">
+                  {t("Crie uma conta")}
+                  <IoArrowForward className="ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+                </span>
+              </button>
+            )}
           </div>
         </div>
       </section>
@@ -817,65 +842,66 @@ const LandingPage = () => {
       <footer className="py-12 px-4 relative z-10 border-t border-slate-700/50">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center mb-10">
-            <div className="flex items-center mb-6 md:mb-0">
-              <IoCompassOutline className="text-2xl text-pink-400 mr-2" />
-              <h3 className="text-xl font-bold text-white">{t("Plano de Vida")}</h3>
+            <div className="flex items-center mb-6 md:mb-0 h-10 overflow-hidden">
+              <img src="src/assets/images/logo_mov.png" alt="Logo" className="h-14 object-contain" />
             </div>
 
             <nav className="flex flex-wrap justify-center gap-6">
-              <a href="/benefits" className="text-slate-400 hover:text-white transition-colors">
+              <a href="/benefits" className="text-emerald-400 hover:text-emerald-300 transition-colors">
                 {t("Benefícios")}
               </a>
-              <a href="/plans" className="text-slate-400 hover:text-white transition-colors">
+              <a href="/plans" className="text-blue-400 hover:text-blue-300 transition-colors">
                 {t("Planos")}
               </a>
-              <a href="/contact" className="text-slate-400 hover:text-white transition-colors">
+              <a href="/contact" className="text-amber-400 hover:text-amber-300 transition-colors">
                 {t("Contato")}
               </a>
             </nav>
           </div>
 
-          <div className="relative overflow-hidden rounded-xl shadow-md backdrop-blur-md border border-slate-700/50 bg-slate-800/70 p-8 mb-10">
-            <div className="absolute inset-0 overflow-hidden">
-              <div
-                className="absolute -inset-[10px] rounded-full opacity-20 blur-3xl bg-gradient-to-r from-pink-600 to-purple-600"
-                style={{
-                  transition: "all 0.5s ease-out",
-                  width: "50%",
-                  height: "50%",
-                }}
-              />
-            </div>
-
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="text-center md:text-left">
-                <h3 className="text-xl font-bold text-white mb-2">{t("Pronto para transformar seu futuro?")}</h3>
-                <p className="text-slate-300">{t("Não espere mais para começar sua jornada rumo ao sucesso.")}</p>
+          {!isLoggedIn && (
+            <div className="relative overflow-hidden rounded-xl shadow-md backdrop-blur-md border border-slate-700/50 bg-slate-800/70 p-8 mb-10">
+              <div className="absolute inset-0 overflow-hidden">
+                <div
+                  className="absolute -inset-[10px] rounded-full opacity-20 blur-3xl bg-gradient-to-r from-pink-600 to-purple-600"
+                  style={{
+                    transition: "all 0.5s ease-out",
+                    width: "50%",
+                    height: "50%",
+                  }}
+                />
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  className="py-2.5 px-5 rounded-lg font-medium text-sm bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50 transition-colors"
-                  onClick={() => navigate("/login")}
-                >
-                  {t("Fazer login")}
-                </button>
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="text-center md:text-left">
+                  <h3 className="text-xl font-bold text-white mb-2">{t("Pronto para transformar seu futuro?")}</h3>
+                  <p className="text-slate-300">{t("Não espere mais para começar sua jornada rumo ao sucesso.")}</p>
+                </div>
 
-                <button
-                  className="group relative flex items-center justify-center py-2.5 px-5 rounded-lg font-medium text-sm text-white overflow-hidden"
-                  onClick={() => navigate("/register")}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 transition-transform duration-300 group-hover:scale-105"></div>
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
-                  <span className="relative z-10">{t("Cadastre-se")}</span>
-                </button>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    className="py-2.5 px-5 rounded-lg font-medium text-sm bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50 transition-colors"
+                    onClick={() => navigate("/login")}
+                  >
+                    {t("Fazer login")}
+                  </button>
+
+                  <button
+                    className="group relative flex items-center justify-center py-2.5 px-5 rounded-lg font-medium text-sm text-white overflow-hidden"
+                    onClick={() => navigate("/register")}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 transition-transform duration-300 group-hover:scale-105"></div>
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
+                    <span className="relative z-10">{t("Cadastre-se")}</span>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="flex flex-col md:flex-row justify-between items-center pt-6 border-t border-slate-700/50">
             <p className="text-slate-400 text-sm mb-4 md:mb-0">
-              © 2024 | {t("Desenvolvido por Dalacorte Innovations")}
+              © 2025 | {t("Desenvolvido por Dalacorte Innovations")}
             </p>
 
             <div className="flex gap-6">
@@ -894,4 +920,3 @@ const LandingPage = () => {
 }
 
 export default LandingPage
-

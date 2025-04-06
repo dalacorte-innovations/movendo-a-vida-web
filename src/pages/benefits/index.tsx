@@ -13,6 +13,7 @@ import {
   IoShieldCheckmarkOutline,
   IoRocketOutline,
   IoTrendingUpOutline,
+  IoChevronBackOutline,
 } from "react-icons/io5"
 
 const BenefitsPage = () => {
@@ -296,49 +297,42 @@ const BenefitsPage = () => {
         bg: darkMode ? "bg-emerald-900/30" : "bg-emerald-100",
         text: darkMode ? "text-emerald-400" : "text-emerald-600",
         border: darkMode ? "border-emerald-800/30" : "border-emerald-200",
-        hoverBg: darkMode ? "hover:bg-emerald-900/50" : "hover:bg-emerald-200/70",
         gradient: darkMode ? "from-emerald-500 to-teal-600" : "from-emerald-500 to-teal-600",
       },
       blue: {
         bg: darkMode ? "bg-blue-900/30" : "bg-blue-100",
         text: darkMode ? "text-blue-400" : "text-blue-600",
         border: darkMode ? "border-blue-800/30" : "border-blue-200",
-        hoverBg: darkMode ? "hover:bg-blue-900/50" : "hover:bg-blue-200/70",
         gradient: darkMode ? "from-blue-500 to-indigo-600" : "from-blue-500 to-indigo-600",
       },
       amber: {
         bg: darkMode ? "bg-amber-900/30" : "bg-amber-100",
         text: darkMode ? "text-amber-400" : "text-amber-600",
         border: darkMode ? "border-amber-800/30" : "border-amber-200",
-        hoverBg: darkMode ? "hover:bg-amber-900/50" : "hover:bg-amber-200/70",
         gradient: darkMode ? "from-amber-500 to-orange-600" : "from-amber-500 to-orange-600",
       },
       pink: {
         bg: darkMode ? "bg-pink-900/30" : "bg-pink-100",
         text: darkMode ? "text-pink-400" : "text-pink-600",
         border: darkMode ? "border-pink-800/30" : "border-pink-200",
-        hoverBg: darkMode ? "hover:bg-pink-900/50" : "hover:bg-pink-200/70",
         gradient: darkMode ? "from-pink-500 to-rose-600" : "from-pink-500 to-rose-600",
       },
       purple: {
         bg: darkMode ? "bg-purple-900/30" : "bg-purple-100",
         text: darkMode ? "text-purple-400" : "text-purple-600",
         border: darkMode ? "border-purple-800/30" : "border-purple-200",
-        hoverBg: darkMode ? "hover:bg-purple-900/50" : "hover:bg-purple-200/70",
         gradient: darkMode ? "from-purple-500 to-violet-600" : "from-purple-500 to-violet-600",
       },
       indigo: {
         bg: darkMode ? "bg-indigo-900/30" : "bg-indigo-100",
         text: darkMode ? "text-indigo-400" : "text-indigo-600",
         border: darkMode ? "border-indigo-800/30" : "border-indigo-200",
-        hoverBg: darkMode ? "hover:bg-indigo-900/50" : "hover:bg-indigo-200/70",
         gradient: darkMode ? "from-indigo-500 to-blue-600" : "from-indigo-500 to-blue-600",
       },
       cyan: {
         bg: darkMode ? "bg-cyan-900/30" : "bg-cyan-100",
         text: darkMode ? "text-cyan-400" : "text-cyan-600",
         border: darkMode ? "border-cyan-800/30" : "border-cyan-200",
-        hoverBg: darkMode ? "hover:bg-cyan-900/50" : "hover:bg-cyan-200/70",
         gradient: darkMode ? "from-cyan-500 to-teal-600" : "from-cyan-500 to-teal-600",
       },
     }
@@ -350,14 +344,12 @@ const BenefitsPage = () => {
             bg: "bg-pink-900/30",
             text: "text-pink-400",
             border: "border-pink-800/30",
-            hoverBg: "hover:bg-pink-900/50",
             gradient: "from-pink-500 to-purple-600",
           }
         : {
             bg: "bg-blue-100",
             text: "text-blue-600",
             border: "border-blue-200",
-            hoverBg: "hover:bg-blue-200/70",
             gradient: "from-blue-500 to-indigo-600",
           })
     )
@@ -367,6 +359,19 @@ const BenefitsPage = () => {
     <div className={`min-h-screen overflow-hidden ${darkMode ? "bg-[#0F172A]" : "bg-[#f0f7ff]"}`}>
       <canvas ref={waveCanvasRef} className="fixed inset-0 pointer-events-none z-0" />
       <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
+
+      {/* Back button in the top left corner */}
+      <div className="fixed top-4 left-4 z-20">
+        <button
+          onClick={() => navigate("/")}
+          className={`flex items-center justify-center w-10 h-10 rounded-full shadow-lg transition-colors ${
+            darkMode ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-blue-500 text-white hover:bg-blue-600"
+          }`}
+          aria-label={t("Voltar")}
+        >
+          <IoChevronBackOutline className="text-xl" />
+        </button>
+      </div>
 
       <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8 relative z-10">
         <div
@@ -392,16 +397,6 @@ const BenefitsPage = () => {
           <div className="relative p-6 md:p-10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
               <div className="flex items-center">
-                <button
-                  onClick={() => navigate("/")}
-                  className={`flex items-center justify-center w-10 h-10 rounded-lg mr-4 transition-colors ${
-                    darkMode
-                      ? "bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50"
-                      : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
-                  }`}
-                >
-                  <IoArrowBack />
-                </button>
                 <div>
                   <h1 className={`text-2xl md:text-3xl font-bold ${darkMode ? "text-white" : "text-slate-800"}`}>
                     {t("Benefícios do Plano de Vida")}
@@ -424,9 +419,7 @@ const BenefitsPage = () => {
                 key={benefit.id}
                 className={`relative overflow-hidden rounded-xl shadow-md backdrop-blur-md border transition-all duration-300 ${
                   colorClasses.border
-                } ${colorClasses.hoverBg} ${
-                  darkMode ? "bg-slate-800/70" : "bg-white/80"
-                } transform transition-all duration-500 ease-out ${
+                } ${darkMode ? "bg-slate-800/70" : "bg-white/80"} transform transition-all duration-500 ease-out ${
                   animateIn ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
@@ -487,7 +480,7 @@ const BenefitsPage = () => {
             <div
               className={`absolute inset-0 ${
                 darkMode
-                  ? "bg-gradient-to-r from-pink-600 to-purple-600"
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600"
                   : "bg-gradient-to-r from-blue-600 to-indigo-600"
               } transition-transform duration-300 group-hover:scale-105`}
             />

@@ -621,17 +621,6 @@ const LifePlanTable = () => {
                 <button
                   className={`group flex items-center justify-center py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 ${
                     darkMode
-                      ? "bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50 border border-emerald-800/30"
-                      : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
-                  }`}
-                  onClick={handleGenerateCSV}
-                >
-                  <FaFileCsv className="mr-2" />
-                  <span>Exportar CSV</span>
-                </button>
-                <button
-                  className={`group flex items-center justify-center py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 ${
-                    darkMode
                       ? "bg-red-900/30 text-red-400 hover:bg-red-900/50 border border-red-800/30"
                       : "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
                   }`}

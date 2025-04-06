@@ -1,7 +1,8 @@
 "use client"
 
 import { useContext, useState, useEffect, useRef } from "react"
-import { FaWhatsapp, FaPaperPlane, FaArrowLeft } from "react-icons/fa"
+import { FaWhatsapp, FaPaperPlane, FaChevronLeft } from "react-icons/fa"
+import { IoArrowBack } from "react-icons/io5"
 import { ThemeContext } from "../../utils/ThemeContext"
 import { configBackendConnection, endpoints } from "../../utils/backendConnection"
 import { toast } from "react-toastify"
@@ -202,6 +203,17 @@ const ContactPage = () => {
     <div
       className={`min-h-screen flex items-center justify-center relative overflow-hidden ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}
     >
+      {/* Back button - Fixed position */}
+      <button
+        onClick={() => navigate(-1)}
+        className={`fixed top-6 left-6 z-50 flex items-center justify-center w-10 h-10 rounded-full shadow-lg transition-all ${
+          darkMode ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-blue-500 hover:bg-blue-600 text-white"
+        }`}
+        aria-label={t("Voltar")}
+      >
+        <FaChevronLeft />
+      </button>
+
       {/* Animated background */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ zIndex: 0 }} />
 
@@ -226,7 +238,7 @@ const ContactPage = () => {
               } shadow-xl`}
             >
               <h1 className={`text-4xl font-bold mb-6 ${darkMode ? "text-white" : "text-gray-800"}`}>
-                {t("Contato Plano de Vida")}
+                {t("Contato Movendo a Vida para Mudar o Futuro")}
               </h1>
 
               <p className={`text-lg mb-8 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
@@ -295,17 +307,25 @@ const ContactPage = () => {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => navigate("/")}
-                  className={`flex items-center gap-2 py-2 px-4 rounded-lg transition-colors ${
-                    darkMode
-                      ? "text-gray-300 hover:text-white hover:bg-gray-800/50"
-                      : "text-gray-600 hover:text-gray-800 hover:bg-gray-100/50"
-                  }`}
-                >
-                  <FaArrowLeft />
-                  <span>{t("Voltar para o site")}</span>
-                </button>
+                <div className="flex justify-center mt-10">
+                  <button
+                    onClick={() => navigate("/")}
+                    className={`group relative flex items-center justify-center py-3.5 px-6 rounded-xl font-medium text-sm text-white overflow-hidden transition-all duration-300`}
+                  >
+                    <div
+                      className={`absolute inset-0 ${
+                        darkMode
+                          ? "bg-gradient-to-r from-blue-600 to-indigo-600"
+                          : "bg-gradient-to-r from-blue-600 to-indigo-600"
+                      } transition-transform duration-300 group-hover:scale-105`}
+                    />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300" />
+                    <span className="relative z-10 flex items-center">
+                      <IoArrowBack className="mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
+                      {t("Voltar para o site")}
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -345,7 +365,7 @@ const ContactPage = () => {
                       onChange={handleChange}
                       className={`w-full p-3 rounded-lg focus:outline-none focus:ring-2 transition-all ${
                         darkMode
-                          ? "bg-gray-800/50 border border-gray-700 text-white focus:ring-purple-500/50"
+                          ? "bg-gray-800/50 border border-gray-700 text-white focus:ring-blue-500/50"
                           : "bg-white/80 border border-gray-300 text-gray-900 focus:ring-blue-500/50"
                       }`}
                       placeholder={t("Digite seu nome aqui")}
@@ -368,7 +388,7 @@ const ContactPage = () => {
                       onChange={handleChange}
                       className={`w-full p-3 rounded-lg focus:outline-none focus:ring-2 transition-all ${
                         darkMode
-                          ? "bg-gray-800/50 border border-gray-700 text-white focus:ring-purple-500/50"
+                          ? "bg-gray-800/50 border border-gray-700 text-white focus:ring-blue-500/50"
                           : "bg-white/80 border border-gray-300 text-gray-900 focus:ring-blue-500/50"
                       }`}
                       placeholder={t("Digite seu e-mail aqui")}
@@ -390,7 +410,7 @@ const ContactPage = () => {
                       onChange={handleChange}
                       className={`w-full p-3 h-32 rounded-lg focus:outline-none focus:ring-2 transition-all ${
                         darkMode
-                          ? "bg-gray-800/50 border border-gray-700 text-white focus:ring-purple-500/50"
+                          ? "bg-gray-800/50 border border-gray-700 text-white focus:ring-blue-500/50"
                           : "bg-white/80 border border-gray-300 text-gray-900 focus:ring-blue-500/50"
                       }`}
                       placeholder={t("Escreva sua mensagem aqui")}
@@ -402,8 +422,8 @@ const ContactPage = () => {
                     type="submit"
                     className={`w-full py-3 px-6 rounded-lg flex items-center justify-center gap-2 font-medium transition-all ${
                       darkMode
-                        ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-                        : "bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                        : "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
                     }`}
                   >
                     <FaPaperPlane />

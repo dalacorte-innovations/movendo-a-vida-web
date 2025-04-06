@@ -359,7 +359,7 @@ function HomePage() {
                       />
                     </div>
                     <h1 className={`text-3xl font-bold ${darkMode ? "text-white" : "text-slate-800"}`}>
-                      {t("Bem-vindo ao seu Planejador")}
+                      {t("Bem-vindo ao seu Futuro")}
                     </h1>
                   </div>
                   <p className={`text-lg mt-2 ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
@@ -503,4 +503,3 @@ function HomePage() {
 }
 
 export default HomePage
-
