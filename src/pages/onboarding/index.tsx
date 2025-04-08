@@ -1,39 +1,34 @@
 "use client"
 
+import React from "react"
 import { useState, useContext, useRef, useEffect } from "react"
 import {
-  IoChevronDown,
-  IoChevronUp,
   IoBookOutline,
   IoStatsChartOutline,
   IoPersonAddOutline,
   IoCardOutline,
   IoPersonCircleOutline,
   IoShareSocialOutline,
-  IoPencil,
-  IoSave,
-  IoClose,
-  IoCloudUploadOutline,
-  IoMailOutline,
-  IoPhonePortraitOutline,
-  IoCheckmarkCircle,
-  IoArrowForward,
-  IoCopyOutline,
-  IoWalletOutline,
   IoCheckmarkOutline,
-  IoBarChartOutline,
+  IoWalletOutline,
   IoTrendingUpOutline,
+  IoBarChartOutline,
   IoCalendarOutline,
+  IoLeafOutline,
+  IoRocketSharp,
+  IoSparkles,
+  IoCashOutline,
+  IoGiftOutline,
+  IoArrowForward,
 } from "react-icons/io5"
 import Sidebar from "../../components/sidebar"
 import { ThemeContext } from "../../utils/ThemeContext.jsx"
 import { useTranslation } from "react-i18next"
+import FAQSection from "./faq-section.tsx"
 
 const TutorialPage = () => {
   const { darkMode } = useContext(ThemeContext)
   const { t } = useTranslation()
-  const [openSection, setOpenSection] = useState(null)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [animateIn, setAnimateIn] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>()
@@ -42,17 +37,6 @@ const TutorialPage = () => {
 
   useEffect(() => {
     setAnimateIn(true)
-  }, [])
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY })
-    }
-
-    window.addEventListener("mousemove", handleMouseMove)
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove)
-    }
   }, [])
 
   useEffect(() => {
@@ -76,9 +60,7 @@ const TutorialPage = () => {
         period: 0.02,
         speed: 0.01,
         phase: 0,
-        color: darkMode
-          ? "rgba(219, 39, 119, 0.3)" // Pink in dark mode
-          : "rgba(59, 130, 246, 0.15)", // Blue in light mode
+        color: darkMode ? "rgba(219, 39, 119, 0.3)" : "rgba(59, 130, 246, 0.15)",
         lineWidth: 3,
       },
       {
@@ -86,9 +68,7 @@ const TutorialPage = () => {
         period: 0.03,
         speed: 0.015,
         phase: 2,
-        color: darkMode
-          ? "rgba(139, 92, 246, 0.3)" // Purple in dark mode
-          : "rgba(37, 99, 235, 0.15)", // Darker blue in light mode
+        color: darkMode ? "rgba(139, 92, 246, 0.3)" : "rgba(37, 99, 235, 0.15)",
         lineWidth: 2,
       },
       {
@@ -96,9 +76,7 @@ const TutorialPage = () => {
         period: 0.01,
         speed: 0.005,
         phase: 4,
-        color: darkMode
-          ? "rgba(236, 72, 153, 0.2)" // Pink in dark mode
-          : "rgba(96, 165, 250, 0.1)", // Lighter blue in light mode
+        color: darkMode ? "rgba(236, 72, 153, 0.2)" : "rgba(96, 165, 250, 0.1)",
         lineWidth: 4,
       },
     ]
@@ -210,8 +188,8 @@ const TutorialPage = () => {
         ctx.beginPath()
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
         ctx.fillStyle = darkMode
-          ? `rgba(219, 39, 119, ${particle.opacity})` // Pink in dark mode
-          : `rgba(59, 130, 246, ${particle.opacity * 0.7})` // Blue in light mode
+          ? `rgba(219, 39, 119, ${particle.opacity})`
+          : `rgba(59, 130, 246, ${particle.opacity * 0.7})`
         ctx.fill()
 
         particle.connections.forEach((connectedIndex) => {
@@ -224,9 +202,7 @@ const TutorialPage = () => {
           ctx.beginPath()
           ctx.moveTo(particle.x, particle.y)
           ctx.lineTo(connectedParticle.x, connectedParticle.y)
-          ctx.strokeStyle = darkMode
-            ? `rgba(236, 72, 153, ${opacity * 0.3})` // Pink in dark mode
-            : `rgba(37, 99, 235, ${opacity * 0.15})` // Blue in light mode
+          ctx.strokeStyle = darkMode ? `rgba(236, 72, 153, ${opacity * 0.3})` : `rgba(37, 99, 235, ${opacity * 0.15})`
           ctx.lineWidth = 1
           ctx.stroke()
         })
@@ -249,7 +225,6 @@ const TutorialPage = () => {
     }
   }, [darkMode])
 
-  // Example components for tutorials
   const LifePlanExample = () => {
     return (
       <div className="space-y-6">
@@ -422,270 +397,172 @@ const TutorialPage = () => {
   }
 
   const PlansExample = () => {
-    const [selectedPlan, setSelectedPlan] = useState(1)
-    const [step, setStep] = useState(1)
-
-    const plans = [
-      {
-        id: 1,
-        name: t("Plano Básico"),
-        price: "R$ 9,90",
-        features: [t("Plano de vida básico"), t("1 usuário"), t("Exportação em PDF")],
-      },
-      {
-        id: 2,
-        name: t("Plano Premium"),
-        price: "R$ 19,90",
-        features: [t("Plano de vida completo"), t("3 usuários"), t("Exportação em PDF e CSV"), t("Gráficos avançados")],
-      },
-      {
-        id: 3,
-        name: t("Plano Empresarial"),
-        price: "R$ 49,90",
-        features: [
-          t("Plano de vida completo"),
-          t("10 usuários"),
-          t("Exportação em todos formatos"),
-          t("Gráficos avançados"),
-          t("Suporte prioritário"),
-        ],
-      },
-    ]
-
     return (
       <div className="space-y-6">
-        {step === 1 && (
-          <>
-            <p className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
-              {t("Para contratar um plano ou alterar o seu atual, primeiro selecione o plano desejado:")}
-            </p>
+        <p className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
+          {t("Para contratar um plano ou alterar o seu atual, primeiro selecione o plano desejado:")}
+        </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {plans.map((plan) => (
-                <div
-                  key={plan.id}
-                  className={`relative overflow-hidden rounded-xl p-5 cursor-pointer transition-all duration-300 ${
-                    selectedPlan === plan.id
-                      ? darkMode
-                        ? "bg-pink-900/30 border-2 border-pink-500/50"
-                        : "bg-blue-100/80 border-2 border-blue-500/50"
-                      : darkMode
-                        ? "bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50"
-                        : "bg-white/90 border border-blue-100 hover:bg-blue-50/50"
-                  }`}
-                  onClick={() => setSelectedPlan(plan.id)}
-                >
-                  {selectedPlan === plan.id && (
-                    <div
-                      className={`absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center ${
-                        darkMode ? "bg-pink-500" : "bg-blue-500"
-                      }`}
-                    >
-                      <IoCheckmarkOutline className="text-white text-sm" />
-                    </div>
-                  )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            {
+              id: 1,
+              title: t("Iniciante"),
+              price: "R$79,00",
+              paymentType: t("Pagamento Único"),
+              accessPeriod: t("Acesso por 1 ano"),
+              description: t(
+                "Para quem está começando sua jornada com o essencial e deseja aprender a usar a plataforma com clareza.",
+              ),
+              features: [
+                t("Plano de Vida"),
+                t("Exportar PDF"),
+                t("Gráficos"),
+                t("Guia prático de uso da plataforma"),
+                t("Acesso à indicação de Coaches de Planejamento de Vida"),
+              ],
+              color: "emerald",
+              icon: IoLeafOutline,
+            },
+            {
+              id: 2,
+              title: t("Avançado"),
+              price: "R$98,80",
+              paymentType: t("Pagamento Único"),
+              accessPeriod: t("Acesso por 2 ano"),
+              description: t(
+                "Ideal para quem busca mais recursos, quer se organizar melhor e ainda ganhar por indicações.",
+              ),
+              features: [
+                t("Plano de Vida"),
+                t("Exportar PDF"),
+                t("Gráficos"),
+                t("Guia prático de uso da plataforma"),
+                t("Benefício: Ganhe R$20 por cada nova indicação aprovada"),
+              ],
+              popular: true,
+              color: "blue",
+              icon: IoRocketSharp,
+            },
+            {
+              id: 3,
+              title: t("Profissional (Coach)"),
+              price: "R$2.798,00",
+              paymentType: t("Pagamento Único"),
+              accessPeriod: t("Acesso por 1 ano"),
+              accountsIncluded: t("Até 50 contas inclusas"),
+              description: t(
+                "Para coaches de planejamento de vida que desejam escalar seu impacto com personalização e presença profissional.",
+              ),
+              features: [
+                t("Acesso à 50 Plataformas Avançado"),
+                t("Plataforma personalizada com logo e nome do coach"),
+                t("Indicação como Coach parceiro oficial"),
+                t("Destaque na página inicial da plataforma"),
+                t("Dashboard exclusivo para gestão dos clientes"),
+              ],
+              color: "purple",
+              icon: IoSparkles,
+            },
+          ].map((plan) => {
+            const colorMap = {
+              emerald: {
+                bg: darkMode ? "bg-emerald-900/30" : "bg-emerald-100",
+                text: darkMode ? "text-emerald-400" : "text-emerald-600",
+                border: darkMode ? "border-emerald-800/30" : "border-emerald-200",
+                gradient: darkMode ? "from-emerald-600 to-teal-600" : "from-emerald-500 to-teal-500",
+              },
+              blue: {
+                bg: darkMode ? "bg-blue-900/30" : "bg-blue-100",
+                text: darkMode ? "text-blue-400" : "text-blue-600",
+                border: darkMode ? "border-blue-800/30" : "border-blue-200",
+                gradient: darkMode ? "from-blue-600 to-indigo-600" : "from-blue-500 to-indigo-500",
+              },
+              purple: {
+                bg: darkMode ? "bg-purple-900/30" : "bg-purple-100",
+                text: darkMode ? "text-purple-400" : "text-purple-600",
+                border: darkMode ? "border-purple-800/30" : "border-purple-200",
+                gradient: darkMode ? "from-purple-600 to-violet-600" : "from-purple-500 to-violet-500",
+              },
+            }
 
-                  <h3 className={`text-lg font-semibold mb-2 ${darkMode ? "text-white" : "text-slate-800"}`}>
-                    {plan.name}
-                  </h3>
+            const colorClasses = colorMap[plan.color]
 
+            return (
+              <div
+                key={plan.id}
+                className={`relative overflow-hidden rounded-xl shadow-md backdrop-blur-md border-2 ${colorClasses.border} ${
+                  darkMode ? "bg-slate-800/70" : "bg-white/90"
+                }`}
+              >
+                <div className="absolute inset-0 overflow-hidden">
                   <div
-                    className={`text-2xl font-bold mb-4 ${
+                    className={`absolute -inset-[10px] rounded-full opacity-20 blur-3xl bg-gradient-to-r ${colorClasses.gradient}`}
+                    style={{
+                      top: "10%",
+                      left: "25%",
+                      width: "50%",
+                      height: "50%",
+                    }}
+                  />
+                </div>
+
+                {plan.popular && (
+                  <div
+                    className={`absolute top-4 right-4 ${
                       darkMode
-                        ? selectedPlan === plan.id
-                          ? "text-pink-400"
-                          : "text-slate-300"
-                        : selectedPlan === plan.id
-                          ? "text-blue-600"
-                          : "text-slate-700"
-                    }`}
+                        ? "bg-pink-900/50 text-pink-300 border border-pink-800/30"
+                        : "bg-blue-100 text-blue-700 border border-blue-200"
+                    } px-3 py-1 rounded-full text-xs font-semibold z-10`}
                   >
-                    {plan.price}
-                    <span className={`text-sm font-normal ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
-                      /mês
-                    </span>
+                    {t("Mais popular")}
+                  </div>
+                )}
+
+                <div className="relative p-6">
+                  <div className="flex items-center mb-4">
+                    <div className={`flex items-center justify-center w-12 h-12 rounded-xl ${colorClasses.bg} mr-4`}>
+                      <plan.icon className={`text-xl ${colorClasses.text}`} />
+                    </div>
+                    <h3 className={`text-xl font-bold ${darkMode ? "text-white" : "text-slate-800"}`}>{plan.title}</h3>
                   </div>
 
-                  <ul className="space-y-2">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
+                  <div className={`text-3xl font-bold mb-2 ${darkMode ? "text-white" : "text-slate-800"}`}>
+                    {plan.price}
+                  </div>
+
+                  <div className={`mb-4 text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
+                    {plan.paymentType} – {plan.accessPeriod}
+                    {plan.accountsIncluded && (
+                      <div className="mt-1 font-medium text-sm">🎯 {plan.accountsIncluded}</div>
+                    )}
+                  </div>
+
+                  <p className={`mb-6 text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>{plan.description}</p>
+
+                  <div className={`h-px my-6 ${darkMode ? "bg-slate-700" : "bg-slate-200"}`}></div>
+
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center">
                         <div
-                          className={`flex-shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center ${
-                            darkMode ? "bg-pink-900/50" : "bg-blue-100"
-                          } mr-2`}
+                          className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
+                            darkMode ? "bg-emerald-900/30" : "bg-emerald-100"
+                          } mr-3`}
                         >
-                          <IoCheckmarkOutline className={`text-xs ${darkMode ? "text-pink-400" : "text-blue-600"}`} />
+                          <IoCheckmarkOutline
+                            className={`text-xs ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}
+                          />
                         </div>
                         <span className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-              ))}
-            </div>
-
-            <div className="flex justify-end mt-4">
-              <button
-                className={`group relative flex items-center justify-center py-2.5 px-5 rounded-lg font-medium text-sm text-white overflow-hidden transition-all duration-300`}
-                onClick={() => setStep(2)}
-              >
-                <div
-                  className={`absolute inset-0 ${
-                    darkMode
-                      ? "bg-gradient-to-r from-pink-600 to-purple-600"
-                      : "bg-gradient-to-r from-blue-600 to-indigo-600"
-                  } transition-transform duration-300 group-hover:scale-105`}
-                ></div>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
-                <span className="relative z-10 flex items-center">
-                  {t("Realizar pagamento")}
-                  <IoArrowForward className="ml-2 transition-transform duration-300 group-hover:translate-x-1" />
-                </span>
-              </button>
-            </div>
-          </>
-        )}
-
-        {step === 2 && (
-          <>
-            <div
-              className={`relative overflow-hidden rounded-xl shadow-md ${
-                darkMode ? "bg-slate-800/50 border border-slate-700/50" : "bg-white/90 border border-blue-100"
-              } p-5`}
-            >
-              <h3 className={`text-lg font-semibold mb-4 ${darkMode ? "text-white" : "text-slate-800"}`}>
-                {t("Página de Pagamento")}
-              </h3>
-
-              <div className="space-y-4">
-                <div
-                  className={`p-4 rounded-lg ${
-                    darkMode ? "bg-slate-700/30 border border-slate-600/30" : "bg-blue-50/50 border border-blue-100"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={`font-medium ${darkMode ? "text-white" : "text-slate-800"}`}>
-                      {plans.find((p) => p.id === selectedPlan)?.name}
-                    </span>
-                    <span className={`font-bold ${darkMode ? "text-pink-400" : "text-blue-600"}`}>
-                      {plans.find((p) => p.id === selectedPlan)?.price}/mês
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div
-                    className={`p-4 rounded-lg ${
-                      darkMode ? "bg-slate-700/30 border border-slate-600/30" : "bg-slate-50 border border-slate-200"
-                    }`}
-                  >
-                    <h4 className={`text-sm font-medium mb-3 ${darkMode ? "text-white" : "text-slate-800"}`}>
-                      {t("Cartão de Crédito")}
-                    </h4>
-
-                    <div className="space-y-3">
-                      <div className={`h-10 rounded-lg ${darkMode ? "bg-slate-600/50" : "bg-white"}`}></div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className={`h-10 rounded-lg ${darkMode ? "bg-slate-600/50" : "bg-white"}`}></div>
-                        <div className={`h-10 rounded-lg ${darkMode ? "bg-slate-600/50" : "bg-white"}`}></div>
-                      </div>
-                      <div className={`h-10 rounded-lg ${darkMode ? "bg-slate-600/50" : "bg-white"}`}></div>
-                    </div>
-                  </div>
-
-                  <div
-                    className={`p-4 rounded-lg ${
-                      darkMode ? "bg-slate-700/30 border border-slate-600/30" : "bg-slate-50 border border-slate-200"
-                    }`}
-                  >
-                    <h4 className={`text-sm font-medium mb-3 ${darkMode ? "text-white" : "text-slate-800"}`}>
-                      {t("Boleto Bancário")}
-                    </h4>
-
-                    <div
-                      className={`h-32 rounded-lg flex items-center justify-center ${
-                        darkMode ? "bg-slate-600/50" : "bg-white"
-                      }`}
-                    >
-                      <div className={`text-center ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
-                        <IoWalletOutline className="text-3xl mx-auto mb-2" />
-                        <span className="text-sm">{t("Gerar boleto")}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
-
-              <div className="flex justify-between mt-6">
-                <button
-                  className={`flex items-center justify-center py-2.5 px-5 rounded-lg font-medium text-sm transition-colors ${
-                    darkMode
-                      ? "bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50"
-                      : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
-                  }`}
-                  onClick={() => setStep(1)}
-                >
-                  {t("Voltar")}
-                </button>
-
-                <button
-                  className={`group relative flex items-center justify-center py-2.5 px-5 rounded-lg font-medium text-sm text-white overflow-hidden transition-all duration-300`}
-                  onClick={() => setStep(3)}
-                >
-                  <div
-                    className={`absolute inset-0 ${
-                      darkMode
-                        ? "bg-gradient-to-r from-pink-600 to-purple-600"
-                        : "bg-gradient-to-r from-blue-600 to-indigo-600"
-                    } transition-transform duration-300 group-hover:scale-105`}
-                  ></div>
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
-                  <span className="relative z-10 flex items-center">{t("Finalizar Pagamento")}</span>
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-
-        {step === 3 && (
-          <div
-            className={`relative overflow-hidden rounded-xl shadow-md ${
-              darkMode ? "bg-slate-800/50 border border-slate-700/50" : "bg-white/90 border border-blue-100"
-            } p-6 text-center`}
-          >
-            <div
-              className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${
-                darkMode ? "bg-emerald-900/30" : "bg-emerald-100"
-              } mb-4`}
-            >
-              <IoCheckmarkCircle className={`text-3xl ${darkMode ? "text-emerald-400" : "text-emerald-600"}`} />
-            </div>
-
-            <h3 className={`text-xl font-semibold mb-2 ${darkMode ? "text-white" : "text-slate-800"}`}>
-              {t("Pagamento Bem-Sucedido!")}
-            </h3>
-
-            <p className={`text-sm mb-6 ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
-              {t("Seu plano")} <strong>{plans.find((p) => p.id === selectedPlan)?.name}</strong>{" "}
-              {t("foi ativado com sucesso. Aproveite todos os recursos disponíveis!")}
-            </p>
-
-            <button
-              className={`group relative flex items-center justify-center py-2.5 px-5 rounded-lg font-medium text-sm text-white overflow-hidden transition-all duration-300 mx-auto`}
-              onClick={() => setStep(1)}
-            >
-              <div
-                className={`absolute inset-0 ${
-                  darkMode
-                    ? "bg-gradient-to-r from-emerald-600 to-teal-600"
-                    : "bg-gradient-to-r from-emerald-600 to-teal-600"
-                } transition-transform duration-300 group-hover:scale-105`}
-              ></div>
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
-              <span className="relative z-10 flex items-center">{t("Voltar para Planos")}</span>
-            </button>
-          </div>
-        )}
+            )
+          })}
+        </div>
       </div>
     )
   }
@@ -892,15 +769,174 @@ const TutorialPage = () => {
   }
 
   const InviteExample = () => {
-    const [copied, setCopied] = useState(false)
-
-    const handleCopy = () => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-
     return (
       <div className="space-y-6">
+        {/* Renda Extra - Featured Section */}
+        <div
+          className={`relative overflow-hidden rounded-xl shadow-md ${
+            darkMode ? "bg-slate-800/50 border border-slate-700/50" : "bg-white/90 border border-blue-100"
+          } p-5 mb-8`}
+        >
+          <div className="absolute inset-0 overflow-hidden">
+            <div
+              className={`absolute -inset-[10px] rounded-full opacity-30 blur-3xl ${
+                darkMode ? "bg-emerald-500" : "bg-emerald-400"
+              }`}
+              style={{
+                top: "20%",
+                left: "30%",
+                width: "60%",
+                height: "60%",
+              }}
+            />
+          </div>
+
+          <div className="relative">
+            <div className="flex items-center mb-6">
+              <div
+                className={`flex items-center justify-center w-14 h-14 rounded-full ${
+                  darkMode ? "bg-emerald-900/40" : "bg-emerald-100"
+                } mr-4`}
+              >
+                <IoCashOutline className={`text-2xl ${darkMode ? "text-emerald-400" : "text-emerald-600"}`} />
+              </div>
+              <div>
+                <h3 className={`text-xl font-bold ${darkMode ? "text-white" : "text-slate-800"}`}>
+                  {t("Renda Extra")}
+                </h3>
+                <p className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
+                  {t("Ganhe dinheiro indicando amigos para o Plano de Vida")}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div
+                className={`p-5 rounded-xl ${
+                  darkMode ? "bg-slate-700/30 border border-slate-600/30" : "bg-emerald-50/70 border border-emerald-100"
+                }`}
+              >
+                <div className="flex items-center mb-3">
+                  <IoGiftOutline className={`text-xl mr-3 ${darkMode ? "text-emerald-400" : "text-emerald-600"}`} />
+                  <h4 className={`font-semibold ${darkMode ? "text-white" : "text-slate-800"}`}>
+                    {t("Recompensas por Indicação")}
+                  </h4>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
+                      {t("Cadastro de amigo")}
+                    </span>
+                    <span className={`font-bold ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}>
+                      10 {t("pontos")}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
+                      {t("Assinatura de plano pago")}
+                    </span>
+                    <span className={`font-bold ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}>
+                      50 {t("pontos")}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
+                      {t("Plano Avançado")}
+                    </span>
+                    <span className={`font-bold ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}>R$ 20,00</span>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`p-5 rounded-xl ${
+                  darkMode ? "bg-slate-700/30 border border-slate-600/30" : "bg-emerald-50/70 border border-emerald-100"
+                }`}
+              >
+                <div className="flex items-center mb-3">
+                  <IoWalletOutline className={`text-xl mr-3 ${darkMode ? "text-emerald-400" : "text-emerald-600"}`} />
+                  <h4 className={`font-semibold ${darkMode ? "text-white" : "text-slate-800"}`}>
+                    {t("Troque seus pontos")}
+                  </h4>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
+                      100 {t("pontos")}
+                    </span>
+                    <span className={`font-bold ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}>
+                      1 {t("mês grátis")}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
+                      300 {t("pontos")}
+                    </span>
+                    <span className={`font-bold ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}>
+                      3 {t("meses grátis")}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
+                      500 {t("pontos")}
+                    </span>
+                    <span className={`font-bold ${darkMode ? "text-emerald-400" : "text-emerald-600"}`}>
+                      6 {t("meses grátis")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className={`p-4 rounded-xl ${
+                darkMode
+                  ? "bg-emerald-900/20 border border-emerald-800/30"
+                  : "bg-emerald-100/70 border border-emerald-200"
+              } flex items-center justify-between`}
+            >
+              <div className="flex items-center">
+                <div className="w-12 h-12 flex items-center justify-center mr-3">
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    <circle cx="50" cy="50" r="45" fill={darkMode ? "#064e3b" : "#d1fae5"} />
+                    <path
+                      d="M50,5 A45,45 0 0,1 95,50 A45,45 0 0,1 50,95 A45,45 0 0,1 5,50 A45,45 0 0,1 50,5 Z"
+                      fill="none"
+                      stroke={darkMode ? "#10b981" : "#059669"}
+                      strokeWidth="2"
+                    />
+                    <text
+                      x="50"
+                      y="50"
+                      fontFamily="Arial"
+                      fontSize="40"
+                      fontWeight="bold"
+                      fill={darkMode ? "#10b981" : "#059669"}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      $
+                    </text>
+                  </svg>
+                </div>
+                <div>
+                  <h4 className={`font-semibold ${darkMode ? "text-emerald-400" : "text-emerald-700"}`}>
+                    {t("Comece a ganhar agora")}
+                  </h4>
+                  <p className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
+                    {t("Compartilhe seu link único e acompanhe seus ganhos")}
+                  </p>
+                </div>
+              </div>
+              <div className={`${darkMode ? "text-emerald-400" : "text-emerald-600"}`}>
+                <IoArrowForward className="text-xl" />
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div
           className={`relative overflow-hidden rounded-xl shadow-md ${
             darkMode ? "bg-slate-800/50 border border-slate-700/50" : "bg-white/90 border border-blue-100"
@@ -946,18 +982,6 @@ const TutorialPage = () => {
                 value="https://planodevida.com/register/ABC123"
                 readOnly
               />
-              <button
-                type="button"
-                className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
-                  darkMode
-                    ? "bg-slate-700 hover:bg-slate-600 text-slate-300"
-                    : "bg-slate-100 hover:bg-slate-200 text-slate-600"
-                }`}
-                onClick={handleCopy}
-                title={t("Copiar link")}
-              >
-                {copied ? <IoCheckmarkOutline /> : <IoCopyOutline />}
-              </button>
             </div>
           </div>
 
@@ -1022,23 +1046,6 @@ const TutorialPage = () => {
               </p>
             </div>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              type="button"
-              className={`group relative flex items-center justify-center py-3 px-4 rounded-lg font-medium text-sm text-white overflow-hidden transition-all duration-300 flex-1`}
-            >
-              <div
-                className={`absolute inset-0 ${
-                  darkMode
-                    ? "bg-gradient-to-r from-pink-600 to-purple-600"
-                    : "bg-gradient-to-r from-blue-600 to-indigo-600"
-                } transition-transform duration-300 group-hover:scale-105`}
-              ></div>
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
-              <span className="relative z-10 flex items-center">{t("Retirar bônus")}</span>
-            </button>
-          </div>
         </div>
 
         <p className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
@@ -1070,13 +1077,6 @@ const TutorialPage = () => {
   }
 
   const EditInfoExample = () => {
-    const [isEditing, setIsEditing] = useState(false)
-    const [formData, setFormData] = useState({
-      nomeCompleto: "João Silva",
-      telefone: "(51) 99999-9999",
-      email: "joao.silva@email.com",
-    })
-
     return (
       <div className="space-y-6">
         <div
@@ -1092,40 +1092,21 @@ const TutorialPage = () => {
                 }`}
               >
                 <div className="p-6 flex flex-col items-center">
-                  <div className="relative group">
+                  <div className="relative">
                     <div
                       className={`w-32 h-32 rounded-full overflow-hidden border-4 ${
                         darkMode ? "border-pink-500/30" : "border-blue-500/30"
-                      } transition-all duration-300 group-hover:border-opacity-100`}
+                      }`}
                     >
                       <div className="w-full h-full bg-slate-300 dark:bg-slate-600 flex items-center justify-center">
                         <IoPersonCircleOutline className="text-5xl text-slate-400 dark:text-slate-500" />
                       </div>
                     </div>
-                    <div
-                      className={`absolute inset-0 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-                        darkMode ? "bg-slate-900/70" : "bg-slate-700/50"
-                      }`}
-                    >
-                      <div className="cursor-pointer flex items-center justify-center w-full h-full">
-                        <IoCloudUploadOutline className="text-3xl text-white" />
-                      </div>
-                    </div>
                   </div>
                   <h2 className={`mt-4 text-lg font-semibold ${darkMode ? "text-white" : "text-slate-800"}`}>
-                    {formData.nomeCompleto}
+                    João Silva
                   </h2>
-                  <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>{formData.email}</p>
-                  <button
-                    className={`mt-4 flex items-center justify-center py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 cursor-pointer ${
-                      darkMode
-                        ? "bg-pink-900/30 text-pink-400 hover:bg-pink-900/50 border border-pink-800/30"
-                        : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200"
-                    }`}
-                  >
-                    <IoCloudUploadOutline className="mr-2" />
-                    {t("Alterar foto")}
-                  </button>
+                  <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>joao.silva@email.com</p>
                   <p className={`mt-3 text-xs text-center ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
                     {t("A foto deve ter pelo menos 800x800px. JPG ou PNG são permitidos.")}
                   </p>
@@ -1147,23 +1128,6 @@ const TutorialPage = () => {
                       <IoPersonCircleOutline className={`mr-2 ${darkMode ? "text-pink-400" : "text-blue-600"}`} />
                       {t("Informações pessoais")}
                     </h3>
-
-                    <button
-                      type="button"
-                      className={`group flex items-center justify-center py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 ${
-                        isEditing
-                          ? darkMode
-                            ? "bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50 border border-emerald-800/30"
-                            : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
-                          : darkMode
-                            ? "bg-pink-900/30 text-pink-400 hover:bg-pink-900/50 border border-pink-800/30"
-                            : "bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200"
-                      }`}
-                      onClick={() => setIsEditing(!isEditing)}
-                    >
-                      {isEditing ? <IoSave className="mr-2" /> : <IoPencil className="mr-2" />}
-                      <span>{isEditing ? t("Salvar") : t("Editar")}</span>
-                    </button>
                   </div>
 
                   <div className="space-y-4">
@@ -1173,26 +1137,13 @@ const TutorialPage = () => {
                       >
                         {t("Nome completo")}
                       </label>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          className={`w-full px-4 py-3 rounded-lg transition-colors ${
-                            darkMode
-                              ? "bg-slate-700/50 text-white border border-slate-600/50 focus:border-pink-500/50"
-                              : "bg-white text-slate-800 border border-slate-200 focus:border-blue-300"
-                          } focus:outline-none`}
-                          value={formData.nomeCompleto}
-                          onChange={(e) => setFormData({ ...formData, nomeCompleto: e.target.value })}
-                        />
-                      ) : (
-                        <div
-                          className={`px-4 py-3 rounded-lg ${
-                            darkMode ? "bg-slate-700/30 text-white" : "bg-slate-50 text-slate-800"
-                          }`}
-                        >
-                          {formData.nomeCompleto}
-                        </div>
-                      )}
+                      <div
+                        className={`px-4 py-3 rounded-lg ${
+                          darkMode ? "bg-slate-700/30 text-white" : "bg-slate-50 text-slate-800"
+                        }`}
+                      >
+                        João Silva
+                      </div>
                     </div>
 
                     <div>
@@ -1201,38 +1152,13 @@ const TutorialPage = () => {
                       >
                         {t("Telefone")}
                       </label>
-                      {isEditing ? (
-                        <div className="relative">
-                          <div
-                            className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${
-                              darkMode ? "text-slate-400" : "text-slate-500"
-                            }`}
-                          >
-                            <IoPhonePortraitOutline />
-                          </div>
-                          <input
-                            type="text"
-                            className={`w-full pl-10 pr-4 py-3 rounded-lg transition-colors ${
-                              darkMode
-                                ? "bg-slate-700/50 text-white border border-slate-600/50 focus:border-pink-500/50"
-                                : "bg-white text-slate-800 border border-slate-200 focus:border-blue-300"
-                            } focus:outline-none`}
-                            value={formData.telefone}
-                            onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          className={`px-4 py-3 rounded-lg flex items-center ${
-                            darkMode ? "bg-slate-700/30 text-white" : "bg-slate-50 text-slate-800"
-                          }`}
-                        >
-                          <IoPhonePortraitOutline
-                            className={`mr-2 ${darkMode ? "text-slate-400" : "text-slate-500"}`}
-                          />
-                          {formData.telefone}
-                        </div>
-                      )}
+                      <div
+                        className={`px-4 py-3 rounded-lg flex items-center ${
+                          darkMode ? "bg-slate-700/30 text-white" : "bg-slate-50 text-slate-800"
+                        }`}
+                      >
+                        (51) 99999-9999
+                      </div>
                     </div>
 
                     <div>
@@ -1241,76 +1167,17 @@ const TutorialPage = () => {
                       >
                         {t("E-mail")}
                       </label>
-                      {isEditing ? (
-                        <div className="relative">
-                          <div
-                            className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${
-                              darkMode ? "text-slate-400" : "text-slate-500"
-                            }`}
-                          >
-                            <IoMailOutline />
-                          </div>
-                          <input
-                            type="email"
-                            className={`w-full pl-10 pr-4 py-3 rounded-lg transition-colors ${
-                              darkMode
-                                ? "bg-slate-700/50 text-white border border-slate-600/50 focus:border-pink-500/50"
-                                : "bg-white text-slate-800 border border-slate-200 focus:border-blue-300"
-                            } focus:outline-none`}
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          className={`px-4 py-3 rounded-lg flex items-center ${
-                            darkMode ? "bg-slate-700/30 text-white" : "bg-slate-50 text-slate-800"
-                          }`}
-                        >
-                          <IoMailOutline className={`mr-2 ${darkMode ? "text-slate-400" : "text-slate-500"}`} />
-                          {formData.email}
-                        </div>
-                      )}
+                      <div
+                        className={`px-4 py-3 rounded-lg flex items-center ${
+                          darkMode ? "bg-slate-700/30 text-white" : "bg-slate-50 text-slate-800"
+                        }`}
+                      >
+                        joao.silva@email.com
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {isEditing && (
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    className={`flex items-center justify-center py-2.5 px-5 rounded-lg font-medium text-sm transition-colors ${
-                      darkMode
-                        ? "bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50"
-                        : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
-                    }`}
-                    onClick={() => setIsEditing(false)}
-                  >
-                    <IoClose className="mr-2" />
-                    {t("Cancelar")}
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`group relative flex items-center justify-center py-2.5 px-5 rounded-lg font-medium text-sm text-white overflow-hidden transition-all duration-300`}
-                    onClick={() => setIsEditing(false)}
-                  >
-                    <div
-                      className={`absolute inset-0 ${
-                        darkMode
-                          ? "bg-gradient-to-r from-emerald-600 to-teal-600"
-                          : "bg-gradient-to-r from-emerald-600 to-teal-600"
-                      } transition-transform duration-300 group-hover:scale-105`}
-                    ></div>
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
-                    <span className="relative z-10 flex items-center">
-                      <IoSave className="mr-2" />
-                      {t("Salvar Alterações")}
-                    </span>
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -1383,10 +1250,6 @@ const TutorialPage = () => {
     },
   ]
 
-  const toggleSection = (id) => {
-    setOpenSection(openSection === id ? null : id)
-  }
-
   return (
     <div className={`flex h-screen overflow-hidden ${darkMode ? "bg-[#0F172A]" : "bg-[#f0f7ff]"}`}>
       <div
@@ -1401,7 +1264,7 @@ const TutorialPage = () => {
 
       <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
 
-      <main className="flex-grow p-4 md:p-6 lg:p-8 md:ml-16 overflow-auto relative z-10">
+      <main className="flex-grow p-4 mt-10 pb-20 md:p-6 lg:p-8 md:ml-16 overflow-auto relative z-10">
         <div className="max-w-4xl mx-auto">
           <div
             className={`relative overflow-hidden rounded-2xl shadow-xl backdrop-blur-md mb-6 ${
@@ -1414,9 +1277,8 @@ const TutorialPage = () => {
                   darkMode ? "bg-pink-500" : "bg-blue-400"
                 }`}
                 style={{
-                  top: mousePosition.y * 0.05,
-                  left: mousePosition.x * 0.05,
-                  transition: "all 0.3s ease-out",
+                  top: "10%",
+                  left: "25%",
                   width: "50%",
                   height: "50%",
                 }}
@@ -1435,6 +1297,8 @@ const TutorialPage = () => {
             </div>
           </div>
 
+          <FAQSection />
+
           <div className="space-y-4">
             {tutorials.map((tutorial, index) => (
               <div
@@ -1447,12 +1311,7 @@ const TutorialPage = () => {
                     darkMode ? "bg-slate-800/70 border border-slate-700/50" : "bg-white/80 border border-blue-100"
                   }`}
                 >
-                  <button
-                    className="w-full text-left p-5 focus:outline-none"
-                    onClick={() => toggleSection(tutorial.id)}
-                    aria-expanded={openSection === tutorial.id}
-                    aria-controls={`content-${tutorial.id}`}
-                  >
+                  <div className="w-full text-left p-5">
                     <div className="flex items-start">
                       <div
                         className={`flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-lg ${
@@ -1469,23 +1328,13 @@ const TutorialPage = () => {
                           {tutorial.description}
                         </p>
                       </div>
-                      <div className="flex-shrink-0 ml-4 flex items-center">
-                        <div
-                          className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors ${
-                            darkMode ? "bg-slate-700/50 text-slate-300" : "bg-slate-100 text-slate-600"
-                          }`}
-                        >
-                          {openSection === tutorial.id ? <IoChevronUp /> : <IoChevronDown />}
-                        </div>
-                      </div>
+                      <div className="flex-shrink-0 ml-4"></div>
                     </div>
-                  </button>
+                  </div>
 
                   <div
                     id={`content-${tutorial.id}`}
-                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                      openSection === tutorial.id ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0"
-                    }`}
+                    className={`transition-all duration-300 ease-in-out overflow-hidden max-h-[5000px] opacity-100`}
                   >
                     <div className={`p-5 border-t ${darkMode ? "border-slate-700/50" : "border-slate-200/50"}`}>
                       {tutorial.content}
@@ -1502,4 +1351,3 @@ const TutorialPage = () => {
 }
 
 export default TutorialPage
-
