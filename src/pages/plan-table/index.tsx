@@ -57,6 +57,10 @@ const LifePlanTable = () => {
   const animationRef = useRef<number>()
   const waveCanvasRef = useRef<HTMLCanvasElement>(null)
   const waveAnimationRef = useRef<number>()
+  
+  // Refs for synchronized scrolling
+  const tableContainersRef = useRef<(HTMLDivElement | null)[]>([])
+  const isScrollingRef = useRef(false)
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -66,6 +70,45 @@ const LifePlanTable = () => {
     window.addEventListener("mousemove", handleMouseMove)
     return () => {
       window.removeEventListener("mousemove", handleMouseMove)
+    }
+  }, [])
+
+  // Set up synchronized scrolling
+  useEffect(() => {
+    const handleScroll = (event: Event) => {
+      if (isScrollingRef.current) return
+      
+      isScrollingRef.current = true
+      
+      const scrolledElement = event.target as HTMLDivElement
+      const scrollLeft = scrolledElement.scrollLeft
+      
+      tableContainersRef.current.forEach(container => {
+        if (container && container !== scrolledElement) {
+          container.scrollLeft = scrollLeft
+        }
+      })
+      
+      // Reset the flag after a short delay to prevent infinite loops
+      setTimeout(() => {
+        isScrollingRef.current = false
+      }, 10)
+    }
+    
+    // Add scroll event listeners to all table containers
+    tableContainersRef.current.forEach(container => {
+      if (container) {
+        container.addEventListener('scroll', handleScroll)
+      }
+    })
+    
+    return () => {
+      // Clean up event listeners
+      tableContainersRef.current.forEach(container => {
+        if (container) {
+          container.removeEventListener('scroll', handleScroll)
+        }
+      })
     }
   }, [])
 
@@ -124,7 +167,7 @@ const LifePlanTable = () => {
         ctx.moveTo(0, canvas.height / 2 + Math.sin(wave.phase) * wave.amplitude)
 
         for (let x = 0; x < canvas.width; x++) {
-          const y = canvas.height / 2 + Math.sin(wave.period * x + wave.phase) * wave.amplitude
+          const y = canvas.height / 2 + Math.sin(wave.period * x + wave.amplitude) * wave.amplitude
           ctx.lineTo(x, y)
         }
 
@@ -564,6 +607,11 @@ const LifePlanTable = () => {
     toast.info("Alterações descartadas.")
   }
 
+  // Function to set the ref for each table container
+  const setTableContainerRef = (index: number, element: HTMLDivElement | null) => {
+    tableContainersRef.current[index] = element
+  }
+
   return (
     <div className={`flex h-screen overflow-hidden ${darkMode ? "bg-[#0F172A]" : "bg-[#f8f9ff]"}`}>
       <LoadingSpinner isLoading={isLoading} />
@@ -672,7 +720,7 @@ const LifePlanTable = () => {
         )}
 
         <div className="space-y-6">
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <div
               key={category}
               className={`relative overflow-hidden rounded-xl shadow-md backdrop-blur-md ${darkMode ? "bg-slate-800/70 border border-slate-700/50" : "bg-white/80 border border-indigo-100"}`}
@@ -691,7 +739,11 @@ const LifePlanTable = () => {
                   {formatCategoryName(category)}
                 </h3>
 
-                <div className="overflow-x-auto" style={{ paddingBottom: "20px" }}>
+                <div 
+                  className="overflow-x-auto" 
+                  style={{ paddingBottom: "20px" }}
+                  ref={(el) => setTableContainerRef(index, el)}
+                >
                   <table className="w-full text-sm border-collapse">
                     <thead>
                       <tr>

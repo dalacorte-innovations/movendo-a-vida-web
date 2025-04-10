@@ -1,5 +1,4 @@
 "use client"
-
 import React from "react"
 import { useState, useContext, useRef, useEffect } from "react"
 import {
@@ -464,6 +463,26 @@ const TutorialPage = () => {
               color: "purple",
               icon: IoSparkles,
             },
+            {
+              id: 4,
+              title: t("Empresarial"),
+              price: "R$4.980,00",
+              paymentType: t("Pagamento Único"),
+              accessPeriod: t("Acesso por 1 ano"),
+              accountsIncluded: t("Acesso estimado: 100 contas"),
+              description: t(
+                "Ideal para empresas que desejam promover bem-estar, planejamento de vida e inteligência financeira aos seus colaboradores, de forma inovadora e acessível.",
+              ),
+              features: [
+                t("Plataforma personalizada com logo e identidade visual da empresa"),
+                t("Acesso individual para colaboradores com plano Avançado"),
+                t("Painel corporativo com visão geral dos acessos, engajamento e progresso"),
+                t("Suporte dedicado para RH e líderes internos"),
+                t("Agenda inteligente e recursos de produtividade pessoal"),
+              ],
+              color: "violet",
+              icon: IoSparkles,
+            },
           ].map((plan) => {
             const colorMap = {
               emerald: {
@@ -483,6 +502,12 @@ const TutorialPage = () => {
                 text: darkMode ? "text-purple-400" : "text-purple-600",
                 border: darkMode ? "border-purple-800/30" : "border-purple-200",
                 gradient: darkMode ? "from-purple-600 to-violet-600" : "from-purple-500 to-violet-500",
+              },
+              violet: {
+                bg: darkMode ? "bg-violet-900/30" : "bg-violet-100",
+                text: darkMode ? "text-violet-400" : "text-violet-600",
+                border: darkMode ? "border-violet-800/30" : "border-violet-200",
+                gradient: darkMode ? "from-violet-600 to-purple-600" : "from-violet-500 to-purple-500",
               },
             }
 

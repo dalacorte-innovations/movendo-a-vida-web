@@ -1,5 +1,5 @@
 "use client"
-
+import React from "react"
 import { useState, useEffect, useContext, useRef } from "react"
 import { FaCircleCheck } from "react-icons/fa6"
 import {
@@ -93,6 +93,32 @@ const plans = [
     icon: IoSparkles,
     color: "purple",
   },
+  {
+    title: "Empresarial",
+    price: "R$4.980,00",
+    paymentType: "Pagamento Único",
+    accessPeriod: "Acesso por 1 ano",
+    accountsIncluded: "Acesso estimado: 100 contas",
+    description:
+      "Ideal para empresas que desejam promover bem-estar, planejamento de vida e inteligência financeira aos seus colaboradores, de forma inovadora e acessível.",
+    features: [
+      "Plataforma personalizada com logo e identidade visual da empresa",
+      "Acesso individual para colaboradores com plano Avançado",
+      "Painel corporativo com visão geral dos acessos, engajamento e progresso",
+      "Suporte dedicado para RH e líderes internos",
+      "Agenda inteligente e recursos de produtividade pessoal",
+      "Possibilidade de integração com programas internos de saúde e bem-estar",
+      "Acompanhamento mensal por especialista (opcional)",
+      "Opcional: Acesso à Inteligência Artificial por R$ 20/mês por conta",
+    ],
+    availableFeatures: [true, true, true, true, true, true, true, true],
+    buttonColor: "bg-violet-600",
+    buttonText: "Finalizar Proposta Empresarial",
+    popular: false,
+    plan_name: "Plano Empresarial",
+    icon: IoSparkles,
+    color: "violet",
+  },
 ]
 
 const PlansPage = () => {
@@ -159,8 +185,8 @@ const PlansPage = () => {
         speed: 0.01,
         phase: 0,
         color: darkMode
-          ? "rgba(219, 39, 119, 0.3)" // Pink in dark mode
-          : "rgba(59, 130, 246, 0.15)", // Blue in light mode
+          ? "rgba(219, 39, 119, 0.3)"
+          : "rgba(59, 130, 246, 0.15)",
         lineWidth: 3,
       },
       {
@@ -169,8 +195,8 @@ const PlansPage = () => {
         speed: 0.015,
         phase: 2,
         color: darkMode
-          ? "rgba(139, 92, 246, 0.3)" // Purple in dark mode
-          : "rgba(37, 99, 235, 0.15)", // Darker blue in light mode
+          ? "rgba(139, 92, 246, 0.3)"
+          : "rgba(37, 99, 235, 0.15)",
         lineWidth: 2,
       },
       {
@@ -179,9 +205,8 @@ const PlansPage = () => {
         speed: 0.005,
         phase: 4,
         color: darkMode
-          ? "rgba(236, 72, 153, 0.2)" // Pink in dark mode
-          : "rgba(96, 165, 250, 0.1)", // Lighter blue in light mode
-        lineWidth: 4,
+          ? "rgba(236, 72, 153, 0.2)"
+          : "rgba(96, 165, 250, 0.1)",
       },
     ]
 
@@ -192,7 +217,7 @@ const PlansPage = () => {
         wave.phase += wave.speed
 
         ctx.beginPath()
-        ctx.lineWidth = wave.lineWidth
+        ctx.lineWidth = wave.lineWidth ?? 1
         ctx.strokeStyle = wave.color
 
         ctx.moveTo(0, canvas.height / 2 + Math.sin(wave.phase) * wave.amplitude)
@@ -292,8 +317,8 @@ const PlansPage = () => {
         ctx.beginPath()
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
         ctx.fillStyle = darkMode
-          ? `rgba(219, 39, 119, ${particle.opacity})` // Pink in dark mode
-          : `rgba(59, 130, 246, ${particle.opacity * 0.7})` // Blue in light mode
+          ? `rgba(219, 39, 119, ${particle.opacity})`
+          : `rgba(59, 130, 246, ${particle.opacity * 0.7})`
         ctx.fill()
 
         particle.connections.forEach((connectedIndex) => {
@@ -307,8 +332,8 @@ const PlansPage = () => {
           ctx.moveTo(particle.x, particle.y)
           ctx.lineTo(connectedParticle.x, connectedParticle.y)
           ctx.strokeStyle = darkMode
-            ? `rgba(236, 72, 153, ${opacity * 0.3})` // Pink in dark mode
-            : `rgba(37, 99, 235, ${opacity * 0.15})` // Blue in light mode
+            ? `rgba(236, 72, 153, ${opacity * 0.3})`
+            : `rgba(37, 99, 235, ${opacity * 0.15})`
           ctx.lineWidth = 1
           ctx.stroke()
         })
@@ -369,6 +394,13 @@ const PlansPage = () => {
         border: darkMode ? "border-purple-800/30" : "border-purple-200",
         hoverBg: darkMode ? "bg-purple-900/50" : "bg-purple-200/70",
         gradient: darkMode ? "from-purple-600 to-violet-600" : "from-purple-500 to-violet-500",
+      },
+      violet: {
+        bg: darkMode ? "bg-violet-900/30" : "bg-violet-100",
+        text: darkMode ? "text-violet-400" : "text-violet-600",
+        border: darkMode ? "border-violet-800/30" : "border-violet-200",
+        hoverBg: darkMode ? "bg-violet-900/50" : "bg-violet-200/70",
+        gradient: darkMode ? "from-violet-600 to-purple-600" : "from-violet-500 to-purple-500",
       },
     }
 
@@ -458,7 +490,7 @@ const PlansPage = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {plans.map((plan, index) => {
               const isDisabled = paymentMade && currentPlan === plan.plan_name
               const isHovered = hoveredPlan === index || selectedPlan === index
@@ -635,11 +667,17 @@ const PlansPage = () => {
       </main>
 
       {selectedPlan !== null && (
-        <PaymentModal selectedPlan={plans[selectedPlan]} onClose={() => setSelectedPlan(null)} />
+        <PaymentModal
+          selectedPlan={plans[selectedPlan]}
+          allPlans={plans}
+          onClose={() => setSelectedPlan(null)}
+          onSelectPlan={(index) => {
+            setSelectedPlan(index)
+          }}
+        />
       )}
     </div>
   )
 }
 
 export default PlansPage
-

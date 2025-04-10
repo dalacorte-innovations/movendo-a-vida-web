@@ -20,6 +20,12 @@ export const endpoints = {
     emailMessageAPI: `${ApiIndex}/email-message/`,
     lifePlanAPI: `${ApiIndex}/life-plan/`,
     lifePlanItemAPI: `${ApiIndex}/life-plan-item/`,
+    UserPasswordChange: `${ApiIndex}/users/change_password/`,
+    UserStats: `${ApiIndex}/users/user_stats/`,
+    UserListWithdrawals: `${ApiIndex}/users/list_withdrawals/`,
+    UserRequestWithdrawals: `${ApiIndex}/users/request_withdrawal/`,
+    acceptTermsAndPrivacy: `${ApiIndex}/users/accept_terms_and_privacy/`,
+
 };
 
 

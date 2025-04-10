@@ -1,5 +1,5 @@
-import React from "react"
-import { type Dispatch, type SetStateAction, useEffect, useMemo, useCallback } from "react"
+import React, { useRef, useEffect } from "react"
+import { type Dispatch, type SetStateAction, useMemo, useCallback } from "react"
 import type { OrganizedData } from "../../types/life-plan/lifePlan"
 import { toast } from "react-toastify"
 import { IoAdd, IoTrashBin, IoCheckmarkCircleOutline } from "react-icons/io5"
@@ -297,54 +297,116 @@ const TableBody: React.FC<TableBodyProps> = ({
 
   const categoryColor = getCategoryColor(category)
 
-  return (
-    <tbody>
-      {Object.keys(data[category] || {}).map((id, index) => {
-        const isLucroPrejuizo = category === "lucroPrejuizo"
-        const isInvestimentosReserva = category === "investimentos" && Number.parseInt(id) === 0
-        const isEditable = !isLucroPrejuizo && !isInvestimentosReserva
-        const isEven = index % 2 === 0
+  // Create a container for all cells in a row to ensure consistent heights
+  const renderTableRow = (id, index, isLucroPrejuizo, isInvestimentosReserva, isEditable, isEven) => {
+    return (
+      <tr
+        key={index}
+        className={`transition-colors ${
+          darkMode ? (isEven ? "bg-slate-800/30" : "bg-transparent") : isEven ? "bg-slate-50/70" : "bg-white/80"
+        } hover:${darkMode ? "bg-slate-700/50" : "bg-slate-100/80"}`}
+      >
+        <td className="py-2 px-2 flex items-center justify-center" style={{ width: "50px" }}>
+          {isEditable && (
+            <button
+              onClick={() => handleRemoveItem(Number.parseInt(id))}
+              className={`flex items-center justify-center w-7 h-7 rounded-full transition-all duration-300 ${
+                darkMode
+                  ? `hover:bg-${categoryColor.bgDark} text-slate-400 hover:${categoryColor.text}`
+                  : `hover:${categoryColor.bgLight} text-slate-500 hover:${categoryColor.text}`
+              }`}
+            >
+              <IoTrashBin size={16} />
+            </button>
+          )}
+        </td>
 
-        return (
-          <tr
-            key={index}
-            className={`transition-colors ${
-              darkMode ? (isEven ? "bg-slate-800/30" : "bg-transparent") : isEven ? "bg-slate-50/70" : "bg-white/80"
-            } hover:${darkMode ? "bg-slate-700/50" : "bg-slate-100/80"}`}
-          >
-            <td className="py-2 px-2 flex items-center justify-center" style={{ width: "50px" }}>
-              {isEditable && (
-                <button
-                  onClick={() => handleRemoveItem(Number.parseInt(id))}
-                  className={`flex items-center justify-center w-7 h-7 rounded-full transition-all duration-300 ${
-                    darkMode
-                      ? `hover:bg-${categoryColor.bgDark} text-slate-400 hover:${categoryColor.text}`
-                      : `hover:${categoryColor.bgLight} text-slate-500 hover:${categoryColor.text}`
-                  }`}
-                >
-                  <IoTrashBin size={16} />
-                </button>
-              )}
-            </td>
+        <td
+          className={`px-4 py-3 border ${
+            darkMode ? "border-slate-600/50 text-white" : "border-indigo-100 text-slate-700"
+          } ${isEditable ? "cursor-pointer hover:bg-opacity-70" : ""}`}
+          style={{ width: "200px", maxWidth: "200px", minWidth: "200px", textAlign: "left" }}
+          onClick={() => {
+            if (!isEditable) return
+            handleEditClick(Number.parseInt(id), "name")
+          }}
+        >
+          {editingCell?.id === Number.parseInt(id) && editingCell?.date === "name" ? (
+            <div className="relative">
+              <input
+                type="text"
+                value={data[category]?.[id]?.name || ""}
+                onChange={(e) => handleChange(e, Number.parseInt(id), "name")}
+                onBlur={handleBlur}
+                className={`w-full py-1 px-2 rounded outline-none transition-all ${
+                  darkMode
+                    ? `bg-slate-700 text-white focus:ring-2 focus:ring-${categoryColor.bg}`
+                    : `bg-white text-slate-800 focus:ring-2 focus:ring-${categoryColor.bg}`
+                }`}
+                autoFocus
+              />
+              <div
+                className={`absolute bottom-0 left-0 h-0.5 ${categoryColor.bg} transition-all duration-300 w-full`}
+              />
+            </div>
+          ) : (
+            <div className={`font-medium ${isLucroPrejuizo ? "font-semibold" : ""} truncate`}>
+              {data[category]?.[id]?.name || " "}
+            </div>
+          )}
+        </td>
 
+        {uniqueDates.map((date, dateIndex) => {
+          const value = Number.parseFloat(data[category]?.[id]?.values?.[date] || 0)
+          const isPositive = value >= 0
+          const isNegative = value < 0
+
+          return (
             <td
-              className={`px-4 py-3 border ${
-                darkMode ? "border-slate-600/50 text-white" : "border-indigo-100 text-slate-700"
-              } ${isEditable ? "cursor-pointer hover:bg-opacity-70" : ""}`}
-              style={{ width: "200px", maxWidth: "200px", minWidth: "200px", textAlign: "left" }}
+              key={date}
+              className={`px-4 py-3 border ${darkMode ? "border-slate-600/50" : "border-indigo-100"} ${
+                isEditable ? "cursor-pointer hover:bg-opacity-70" : ""
+              } ${
+                isLucroPrejuizo
+                  ? isPositive
+                    ? darkMode
+                      ? "text-emerald-400 font-semibold"
+                      : "text-emerald-600 font-semibold"
+                    : darkMode
+                      ? "text-red-400 font-semibold"
+                      : "text-red-600 font-semibold"
+                  : darkMode
+                    ? "text-white"
+                    : "text-slate-700"
+              }`}
+              style={{ 
+                width: "180px", 
+                maxWidth: "180px", 
+                minWidth: "180px", 
+                textAlign: "center",
+                // Ensure consistent cell height with fixed height
+                height: "48px",
+                verticalAlign: "middle"
+              }}
               onClick={() => {
-                if (!isEditable) return
-                handleEditClick(Number.parseInt(id), "name")
+                if (!isEditable || (isInvestimentosReserva && date !== uniqueDates[0])) return
+                handleEditClick(Number.parseInt(id), date)
               }}
             >
-              {editingCell?.id === Number.parseInt(id) && editingCell?.date === "name" ? (
+              {editingCell?.id === Number.parseInt(id) && editingCell?.date === date ? (
                 <div className="relative">
                   <input
                     type="text"
-                    value={data[category]?.[id]?.name || ""}
-                    onChange={(e) => handleChange(e, Number.parseInt(id), "name")}
+                    value={data[category]?.[id]?.values?.[date] || ""}
+                    onChange={(e) => {
+                      if (category === "investimentos" && Number.parseInt(id) !== 0) {
+                        handleInvestmentChange(e, Number.parseInt(id), date)
+                      } else {
+                        handleChange(e, Number.parseInt(id), date)
+                      }
+                    }}
                     onBlur={handleBlur}
-                    className={`w-full py-1 px-2 rounded outline-none transition-all ${
+                    className={`w-full py-1 px-2 rounded outline-none transition-all text-center ${
                       darkMode
                         ? `bg-slate-700 text-white focus:ring-2 focus:ring-${categoryColor.bg}`
                         : `bg-white text-slate-800 focus:ring-2 focus:ring-${categoryColor.bg}`
@@ -356,82 +418,33 @@ const TableBody: React.FC<TableBodyProps> = ({
                   />
                 </div>
               ) : (
-                <div className={`font-medium ${isLucroPrejuizo ? "font-semibold" : ""} truncate`}>
-                  {data[category]?.[id]?.name || " "}
-                </div>
+                <div className="truncate">{formatValue(data[category]?.[id]?.values?.[date] || 0)}</div>
               )}
             </td>
+          )
+        })}
 
-            {uniqueDates.map((date, dateIndex) => {
-              const value = Number.parseFloat(data[category]?.[id]?.values?.[date] || 0)
-              const isPositive = value >= 0
-              const isNegative = value < 0
+        <td
+          className={`px-4 py-3 border ${
+            darkMode ? "border-slate-600/50 text-white" : "border-indigo-100 text-slate-700"
+          } text-center font-semibold`}
+          style={{ width: "180px", maxWidth: "180px", minWidth: "180px" }}
+        >
+          <div className="truncate">{formatValue(data[category]?.[id]?.firstMeta || 0)}</div>
+        </td>
+      </tr>
+    )
+  }
 
-              return (
-                <td
-                  key={date}
-                  className={`px-4 py-3 border ${darkMode ? "border-slate-600/50" : "border-indigo-100"} ${
-                    isEditable ? "cursor-pointer hover:bg-opacity-70" : ""
-                  } ${
-                    isLucroPrejuizo
-                      ? isPositive
-                        ? darkMode
-                          ? "text-emerald-400 font-semibold"
-                          : "text-emerald-600 font-semibold"
-                        : darkMode
-                          ? "text-red-400 font-semibold"
-                          : "text-red-600 font-semibold"
-                      : darkMode
-                        ? "text-white"
-                        : "text-slate-700"
-                  }`}
-                  style={{ width: "180px", maxWidth: "180px", minWidth: "180px", textAlign: "center" }}
-                  onClick={() => {
-                    if (!isEditable || (isInvestimentosReserva && date !== uniqueDates[0])) return
-                    handleEditClick(Number.parseInt(id), date)
-                  }}
-                >
-                  {editingCell?.id === Number.parseInt(id) && editingCell?.date === date ? (
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={data[category]?.[id]?.values?.[date] || ""}
-                        onChange={(e) => {
-                          if (category === "investimentos" && Number.parseInt(id) !== 0) {
-                            handleInvestmentChange(e, Number.parseInt(id), date)
-                          } else {
-                            handleChange(e, Number.parseInt(id), date)
-                          }
-                        }}
-                        onBlur={handleBlur}
-                        className={`w-full py-1 px-2 rounded outline-none transition-all text-center ${
-                          darkMode
-                            ? `bg-slate-700 text-white focus:ring-2 focus:ring-${categoryColor.bg}`
-                            : `bg-white text-slate-800 focus:ring-2 focus:ring-${categoryColor.bg}`
-                        }`}
-                        autoFocus
-                      />
-                      <div
-                        className={`absolute bottom-0 left-0 h-0.5 ${categoryColor.bg} transition-all duration-300 w-full`}
-                      />
-                    </div>
-                  ) : (
-                    <div className="truncate">{formatValue(data[category]?.[id]?.values?.[date] || 0)}</div>
-                  )}
-                </td>
-              )
-            })}
+  return (
+    <tbody>
+      {Object.keys(data[category] || {}).map((id, index) => {
+        const isLucroPrejuizo = category === "lucroPrejuizo"
+        const isInvestimentosReserva = category === "investimentos" && Number.parseInt(id) === 0
+        const isEditable = !isLucroPrejuizo && !isInvestimentosReserva
+        const isEven = index % 2 === 0
 
-            <td
-              className={`px-4 py-3 border ${
-                darkMode ? "border-slate-600/50 text-white" : "border-indigo-100 text-slate-700"
-              } text-center font-semibold`}
-              style={{ width: "180px", maxWidth: "180px", minWidth: "180px" }}
-            >
-              <div className="truncate">{formatValue(data[category]?.[id]?.firstMeta || 0)}</div>
-            </td>
-          </tr>
-        )
+        return renderTableRow(id, index, isLucroPrejuizo, isInvestimentosReserva, isEditable, isEven)
       })}
 
       {category !== "lucroPrejuizo" && (

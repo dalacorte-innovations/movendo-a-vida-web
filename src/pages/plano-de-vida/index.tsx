@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { useState, useEffect, useContext, useRef } from "react"
 import Sidebar from "../../components/sidebar"
 import { ThemeContext } from "../../utils/ThemeContext.jsx"
@@ -73,8 +74,8 @@ const LifePlanPage = () => {
         speed: 0.01,
         phase: 0,
         color: darkMode
-          ? "rgba(219, 39, 119, 0.3)" // Pink in dark mode
-          : "rgba(59, 130, 246, 0.15)", // Blue in light mode
+          ? "rgba(219, 39, 119, 0.3)"
+          : "rgba(59, 130, 246, 0.15)",
         lineWidth: 3,
       },
       {
@@ -83,8 +84,8 @@ const LifePlanPage = () => {
         speed: 0.015,
         phase: 2,
         color: darkMode
-          ? "rgba(139, 92, 246, 0.3)" // Purple in dark mode
-          : "rgba(37, 99, 235, 0.15)", // Darker blue in light mode
+          ? "rgba(139, 92, 246, 0.3)"
+          : "rgba(37, 99, 235, 0.15)",
         lineWidth: 2,
       },
       {
@@ -93,8 +94,8 @@ const LifePlanPage = () => {
         speed: 0.005,
         phase: 4,
         color: darkMode
-          ? "rgba(236, 72, 153, 0.2)" // Pink in dark mode
-          : "rgba(96, 165, 250, 0.1)", // Lighter blue in light mode
+          ? "rgba(236, 72, 153, 0.2)"
+          : "rgba(96, 165, 250, 0.1)",
         lineWidth: 4,
       },
     ]
@@ -206,8 +207,8 @@ const LifePlanPage = () => {
         ctx.beginPath()
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
         ctx.fillStyle = darkMode
-          ? `rgba(219, 39, 119, ${particle.opacity})` // Pink in dark mode
-          : `rgba(59, 130, 246, ${particle.opacity * 0.7})` // Blue in light mode
+          ? `rgba(219, 39, 119, ${particle.opacity})`
+          : `rgba(59, 130, 246, ${particle.opacity * 0.7})`
         ctx.fill()
 
         particle.connections.forEach((connectedIndex) => {
@@ -221,8 +222,8 @@ const LifePlanPage = () => {
           ctx.moveTo(particle.x, particle.y)
           ctx.lineTo(connectedParticle.x, connectedParticle.y)
           ctx.strokeStyle = darkMode
-            ? `rgba(236, 72, 153, ${opacity * 0.3})` // Pink in dark mode
-            : `rgba(37, 99, 235, ${opacity * 0.15})` // Blue in light mode
+            ? `rgba(236, 72, 153, ${opacity * 0.3})`
+            : `rgba(37, 99, 235, ${opacity * 0.15})`
           ctx.lineWidth = 1
           ctx.stroke()
         })
@@ -271,19 +272,20 @@ const LifePlanPage = () => {
       toast.error(t("O nome do plano é obrigatório"))
       return
     }
-
+  
     try {
       setIsLoading(true)
+      
       const method = id ? "PATCH" : "POST"
       const url = id
         ? `${configBackendConnection.baseURL}/${endpoints.lifePlanAPI}${id}/`
         : `${configBackendConnection.baseURL}/${endpoints.lifePlanAPI}`
-
+  
       const currentYear = new Date().getFullYear()
       const years = Array.from({ length: plan.term }, (_, i) => currentYear + i)
-
+  
       const payload = id ? { name: plan.name } : { name: plan.name, years }
-
+  
       const response = await fetch(url, {
         method,
         headers: {
@@ -292,11 +294,13 @@ const LifePlanPage = () => {
         },
         body: JSON.stringify(payload),
       })
-
+  
       if (!response.ok) {
-        throw new Error(id ? t("Erro ao atualizar o plano de vida") : t("Erro ao criar o plano de vida"))
+        const errorData = await response.json().catch(() => ({}))
+        toast.error(errorData.error || (id ? t("Erro ao atualizar o plano de vida") : t("Erro ao criar o plano de vida")))
+        return
       }
-
+  
       const data = await response.json()
       toast.success(id ? t("Plano de vida atualizado com sucesso!") : t("Plano de vida criado com sucesso!"))
       navigate(`/life-plan/${data.id}/table`, { state: { plan: data } })
