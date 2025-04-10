@@ -643,13 +643,13 @@ const LandingPage = () => {
           </div>
 
           <h1 className="text-3xl md:text-5xl font-bold mb-6 text-white leading-tight">
-            {t("Transforme seus valores")} <br /> {t("em metas alcançáveis")}
+            {t("Sonhe grande, planeje com propósito")} <br /> {t("e transforme sua jornada em um legado")}
           </h1>
 
           <p className="text-slate-300 mb-8 max-w-2xl mx-auto">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 font-semibold">
-              {t("Sonhe grande, planeje com propósito e transforme sua jornada em um legado.")}
-            </span>
+            {t(
+              "Defina sua trajetória com clareza e alcance cada marco em sua carreira e vida pessoal. Com um planejamento de 20 anos, você pode transformar seus sonhos em conquistas tangíveis.",
+            )}
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">

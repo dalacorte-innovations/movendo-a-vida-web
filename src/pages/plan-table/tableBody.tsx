@@ -1,8 +1,12 @@
-import React, { useRef, useEffect } from "react"
+"use client"
+
+import type React from "react"
+import { useEffect } from "react"
 import { type Dispatch, type SetStateAction, useMemo, useCallback } from "react"
 import type { OrganizedData } from "../../types/life-plan/lifePlan"
 import { toast } from "react-toastify"
 import { IoAdd, IoTrashBin, IoCheckmarkCircleOutline } from "react-icons/io5"
+import { SyncAllYearsButton } from "../../components/Table/sync-all-years-button"
 
 interface TableBodyProps {
   data: OrganizedData
@@ -43,6 +47,7 @@ const TableBody: React.FC<TableBodyProps> = ({
     "pessoais",
     "realizacoes",
     "receitas",
+    "renda_extra", // Added renda_extra to the categories array
   ]
 
   const getUniqueDateSubtotal = useCallback(
@@ -177,7 +182,6 @@ const TableBody: React.FC<TableBodyProps> = ({
       }))
       setDataHasBeenAltered(true)
 
-      // Show a success toast
       toast.success("Item adicionado com sucesso!")
     },
     [setData, setDataHasBeenAltered, getNewIndex],
@@ -192,7 +196,6 @@ const TableBody: React.FC<TableBodyProps> = ({
       })
       setDataHasBeenAltered(true)
 
-      // Show a success toast
       toast.success("Item removido com sucesso!")
     },
     [category, setData, setDataHasBeenAltered],
@@ -256,7 +259,6 @@ const TableBody: React.FC<TableBodyProps> = ({
     uniqueDates,
   ])
 
-  // Get category color based on category name
   const getCategoryColor = (categoryName: string) => {
     const colorMap = {
       receitas: {
@@ -264,6 +266,12 @@ const TableBody: React.FC<TableBodyProps> = ({
         text: "text-emerald-500",
         bgLight: "bg-emerald-100",
         bgDark: "bg-emerald-900/30",
+      },
+      renda_extra: {
+        bg: "bg-green-500",
+        text: "text-green-500",
+        bgLight: "bg-green-100",
+        bgDark: "bg-green-900/30",
       },
       estudos: { bg: "bg-blue-500", text: "text-blue-500", bgLight: "bg-blue-100", bgDark: "bg-blue-900/30" },
       custos: { bg: "bg-red-500", text: "text-red-500", bgLight: "bg-red-100", bgDark: "bg-red-900/30" },
@@ -297,7 +305,6 @@ const TableBody: React.FC<TableBodyProps> = ({
 
   const categoryColor = getCategoryColor(category)
 
-  // Create a container for all cells in a row to ensure consistent heights
   const renderTableRow = (id, index, isLucroPrejuizo, isInvestimentosReserva, isEditable, isEven) => {
     return (
       <tr
@@ -306,18 +313,29 @@ const TableBody: React.FC<TableBodyProps> = ({
           darkMode ? (isEven ? "bg-slate-800/30" : "bg-transparent") : isEven ? "bg-slate-50/70" : "bg-white/80"
         } hover:${darkMode ? "bg-slate-700/50" : "bg-slate-100/80"}`}
       >
-        <td className="py-2 px-2 flex items-center justify-center" style={{ width: "50px" }}>
+        <td className="py-2 px-2 flex items-center justify-center gap-1" style={{ width: "80px" }}>
           {isEditable && (
-            <button
-              onClick={() => handleRemoveItem(Number.parseInt(id))}
-              className={`flex items-center justify-center w-7 h-7 rounded-full transition-all duration-300 ${
-                darkMode
-                  ? `hover:bg-${categoryColor.bgDark} text-slate-400 hover:${categoryColor.text}`
-                  : `hover:${categoryColor.bgLight} text-slate-500 hover:${categoryColor.text}`
-              }`}
-            >
-              <IoTrashBin size={16} />
-            </button>
+            <>
+              <button
+                onClick={() => handleRemoveItem(Number.parseInt(id))}
+                className={`flex items-center justify-center w-7 h-7 rounded-full transition-all duration-300 ${
+                  darkMode
+                    ? `hover:bg-${categoryColor.bgDark} text-slate-400 hover:${categoryColor.text}`
+                    : `hover:${categoryColor.bgLight} text-slate-500 hover:${categoryColor.text}`
+                }`}
+              >
+                <IoTrashBin size={16} />
+              </button>
+              <SyncAllYearsButton
+                category={category}
+                id={Number.parseInt(id)}
+                uniqueDates={uniqueDates}
+                data={data}
+                setData={setData}
+                setDataHasBeenAltered={setDataHasBeenAltered}
+                darkMode={darkMode}
+              />
+            </>
           )}
         </td>
 
@@ -379,14 +397,13 @@ const TableBody: React.FC<TableBodyProps> = ({
                     ? "text-white"
                     : "text-slate-700"
               }`}
-              style={{ 
-                width: "180px", 
-                maxWidth: "180px", 
-                minWidth: "180px", 
+              style={{
+                width: "180px",
+                maxWidth: "180px",
+                minWidth: "180px",
                 textAlign: "center",
-                // Ensure consistent cell height with fixed height
                 height: "48px",
-                verticalAlign: "middle"
+                verticalAlign: "middle",
               }}
               onClick={() => {
                 if (!isEditable || (isInvestimentosReserva && date !== uniqueDates[0])) return
@@ -485,7 +502,7 @@ const TableBody: React.FC<TableBodyProps> = ({
               darkMode ? "border-slate-600/50" : "border-indigo-100"
             } ${
               category === "lucroPrejuizo"
-                ? subtotals[category][date] >= 0
+                ? subtotals[category]?.[date] >= 0
                   ? darkMode
                     ? "text-emerald-400"
                     : "text-emerald-600"
@@ -495,7 +512,7 @@ const TableBody: React.FC<TableBodyProps> = ({
                 : ""
             }`}
           >
-            <div className="truncate">{formatValue(subtotals[category][date])}</div>
+            <div className="truncate">{formatValue(subtotals[category]?.[date] || 0)}</div>
           </td>
         ))}
         <td
@@ -503,7 +520,7 @@ const TableBody: React.FC<TableBodyProps> = ({
             darkMode ? "border-slate-600/50" : "border-indigo-100"
           }`}
         >
-          {formatValue(Object.values(subtotals[category]).reduce((acc, val) => acc + val, 0))}
+          {formatValue(Object.values(subtotals[category] || {}).reduce((acc, val) => acc + (val || 0), 0))}
         </td>
       </tr>
     </tbody>

@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import './LoadingSpinner.css';
+import { useContext } from "react"
+import { ThemeContext } from "../../utils/ThemeContext.jsx"
+import "./LoadingSpinner.css"
 
 const LoadingSpinner = ({ isLoading }) => {
-    return (
-        isLoading && (
-            <div className="loading-spinner-overlay" id="loading-spinner-overlay">
-                <div className="loading-spinner" id="loading-spinner"></div>
-            </div>
-        )
-    );
-};
+  const { darkMode } = useContext(ThemeContext)
 
-export default LoadingSpinner;
+  if (!isLoading) return null
+
+  return (
+    <div className="loading-spinner-overlay" id="loading-spinner-overlay">
+      <div className={`loading-spinner ${darkMode ? "dark" : "light"}`} id="loading-spinner"></div>
+    </div>
+  )
+}
+
+export default LoadingSpinner

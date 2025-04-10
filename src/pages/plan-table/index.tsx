@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import Sidebar from "../../components/sidebar"
 import { ThemeContext } from "../../utils/ThemeContext.jsx"
 import { IoCaretBack, IoSave, IoTrash, IoCompassOutline } from "react-icons/io5"
-import { FaFilePdf, FaFileCsv } from "react-icons/fa6"
+import { FaFilePdf } from "react-icons/fa6"
 import { configBackendConnection, endpoints, getAuthHeaders } from "../../utils/backendConnection.js"
 import { toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
@@ -13,6 +13,7 @@ import type { OrganizedData } from "../../types/life-plan/lifePlan.js"
 import TableBody from "./tableBody.js"
 import { t } from "i18next"
 import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinnerNotTimer.jsx"
+import PageHeader from "../../components/Table/page-header.tsx"
 
 const months = [
   { full: "Janeiro", abbr: "jan" },
@@ -29,8 +30,10 @@ const months = [
   { full: "Dezembro", abbr: "dez" },
 ]
 
+// Added renda_extra below receitas
 const categories = [
   "receitas",
+  "renda_extra",
   "estudos",
   "custos",
   "lucroPrejuizo",
@@ -57,7 +60,7 @@ const LifePlanTable = () => {
   const animationRef = useRef<number>()
   const waveCanvasRef = useRef<HTMLCanvasElement>(null)
   const waveAnimationRef = useRef<number>()
-  
+
   // Refs for synchronized scrolling
   const tableContainersRef = useRef<(HTMLDivElement | null)[]>([])
   const isScrollingRef = useRef(false)
@@ -77,36 +80,36 @@ const LifePlanTable = () => {
   useEffect(() => {
     const handleScroll = (event: Event) => {
       if (isScrollingRef.current) return
-      
+
       isScrollingRef.current = true
-      
+
       const scrolledElement = event.target as HTMLDivElement
       const scrollLeft = scrolledElement.scrollLeft
-      
-      tableContainersRef.current.forEach(container => {
+
+      tableContainersRef.current.forEach((container) => {
         if (container && container !== scrolledElement) {
           container.scrollLeft = scrollLeft
         }
       })
-      
+
       // Reset the flag after a short delay to prevent infinite loops
       setTimeout(() => {
         isScrollingRef.current = false
       }, 10)
     }
-    
+
     // Add scroll event listeners to all table containers
-    tableContainersRef.current.forEach(container => {
+    tableContainersRef.current.forEach((container) => {
       if (container) {
-        container.addEventListener('scroll', handleScroll)
+        container.addEventListener("scroll", handleScroll)
       }
     })
-    
+
     return () => {
       // Clean up event listeners
-      tableContainersRef.current.forEach(container => {
+      tableContainersRef.current.forEach((container) => {
         if (container) {
-          container.removeEventListener('scroll', handleScroll)
+          container.removeEventListener("scroll", handleScroll)
         }
       })
     }
@@ -301,9 +304,10 @@ const LifePlanTable = () => {
   const formatCategoryName = (category: string) => {
     const formattedCategories: { [key: string]: string } = {
       receitas: "Receitas",
+      renda_extra: "Renda Extra",
       estudos: "Estudos",
       custos: "Custos",
-      lucroPrejuizo: "Lucro/Prejuízo",
+      lucroPrejuizo: "Lucro/Prejuízo Bruto", // Changed to "Bruto" as requested
       investimentos: "Investimentos",
       realizacoes: "Realizações",
       intercambio: "Intercâmbio",
@@ -316,6 +320,7 @@ const LifePlanTable = () => {
   const generateEmptyOrganizedData = (): OrganizedData => {
     return {
       receitas: {},
+      renda_extra: {},
       estudos: {},
       custos: {},
       lucroPrejuizo: {},
@@ -361,14 +366,14 @@ const LifePlanTable = () => {
 
   const getNewIndex = () => {
     let newIndex = 0
-    categories.forEach((category) => (newIndex += Object.keys(organizedData[category]).length))
+    categories.forEach((category) => (newIndex += Object.keys(organizedData[category] || {}).length))
     return newIndex
   }
 
   const sumAllValuesByDate = (date: string, category: string) => {
     let sum = 0
-    Object.keys(organizedData[category]).forEach((id) => {
-      if (organizedData[category][id].values[date]) {
+    Object.keys(organizedData[category] || {}).forEach((id) => {
+      if (organizedData[category][id]?.values?.[date]) {
         sum += Number.parseFloat(organizedData[category][id].values[date])
       }
     })
@@ -395,7 +400,7 @@ const LifePlanTable = () => {
       totalProfit += value
     })
     newProfitLossCategoryData[index] = {
-      name: totalProfit > 0 ? "Lucro" : "Prejuízo",
+      name: totalProfit > 0 ? "Lucro Bruto" : "Prejuízo Bruto", // Changed to "Bruto" as requested
       values: newProfitLossValues,
       firstMeta: 0,
     }
@@ -432,7 +437,7 @@ const LifePlanTable = () => {
 
     // Adiciona os dados do plano ao organizedData
     categories.forEach((category) => {
-      Object.keys(newOrganizedData[category]).forEach((name) => {
+      Object.keys(newOrganizedData[category] || {}).forEach((name) => {
         let rowTotal = 0
         uniqueDates.forEach((date) => {
           if (newOrganizedData[category][name].values[date]) {
@@ -471,7 +476,7 @@ const LifePlanTable = () => {
 
     const totalProfit = Object.values(profitLossValues).reduce((acc, value) => acc + value, 0)
     finalOrganizedData["lucroPrejuizo"][0] = {
-      name: totalProfit > 0 ? "Lucro" : "Prejuízo",
+      name: totalProfit > 0 ? "Lucro Bruto" : "Prejuízo Bruto", // Changed to "Bruto" as requested
       values: profitLossValues,
       firstMeta: 0,
     }
@@ -561,7 +566,7 @@ const LifePlanTable = () => {
 
       categories.forEach((category) => {
         itemsForPlan[category] = {
-          items: Object.keys(organizedData[category]).flatMap((id) => {
+          items: Object.keys(organizedData[category] || {}).flatMap((id) => {
             const item = organizedData[category][id]
             return uniqueDates.map((date) => ({
               category: category,
@@ -627,6 +632,9 @@ const LifePlanTable = () => {
       </div>
 
       <main className="flex-grow p-4 md:p-6 lg:p-8 md:ml-16 overflow-auto relative z-10">
+        {/* Add the new PageHeader component */}
+        <PageHeader darkMode={darkMode} />
+
         <div
           className={`relative overflow-hidden rounded-2xl shadow-xl backdrop-blur-md mb-6 ${darkMode ? "bg-slate-800/70 border border-slate-700/50" : "bg-white/80 border border-indigo-100"}`}
         >
@@ -739,15 +747,15 @@ const LifePlanTable = () => {
                   {formatCategoryName(category)}
                 </h3>
 
-                <div 
-                  className="overflow-x-auto" 
+                <div
+                  className="overflow-x-auto"
                   style={{ paddingBottom: "20px" }}
                   ref={(el) => setTableContainerRef(index, el)}
                 >
                   <table className="w-full text-sm border-collapse">
                     <thead>
                       <tr>
-                        <th className="" style={{ width: "30px", backgroundColor: "transparent" }}></th>
+                        <th className="" style={{ width: "80px", backgroundColor: "transparent" }}></th>
                         <th
                           className={`px-4 py-3 border ${darkMode ? "bg-slate-700/70 text-white border-slate-600/50" : "bg-indigo-50/70 text-slate-800 border-indigo-100"} rounded-tl-lg`}
                         >
@@ -756,13 +764,16 @@ const LifePlanTable = () => {
                         {uniqueDates.map((date, index) => {
                           const [year, month] = date.split("-")
                           const isLast = index === uniqueDates.length - 1
+                          const monthIndex = Number.parseInt(month, 10) - 1
+                          const monthAbbr =
+                            monthIndex >= 0 && monthIndex < months.length ? months[monthIndex].abbr : month
                           return (
                             <th
                               key={date}
                               className={`px-4 py-3 border text-center ${darkMode ? "bg-slate-700/70 text-white border-slate-600/50" : "bg-indigo-50/70 text-slate-800 border-indigo-100"} ${isLast ? "rounded-tr-lg" : ""}`}
                               style={{ minWidth: "180px" }}
                             >
-                              {months[Number.parseInt(month, 10) - 1].abbr} - {year}
+                              {monthAbbr} - {year}
                             </th>
                           )
                         })}
